@@ -13,7 +13,9 @@ export default function RootPage() {
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-background">
-      <p className="text-foreground">Carregando AgencyFlow...</p>
+      <p className="text-foreground">Carregando Venture XP...</p>
     </div>
   );
 }
+
+    

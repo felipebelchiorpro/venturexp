@@ -23,11 +23,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 // Mock data for team members
 const mockTeamMembers: TeamMember[] = [
-  { id: 'tm-001', name: 'Alice Johnson', email: 'alice.j@agencyflow.com', role: 'Admin', status: 'Active', joinedDate: new Date(2023, 0, 15).toISOString(), avatarUrl: 'https://placehold.co/100x100.png' },
-  { id: 'tm-002', name: 'Bob Smith', email: 'bob.s@agencyflow.com', role: 'Manager', status: 'Active', joinedDate: new Date(2023, 2, 10).toISOString(), avatarUrl: 'https://placehold.co/100x100.png' },
+  { id: 'tm-001', name: 'Alice Johnson', email: 'alice.j@venturexp.com', role: 'Admin', status: 'Active', joinedDate: new Date(2023, 0, 15).toISOString(), avatarUrl: 'https://placehold.co/100x100.png' },
+  { id: 'tm-002', name: 'Bob Smith', email: 'bob.s@venturexp.com', role: 'Manager', status: 'Active', joinedDate: new Date(2023, 2, 10).toISOString(), avatarUrl: 'https://placehold.co/100x100.png' },
   { id: 'tm-003', name: 'Carol White', email: 'carol.w@invited.com', role: 'Member', status: 'Pending Invitation', joinedDate: new Date(2024, 5, 1).toISOString() },
-  { id: 'tm-004', name: 'David Brown', email: 'david.b@agencyflow.com', role: 'Analyst', status: 'Active', joinedDate: new Date(2023, 8, 22).toISOString(), avatarUrl: 'https://placehold.co/100x100.png' },
-  { id: 'tm-005', name: 'Eve Davis', email: 'eve.d@agencyflow.com', role: 'Executive', status: 'Inactive', joinedDate: new Date(2022, 11, 5).toISOString(), avatarUrl: 'https://placehold.co/100x100.png' },
+  { id: 'tm-004', name: 'David Brown', email: 'david.b@venturexp.com', role: 'Analyst', status: 'Active', joinedDate: new Date(2023, 8, 22).toISOString(), avatarUrl: 'https://placehold.co/100x100.png' },
+  { id: 'tm-005', name: 'Eve Davis', email: 'eve.d@venturexp.com', role: 'Executive', status: 'Inactive', joinedDate: new Date(2022, 11, 5).toISOString(), avatarUrl: 'https://placehold.co/100x100.png' },
 ];
 
 const getStatusBadgeVariant = (status: TeamMemberStatus): "default" | "secondary" | "destructive" | "outline" => {
@@ -152,3 +152,4 @@ export function MemberList() {
   );
 }
 
+    

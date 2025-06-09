@@ -1,5 +1,8 @@
-# Firebase Studio
 
-This is a NextJS starter in Firebase Studio.
+# Venture XP
 
-To get started, take a look at src/app/page.tsx.
+Este é um projeto inicial NextJS chamado Venture XP, construído no Firebase Studio.
+
+Para começar, dê uma olhada em src/app/page.tsx.
+
+    

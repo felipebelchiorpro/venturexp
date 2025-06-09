@@ -8,8 +8,8 @@ import { ThemeProvider } from "next-themes";
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'AgencyFlow',
-  description: 'Otimize as operações da sua agência com o AgencyFlow.',
+  title: 'Venture XP',
+  description: 'Gerencie seus projetos e equipes com Venture XP.',
 };
 
 export default function RootLayout({
@@ -38,3 +38,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+    

@@ -24,12 +24,12 @@ export const navItems: NavItem[] = [
   { label: 'Lembretes de Pag.', href: '/payment-reminders', icon: BellRing },
 ];
 
-export const APP_NAME = "AgencyFlow";
+export const APP_NAME = "Venture XP";
 export const APP_ICON = Briefcase;
 
 export const MOCK_USER = {
   name: "João Silva",
-  email: "joao.silva@agencyflow.com",
+  email: "joao.silva@venturexp.com",
   avatarUrl: "https://placehold.co/100x100.png",
   role: "Executive" as UserRole,
 };
@@ -141,3 +141,5 @@ export const MOCK_ACCESS_PROFILES: AccessProfile[] = [
         updatedAt: new Date().toISOString(),
     }
 ];
+
+    
