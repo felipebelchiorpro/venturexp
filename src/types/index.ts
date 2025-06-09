@@ -13,6 +13,9 @@ export type PaymentMethodType = typeof PAYMENT_METHODS[number];
 export const PAYMENT_CONDITIONS = ['À vista', 'Parcelado'] as const;
 export type PaymentConditionType = typeof PAYMENT_CONDITIONS[number];
 
+export const SERVICE_ORDER_STATUSES = ['Aberta', 'Em Andamento', 'Finalizada', 'Aguardando Peças', 'Aguardando Aprovação', 'Cancelada'] as const;
+export type ServiceOrderStatusType = typeof SERVICE_ORDER_STATUSES[number];
+
 
 export interface Proposal {
   id: string;
@@ -112,11 +115,16 @@ export interface ServiceOrder {
   id: string;
   clientId: string;
   orderNumber: string;
-  serviceDescription: string;
+  clientName?: string; // Denormalized for easier display
+  contactPhone?: string;
+  serviceAddress?: string;
+  serviceType: string;
+  productsUsed?: string;
   creationDate: string; // ISO date string
-  expectedCompletionDate?: string; // ISO date string
-  status: 'Aberta' | 'Em Progresso' | 'Concluída' | 'Cancelada';
-  assignedTo?: string; // Team member ID or name
-  notes?: string;
+  executionDeadline?: string; // ISO date string
+  serviceValue?: number | null; // Allow null if value is not set
+  currency?: string;
+  additionalNotes?: string;
+  status: ServiceOrderStatusType;
+  assignedTo?: string;
 }
-

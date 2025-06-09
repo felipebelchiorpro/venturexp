@@ -1,6 +1,8 @@
 
 import type { LucideIcon } from 'lucide-react';
 import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact } from 'lucide-react'; // Adicionado Contact
+import type { ServiceOrderStatusType } from '@/types';
+
 
 export interface NavItem {
   label: string;
@@ -52,6 +54,9 @@ export type TeamMemberStatus = typeof TEAM_MEMBER_STATUSES[number];
 
 export const CLIENT_STATUSES = ['Ativo', 'Inativo', 'Potencial'] as const;
 export type ClientStatus = typeof CLIENT_STATUSES[number];
+
+export const SERVICE_ORDER_STATUSES_PT: ServiceOrderStatusType[] = ['Aberta', 'Em Andamento', 'Finalizada', 'Aguardando Peças', 'Aguardando Aprovação', 'Cancelada'];
+
 
 export const MOCK_CLIENTS = [
   { id: 'client-001', name: 'Soluções Inovadoras Ltda', email: 'contato@solucoesinovadoras.com', company: 'Soluções Inovadoras Ltda', phone: '(11) 98765-4321', status: 'Ativo' as ClientStatus, createdAt: new Date(2023, 0, 15).toISOString(), responsable: 'Carlos Pereira', segment: 'Tecnologia', avatarUrl: 'https://placehold.co/100x100.png' },

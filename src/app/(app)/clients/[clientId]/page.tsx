@@ -5,12 +5,12 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MOCK_CLIENTS } from "@/lib/constants"; // Assuming clients might be fetched here in the future
+import { MOCK_CLIENTS, SERVICE_ORDER_STATUSES_PT } from "@/lib/constants"; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock } from "lucide-react";
-import { useParams, useRouter } from "next/navigation"; // Added useRouter
+import { useParams, useRouter } from "next/navigation"; 
 import { useEffect, useState } from "react";
-import type { Client, Invoice, ServiceOrder, InvoiceStatusType, PaymentMethodType } from "@/types";
+import type { Client, Invoice, ServiceOrder, InvoiceStatusType, PaymentMethodType, ServiceOrderStatusType } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -24,14 +24,14 @@ const mockInvoices: Invoice[] = [
 ];
 
 const mockServiceOrders: ServiceOrder[] = [
-    { id: 'os-001', clientId: 'client-001', orderNumber: 'OS-2024-010', serviceDescription: 'Manutenção Website', creationDate: new Date(2024, 4, 20).toISOString(), status: 'Em Progresso', assignedTo: 'Equipe Web' },
-    { id: 'os-002', clientId: 'client-002', orderNumber: 'OS-2024-011', serviceDescription: 'Criação de Conteúdo Blog', creationDate: new Date(2024, 5, 10).toISOString(), status: 'Aberta' },
+    { id: 'os-001', clientId: 'client-001', orderNumber: 'OS-2024-010', serviceType: 'Manutenção Website', creationDate: new Date(2024, 4, 20).toISOString(), status: 'Em Andamento', assignedTo: 'Equipe Web' },
+    { id: 'os-002', clientId: 'client-002', orderNumber: 'OS-2024-011', serviceType: 'Criação de Conteúdo Blog', creationDate: new Date(2024, 5, 10).toISOString(), status: 'Aberta' },
 ];
 
 
 export default function ClientDetailPage() {
   const params = useParams();
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter(); 
   const clientId = params.clientId as string;
   const [client, setClient] = useState<Client | null>(null);
   const [clientInvoices, setClientInvoices] = useState<Invoice[]>([]);
@@ -40,7 +40,6 @@ export default function ClientDetailPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate fetching client data
     const foundClient = MOCK_CLIENTS.find(c => c.id === clientId);
     setClient(foundClient || null);
     if (foundClient) {
@@ -64,7 +63,9 @@ export default function ClientDetailPage() {
   }
 
   const handleAddServiceOrder = () => {
-    toast({ title: "Nova Ordem de Serviço", description: `Criando nova ordem de serviço para ${client.name}. (Simulação)`});
+     if (client) {
+      router.push(`/clients/${client.id}/service-orders/new`);
+    }
   }
 
   const handleViewInvoice = (invoiceNumber: string) => {
@@ -81,13 +82,26 @@ export default function ClientDetailPage() {
   
   const getInvoiceStatusBadgeVariant = (status: InvoiceStatusType) => {
     switch (status) {
-      case 'Paga': return 'default'; // Usually green
-      case 'Pendente': return 'secondary'; // Yellow or neutral
-      case 'Atrasada': return 'destructive'; // Red
-      case 'Cancelada': return 'outline'; // Gray
+      case 'Paga': return 'default'; 
+      case 'Pendente': return 'secondary'; 
+      case 'Atrasada': return 'destructive'; 
+      case 'Cancelada': return 'outline'; 
       default: return 'outline';
     }
   };
+
+  const getServiceOrderStatusBadgeVariant = (status: ServiceOrderStatusType) => {
+    switch (status) {
+      case 'Finalizada': return 'default'; // Green
+      case 'Em Andamento': return 'secondary'; // Yellow or neutral
+      case 'Aberta': return 'outline'; // Blue or primary
+      case 'Aguardando Peças': return 'secondary';
+      case 'Aguardando Aprovação': return 'secondary';
+      case 'Cancelada': return 'destructive'; // Red
+      default: return 'outline';
+    }
+  };
+
 
   return (
     <div className="space-y-8">
@@ -205,11 +219,11 @@ export default function ClientDetailPage() {
                     <li key={os.id} className="flex justify-between items-center p-3 border rounded-md hover:bg-muted/50 transition-colors">
                         <div>
                             <span className="font-medium text-base">OS {os.orderNumber}</span>
-                            <p className="text-sm text-muted-foreground">{os.serviceDescription}</p>
+                            <p className="text-sm text-muted-foreground">{os.serviceType}</p> {/* Changed from serviceDescription */}
                         </div>
                          <div className="flex items-center space-x-2">
-                            <Badge variant={os.status === 'Concluída' ? 'default' : os.status === 'Em Progresso' ? 'secondary' : 'outline'} 
-                                   className={`text-xs ${os.status === 'Concluída' ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}>
+                            <Badge variant={getServiceOrderStatusBadgeVariant(os.status)} 
+                                   className={`text-xs ${os.status === 'Finalizada' ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}>
                                 {os.status}
                             </Badge>
                             <Button variant="ghost" size="sm" onClick={() => handleViewServiceOrder(os.orderNumber)} aria-label="Visualizar Ordem de Serviço">
