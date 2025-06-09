@@ -75,6 +75,9 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
     internalNotes: "",
     registrationDate: new Date(),
     status: "Ativo",
+    company: "",
+    responsable: "",
+    segment: "",
     ...initialData,
     registrationDate: initialData?.registrationDate ? new Date(initialData.registrationDate) : new Date(),
   };
@@ -92,7 +95,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
       avatarUrl: clientId ? (MOCK_CLIENTS.find(c => c.id === clientId)?.avatarUrl || `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`) : `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`,
       ...values,
       registrationDate: values.registrationDate.toISOString(),
-      company: values.clientType === 'Pessoa Jurídica' ? values.name : undefined, // Simple logic
+      company: values.clientType === 'Pessoa Jurídica' ? values.name : values.company, // Use company if provided, else name for PJ
     };
 
     console.log("Dados do cliente:", clientData);
@@ -102,6 +105,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
         onSave(clientData);
     } else {
         // Default behavior if no onSave prop (e.g., direct page usage)
+        // This will add to an empty MOCK_CLIENTS array if it's cleared
         if (clientId) {
             const index = MOCK_CLIENTS.findIndex(c => c.id === clientId);
             if (index !== -1) MOCK_CLIENTS[index] = clientData;
@@ -128,6 +132,9 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
         internalNotes: "",
         registrationDate: new Date(),
         status: "Ativo",
+        company: "",
+        responsable: "",
+        segment: "",
       });
     }
     router.push("/clients");
@@ -204,6 +211,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
                   <FormItem>
                     <FormLabel className="flex items-center"><FileType className="mr-2 h-4 w-4 text-primary" /> 🆔 CPF ou CNPJ</FormLabel>
                     <FormControl><Input placeholder="Documento para controle fiscal" {...field} /></FormControl>
+                     <FormDescription>Usado para emissão de notas ou controle fiscal.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -284,7 +292,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
                         <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={ptBR} />
                       </PopoverContent>
                     </Popover>
-                    <FormDescription className="mt-1">Data automática ou preenchida.</FormDescription>
+                    <FormDescription className="mt-1">Data automática ou preenchida (DD/MM/AAAA).</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

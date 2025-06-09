@@ -22,13 +22,8 @@ import { PIPELINE_STAGES } from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
-// Mock data
-const mockLeads: Lead[] = [
-  { id: 'lead-001', name: 'Alice Wonderland', email: 'alice@example.com', company: 'Wonderland Inc.', status: 'Novo Lead', source: 'Website', lastContacted: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-002', name: 'Bob O Construtor', email: 'bob@construction.com', company: 'BuildIt LLC', status: 'Contactado', source: 'Indicação', assignedTo: 'Joana Silva', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-003', name: 'Charlie Brown', email: 'charlie@peanuts.com', company: 'Peanuts Corp', status: 'Qualificado', source: 'E-mail Frio', lastContacted: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-004', name: 'Diana Prince', email: 'diana@themyscira.gov', company: 'Amazonian Exports', status: 'Proposta Enviada', source: 'Evento', assignedTo: 'João Silva', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString(), notes: "Interessada no pacote completo. Acompanhar na próxima semana." },
-];
+// Mock data - now initialized empty
+const mockLeads: Lead[] = [];
 
 
 export function LeadList() {
@@ -48,7 +43,7 @@ export function LeadList() {
   });
 
   useEffect(() => {
-    setLeads(mockLeads);
+    setLeads(mockLeads); // Will set to empty array
   }, []);
 
   const filteredLeads = useMemo(() => {
@@ -73,6 +68,14 @@ export function LeadList() {
   };
 
   const handleExportCSV = () => {
+    if (filteredLeads.length === 0) {
+      toast({
+        title: "Nenhum Lead para Exportar",
+        description: "Não há leads correspondentes aos filtros atuais para exportar.",
+        variant: "default" 
+      });
+      return;
+    }
     toast({
         title: "Exportar CSV",
         description: "Gerando arquivo CSV dos leads filtrados... (Simulação)",

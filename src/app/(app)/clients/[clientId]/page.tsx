@@ -16,17 +16,9 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";
 
-// Mock data for invoices and service orders
-const mockInvoices: Invoice[] = [
-    { id: 'inv-001', clientId: 'client-001', invoiceNumber: '2024-001', amount: 1500, currency: 'BRL', issueDate: new Date(2024, 4, 1).toISOString(), dueDate: new Date(2024, 4, 15).toISOString(), status: 'Paga', items: [{id: 'item-1', description: 'Consultoria SEO', quantity:1, unitPrice: 1500, total: 1500}], paymentMethod: 'PIX' },
-    { id: 'inv-002', clientId: 'client-001', invoiceNumber: '2024-002', amount: 2500, currency: 'BRL', issueDate: new Date(2024, 5, 1).toISOString(), dueDate: new Date(2024, 5, 15).toISOString(), status: 'Pendente', items: [{id: 'item-2', description: 'Desenvolvimento Web - Fase 1', quantity:1, unitPrice: 2500, total: 2500}], paymentMethod: 'Cartão de Crédito', paymentCondition: 'Parcelado', installments: '2x' },
-    { id: 'inv-003', clientId: 'client-002', invoiceNumber: '2024-003', amount: 800, currency: 'USD', issueDate: new Date(2024, 5, 5).toISOString(), dueDate: new Date(2024, 5, 20).toISOString(), status: 'Atrasada', items: [{id: 'item-3', description: 'Campanha de Ads', quantity:1, unitPrice: 800, total: 800}], paymentMethod: 'Dinheiro' },
-];
-
-const mockServiceOrders: ServiceOrder[] = [
-    { id: 'os-001', clientId: 'client-001', orderNumber: 'OS-2024-010', serviceType: 'Manutenção Website', creationDate: new Date(2024, 4, 20).toISOString(), status: 'Em Andamento', assignedTo: 'Equipe Web' },
-    { id: 'os-002', clientId: 'client-002', orderNumber: 'OS-2024-011', serviceType: 'Criação de Conteúdo Blog', creationDate: new Date(2024, 5, 10).toISOString(), status: 'Aberta' },
-];
+// Mock data for invoices and service orders - now initialized empty
+const mockInvoices: Invoice[] = [];
+const mockServiceOrders: ServiceOrder[] = [];
 
 
 export default function ClientDetailPage() {
@@ -43,6 +35,7 @@ export default function ClientDetailPage() {
     const foundClient = MOCK_CLIENTS.find(c => c.id === clientId);
     setClient(foundClient || null);
     if (foundClient) {
+        // Filter from the global empty mocks, will result in empty lists
         setClientInvoices(mockInvoices.filter(inv => inv.clientId === clientId));
         setClientServiceOrders(mockServiceOrders.filter(os => os.clientId === clientId));
     }
@@ -289,7 +282,7 @@ export default function ClientDetailPage() {
             </CardHeader>
             <CardContent>
                 <p className="text-sm text-muted-foreground text-center py-4">
-                    Um log de atividades recentes relacionadas a este cliente (ex: propostas enviadas, e-mails, pagamentos) será exibido aqui. (Placeholder)
+                    Um log de atividades recentes relacionadas a este cliente será exibido aqui.
                 </p>
             </CardContent>
         </Card>

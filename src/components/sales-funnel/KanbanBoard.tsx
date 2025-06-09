@@ -10,13 +10,8 @@ import { PlusCircle, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
-const initialLeads: Lead[] = [
-  { id: 'lead-1', name: 'Alpha Corp', email: 'contact@alpha.co', status: 'Novo Lead', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-2', name: 'Beta LLC', email: 'info@beta.llc', status: 'Contactado', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-3', name: 'Gamma Inc', email: 'sales@gamma.inc', status: 'Qualificado', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-4', name: 'Delta Solutions', email: 'support@delta.com', status: 'Novo Lead', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-5', name: 'Epsilon Group', email: 'partners@epsilon.org', status: 'Proposta Enviada', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-];
+// Initial leads - now initialized empty
+const initialLeads: Lead[] = [];
 
 
 interface KanbanCardProps {
@@ -69,6 +64,9 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, items, onDragOver, o
         <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Lead
       </Button>
       <ScrollArea className="h-[calc(100vh-20rem)]">
+        {items.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-4">Nenhum lead nesta etapa.</p>
+        )}
         {items.map(item => <KanbanCard key={item.id} item={item} onDragStart={onDragStartCard} onClick={onCardClick} />)}
       </ScrollArea>
     </div>
@@ -81,7 +79,7 @@ export function KanbanBoard() {
   const { toast } = useToast();
 
   useEffect(() => {
-    setLeads(initialLeads);
+    setLeads(initialLeads); // Will set to empty array
   }, []);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, itemId: string) => {

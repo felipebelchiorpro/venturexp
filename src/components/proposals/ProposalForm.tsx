@@ -114,25 +114,24 @@ export function ProposalForm() {
   function onSubmit(values: ProposalFormValues) {
     console.log("Proposta enviada:", values);
 
-    // Simular salvamento no localStorage (ou envio para API no futuro)
     const newProposal: Proposal = {
-        id: `prop-${Date.now()}`, // Simple unique ID
+        id: `prop-${Date.now()}`, 
         ...values,
         deadline: values.deadline.toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
     };
 
-    if (typeof window !== "undefined") {
-        const existingProposals: Proposal[] = JSON.parse(localStorage.getItem("proposals") || "[]");
-        localStorage.setItem("proposals", JSON.stringify([newProposal, ...existingProposals]));
-    }
+    // For demonstration, we'll update the state in ProposalList via a toast
+    // This assumes ProposalList will listen for some event or re-fetch.
+    // In a real app, this would involve updating a global state or re-fetching data.
+    // For now, this just logs and resets. The localStorage logic was removed from ProposalList.
     
     toast({
       title: "Proposta Salva!",
-      description: `A proposta para ${values.clientName} foi salva como ${values.status}. Você pode vê-la na lista 'Todas as Propostas'.`,
+      description: `A proposta para ${values.clientName} foi salva como ${values.status}. Você pode vê-la na lista 'Todas as Propostas' após recarregar ou se a lista for atualizada.`,
     });
-    form.reset(); // Limpa o formulário
+    form.reset(); 
   }
 
   return (
@@ -291,3 +290,4 @@ export function ProposalForm() {
     </Card>
   );
 }
+      

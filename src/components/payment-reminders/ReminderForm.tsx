@@ -21,12 +21,8 @@ import { Send } from "lucide-react";
 import { PAYMENT_TEMPLATE_TYPES } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock client data
-const mockClients = [
-  { id: 'client-1', name: 'Alpha Corp' },
-  { id: 'client-2', name: 'Beta LLC' },
-  { id: 'client-3', name: 'Gamma Inc' },
-];
+// Mock client data - now initialized empty
+const mockClients: { id: string; name: string }[] = [];
 
 const formSchema = z.object({
   templateType: z.string().min(1, { message: "O tipo de modelo é obrigatório." }),
@@ -117,8 +113,9 @@ export function ReminderForm() {
                   <FormItem>
                     <FormLabel>Cliente</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger><SelectValue placeholder={mockClients.length === 0 ? "Nenhum cliente cadastrado" : "Selecione o cliente"} /></SelectTrigger></FormControl>
                       <SelectContent>
+                        {mockClients.length === 0 && <p className="p-2 text-sm text-muted-foreground">Primeiro cadastre clientes.</p>}
                         {mockClients.map(client => (
                           <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
                         ))}
@@ -153,7 +150,7 @@ export function ReminderForm() {
               )}
             />
             <CardFooter className="p-0 pt-6">
-              <Button type="submit" className="w-full md:w-auto">
+              <Button type="submit" className="w-full md:w-auto" disabled={mockClients.length === 0}>
                 <Send className="mr-2 h-4 w-4" /> Enviar Lembrete
               </Button>
             </CardFooter>

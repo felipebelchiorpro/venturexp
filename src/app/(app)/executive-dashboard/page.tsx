@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -9,27 +10,27 @@ import { MOCK_USER } from "@/lib/constants";
 import { BarChart3, DollarSign, FileText, Users, CreditCard, Award, TrendingUp, Activity, AlertTriangle, GanttChartSquare, ListChecks } from 'lucide-react';
 import { ExecutivePlaceholderContent } from '@/components/dashboard/ExecutivePlaceholderContent';
 
-// Mock data for the executive dashboard
+// Mock data for the executive dashboard - zeroed out
 const executiveKpiData = {
   proposals: {
-    sent: { title: "Propostas Enviadas", value: "125", iconName: "FileText" as IconName, change: "+15 este mês" , trend: "up" as const },
-    approved: { title: "Propostas Aprovadas", value: "80", iconName: "CheckCircle" as IconName, change: "+10 este mês", trend: "up" as const },
-    rejected: { title: "Propostas Rejeitadas", value: "20", iconName: "XCircle" as IconName, change: "-5 este mês", trend: "down" as const },
+    sent: { title: "Propostas Enviadas", value: "0", iconName: "FileText" as IconName, change: "+0 este mês" , trend: "neutral" as const },
+    approved: { title: "Propostas Aprovadas", value: "0", iconName: "CheckCircle" as IconName, change: "+0 este mês", trend: "neutral" as const },
+    rejected: { title: "Propostas Rejeitadas", value: "0", iconName: "XCircle" as IconName, change: "-0 este mês", trend: "neutral" as const },
   },
   billing: {
-    monthly: { title: "Faturamento Mensal", value: "R$150.000", iconName: "DollarSign" as IconName, change: "+5% vs mês anterior", trend: "up" as const },
-    annual: { title: "Faturamento Anual (YTD)", value: "R$1.2M", iconName: "DollarSign" as IconName, description: "Meta Anual: R$2M" },
+    monthly: { title: "Faturamento Mensal", value: "R$0", iconName: "DollarSign" as IconName, change: "+0% vs mês anterior", trend: "neutral" as const },
+    annual: { title: "Faturamento Anual (YTD)", value: "R$0", iconName: "DollarSign" as IconName, description: "Meta Anual: N/A" },
   },
   leads: {
-    totalInFunnel: { title: "Total de Leads no Funil", value: "350", iconName: "Users" as IconName, change: "+20 esta semana", trend: "up" as const },
+    totalInFunnel: { title: "Total de Leads no Funil", value: "0", iconName: "Users" as IconName, change: "+0 esta semana", trend: "neutral" as const },
   },
   payments: {
-    onTime: { title: "Pagamentos em Dia", value: "95%", iconName: "CalendarCheck2" as IconName, description: "Últimos 30 dias" },
-    late: { title: "Pagamentos Atrasados", value: "R$25.000", iconName: "CalendarX2" as IconName, description: ">15 dias de atraso" },
-    due: { title: "Pagamentos a Vencer", value: "R$75.000", iconName: "CalendarClock" as IconName, description: "Próximos 7 dias" },
+    onTime: { title: "Pagamentos em Dia", value: "0%", iconName: "CalendarCheck2" as IconName, description: "Últimos 30 dias" },
+    late: { title: "Pagamentos Atrasados", value: "R$0", iconName: "CalendarX2" as IconName, description: ">15 dias de atraso" },
+    due: { title: "Pagamentos a Vencer", value: "R$0", iconName: "CalendarClock" as IconName, description: "Próximos 7 dias" },
   },
   teamPerformance: {
-    topPerformer: { title: "Equipe Destaque (Entregas)", value: "Equipe Alpha", iconName: "Award" as IconName, description: "Baseado em projetos concluídos" },
+    topPerformer: { title: "Equipe Destaque (Entregas)", value: "N/A", iconName: "Award" as IconName, description: "Baseado em projetos concluídos" },
   },
 };
 

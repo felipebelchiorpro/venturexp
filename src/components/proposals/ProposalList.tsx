@@ -21,13 +21,8 @@ import { PROPOSAL_STATUSES } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
-// Mock data
-const mockProposals: Proposal[] = [
-  { id: 'prop-1', clientName: 'Innovatech Ltda.', serviceDescription: 'Desenvolvimento Web', amount: 12000, currency: 'BRL', deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), status: 'Enviada', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 'prop-2', clientName: 'Synergy Corp', serviceDescription: 'Campanha de Marketing', amount: 8500, currency: 'BRL', deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'Rascunho', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 'prop-3', clientName: 'Quantum Solutions', serviceDescription: 'Migração para Nuvem', amount: 25000, currency: 'EUR', deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(), status: 'Aceita', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: 'prop-4', clientName: 'Apex Industries', serviceDescription: 'Otimização SEO', amount: 3000, currency: 'BRL', deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'Recusada', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-];
+// Mock data - initialized empty
+const mockProposals: Proposal[] = [];
 
 const getStatusBadgeVariant = (status: Proposal['status']): "default" | "secondary" | "destructive" | "outline" => {
   switch (status) {
@@ -47,14 +42,17 @@ export function ProposalList() {
 
   useEffect(() => {
     // No futuro, isso viria de uma API
-    const existingProposals = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("proposals") || "[]") : [];
+    // Para o estado "zerado", iniciamos com uma lista vazia.
+    // A lógica do localStorage foi removida para garantir um início limpo.
+    const existingProposals: Proposal[] = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("proposals") || "[]") : [];
     if (existingProposals.length > 0) {
-        setProposals(existingProposals);
-    } else {
-        setProposals(mockProposals);
+        // Se ainda houver algo no localStorage de execuções anteriores, limpamos para o estado "zerado".
         if (typeof window !== "undefined") {
-            localStorage.setItem("proposals", JSON.stringify(mockProposals));
+            localStorage.removeItem("proposals");
         }
+        setProposals([]);
+    } else {
+        setProposals([]); // Inicia vazio
     }
   }, []);
 
@@ -62,9 +60,10 @@ export function ProposalList() {
     if (window.confirm("Tem certeza que deseja excluir esta proposta?")) {
       const updatedProposals = proposals.filter(p => p.id !== id);
       setProposals(updatedProposals);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("proposals", JSON.stringify(updatedProposals));
-      }
+      // Se for reintroduzir o localStorage para propostas criadas na sessão:
+      // if (typeof window !== "undefined") {
+      //   localStorage.setItem("proposals", JSON.stringify(updatedProposals));
+      // }
       toast({
         title: "Proposta Excluída",
         description: "A proposta foi excluída com sucesso. (Simulação)",
