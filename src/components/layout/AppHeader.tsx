@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import React from "react"; // Added React import
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,19 +14,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { APP_ICON, APP_NAME, MOCK_USER, navItems } from "@/lib/constants";
+import { APP_ICON, APP_NAME, MOCK_USER } from "@/lib/constants"; // Removed navItems as it's not used here
 import { LogOut, User, Settings, Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes"; // Assuming next-themes is or will be installed
+import { useTheme } from "next-themes"; 
 
-// Placeholder for Theme Toggle functionality
 const ThemeToggle = () => {
-  const { setTheme, theme } = useTheme ? useTheme() : { setTheme: () => {}, theme: 'light' }; // Graceful fallback if useTheme is not available
+  const { setTheme, theme } = useTheme ? useTheme() : { setTheme: () => {}, theme: 'light' };
 
-  // This useEffect is to avoid hydration mismatch if next-themes is not set up correctly or server/client differ
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
-  if (!mounted || !useTheme) { // Also check if useTheme itself is available
+  if (!mounted || !useTheme) {
     return <Button variant="ghost" size="icon" disabled><Sun className="h-[1.2rem] w-[1.2rem]" /></Button>;
   }
 
@@ -104,7 +103,7 @@ export function AppHeader() {
           <SidebarTrigger />
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
-          {/* <ThemeToggle /> Commenting out ThemeToggle if next-themes is not setup */}
+          <ThemeToggle /> {/* Uncommented ThemeToggle */}
           <UserNav />
         </div>
       </div>
