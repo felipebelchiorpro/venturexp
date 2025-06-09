@@ -1,7 +1,7 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact } from 'lucide-react'; // Adicionado Contact
-import type { ServiceOrderStatusType, ClientType } from '@/types';
+import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck } from 'lucide-react'; // Adicionado Contact e ShieldCheck
+import type { ServiceOrderStatusType, ClientType, AccessPermissionModuleIdType, AccessRestrictionType, AccessStatusType } from '@/types';
 
 
 export interface NavItem {
@@ -15,11 +15,12 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { label: 'Painel Principal', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Painel Executivo', href: '/executive-dashboard', icon: Building, executiveOnly: true },
-  { label: 'Clientes', href: '/clients', icon: Contact }, // Novo item de menu Clientes
+  { label: 'Clientes', href: '/clients', icon: Contact }, 
   { label: 'Funil de Vendas', href: '/sales-funnel', icon: GanttChartSquare },
   { label: 'Propostas', href: '/proposals', icon: FileText },
   { label: 'Leads', href: '/leads', icon: Users },
   { label: 'Gerenciar Equipe', href: '/team', icon: UserPlus },
+  { label: 'Perfis de Acesso', href: '/access-profiles/new', icon: ShieldCheck },
   { label: 'Lembretes de Pag.', href: '/payment-reminders', icon: BellRing },
 ];
 
@@ -43,7 +44,7 @@ export const KPI_DATA = [
 
 export const PIPELINE_STAGES = ['Novo Lead', 'Contactado', 'Qualificado', 'Proposta Enviada', 'Negociação', 'Ganho', 'Perdido'];
 
-export const PROPOSAL_STATUSES = ['Rascunho', 'Enviada', 'Aceita', 'Recusada', 'Arquivada'] as [string, ...string[]]; // Garantindo o tipo correto
+export const PROPOSAL_STATUSES = ['Rascunho', 'Enviada', 'Aceita', 'Recusada', 'Arquivada'] as [string, ...string[]]; 
 export const PAYMENT_TEMPLATE_TYPES = ['Primeiro Lembrete', 'Segundo Lembrete', 'Aviso Final'];
 
 export const USER_ROLES = ['Admin', 'Executive', 'Manager', 'Member', 'Analyst'] as const;
@@ -67,3 +68,21 @@ export const MOCK_CLIENTS = [
   { id: 'client-003', name: 'Consultoria Delta', email: 'parceria@consultoriadelta.com.br', company: 'Consultoria Delta', phone: '(31) 99999-8888', status: 'Inativo' as ClientStatus, createdAt: new Date(2023, 8, 10).toISOString(), responsable: 'Fernando Martins', segment: 'Serviços', avatarUrl: 'https://placehold.co/100x100.png', address: 'Rua dos Inconfidentes, 500, Savassi, Belo Horizonte, MG, 30140-120', document: '98.765.432/0001-11', clientType: 'Pessoa Jurídica' as ClientType, frequentServices: 'Consultoria Financeira Mensal', internalNotes: 'Contrato suspenso temporariamente.', registrationDate: new Date(2023, 7, 15).toISOString() },
   { id: 'client-004', name: 'Agro Forte Brasil', email: 'financeiro@agroforte.com', company: 'Agro Forte Brasil', phone: '(62) 98877-6655', status: 'Potencial' as ClientStatus, createdAt: new Date(2024, 2, 1).toISOString(), responsable: 'Juliana Alves', segment: 'Agronegócio', avatarUrl: 'https://placehold.co/100x100.png', address: 'Fazenda Boa Esperança, Lote 7, Zona Rural, Rio Verde, GO, 75900-000', document: '01.234.567/0001-00', clientType: 'Pessoa Jurídica' as ClientType, frequentServices: 'Análise de solo, Compra de insumos', internalNotes: 'Interessado em financiamento para nova safra.', registrationDate: new Date(2024, 1, 20).toISOString() },
 ];
+
+export const ACCESS_PERMISSION_MODULES_PT: { id: AccessPermissionModuleIdType; label: string; icon: string; }[] = [
+    { id: 'clients', label: 'Clientes', icon: '📁' },
+    { id: 'serviceOrders', label: 'Ordens de Serviço', icon: '🛠️' },
+    { id: 'productsAndStock', label: 'Produtos e Estoque', icon: '📦' },
+    { id: 'financial', label: 'Financeiro', icon: '💰' },
+    { id: 'reportsAndDashboard', label: 'Relatórios e Dashboard', icon: '📈' },
+    { id: 'systemSettings', label: 'Configurações do Sistema', icon: '⚙️' },
+    { id: 'collaboratorManagement', label: 'Gestão de Colaboradores', icon: '🧑‍🤝‍🧑' },
+];
+
+export const ACCESS_RESTRICTION_LEVELS_PT: { id: AccessRestrictionType; label: string; }[] = [
+    { id: 'viewOwnOnly', label: 'Pode ver apenas seus próprios atendimentos/vendas' },
+    { id: 'editOwnOnly', label: 'Pode editar apenas seus próprios registros' },
+    { id: 'viewAllAsManager', label: 'Pode ver dados de outros colaboradores (nível gestor)' },
+];
+
+export const ACCESS_STATUSES_PT: AccessStatusType[] = ['Ativo', 'Inativo', 'Aguardando Ativação'];

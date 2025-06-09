@@ -19,6 +19,23 @@ export type ServiceOrderStatusType = typeof SERVICE_ORDER_STATUSES[number];
 export const CLIENT_TYPES = ['Pessoa Física', 'Pessoa Jurídica'] as const;
 export type ClientType = typeof CLIENT_TYPES[number];
 
+export const ACCESS_PERMISSION_MODULE_IDS = ['clients', 'serviceOrders', 'productsAndStock', 'financial', 'reportsAndDashboard', 'systemSettings', 'collaboratorManagement'] as const;
+export type AccessPermissionModuleIdType = typeof ACCESS_PERMISSION_MODULE_IDS[number];
+
+export type AccessPermissions = {
+  [K in AccessPermissionModuleIdType]?: boolean;
+};
+
+export const ACCESS_RESTRICTION_TYPES = ['viewOwnOnly', 'editOwnOnly', 'viewAllAsManager'] as const;
+export type AccessRestrictionType = typeof ACCESS_RESTRICTION_TYPES[number];
+
+export type AccessRestrictions = {
+  [K in AccessRestrictionType]?: boolean;
+};
+
+export const ACCESS_STATUSES = ['Ativo', 'Inativo', 'Aguardando Ativação'] as const;
+export type AccessStatusType = typeof ACCESS_STATUSES[number];
+
 
 export interface Proposal {
   id: string;
@@ -132,4 +149,19 @@ export interface ServiceOrder {
   additionalNotes?: string;
   status: ServiceOrderStatusType;
   assignedTo?: string;
+}
+
+export interface AccessProfile {
+  id: string;
+  collaboratorName: string;
+  loginEmail: string;
+  temporaryPassword?: string;
+  roleOrFunction: string;
+  permissions: AccessPermissions;
+  activateIndividualDashboard: boolean;
+  restrictions: AccessRestrictions;
+  activationDate: string; // ISO date string
+  accessStatus: AccessStatusType;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
 }
