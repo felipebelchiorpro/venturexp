@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -16,15 +17,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal, Edit, Trash2, PlusCircle, ListFilter, FileDown, UserPlus, CheckCircle } from "lucide-react";
 import type { Lead } from "@/types";
 import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { PIPELINE_STAGES } from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
 
 // Mock data
 const mockLeads: Lead[] = [
-  { id: 'lead-001', name: 'Alice Wonderland', email: 'alice@example.com', company: 'Wonderland Inc.', status: 'New Lead', source: 'Website', lastContacted: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-002', name: 'Bob The Builder', email: 'bob@construction.com', company: 'BuildIt LLC', status: 'Contacted', source: 'Referral', assignedTo: 'Jane Doe', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-003', name: 'Charlie Brown', email: 'charlie@peanuts.com', company: 'Peanuts Corp', status: 'Qualified', source: 'Cold Email', lastContacted: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-004', name: 'Diana Prince', email: 'diana@themyscira.gov', company: 'Amazonian Exports', status: 'Proposal Sent', source: 'Event', assignedTo: 'John Doe', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString(), notes: "Interested in full package. Follow up next week." },
+  { id: 'lead-001', name: 'Alice Wonderland', email: 'alice@example.com', company: 'Wonderland Inc.', status: 'Novo Lead', source: 'Website', lastContacted: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString() },
+  { id: 'lead-002', name: 'Bob O Construtor', email: 'bob@construction.com', company: 'BuildIt LLC', status: 'Contactado', source: 'Indicação', assignedTo: 'Joana Silva', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: 'lead-003', name: 'Charlie Brown', email: 'charlie@peanuts.com', company: 'Peanuts Corp', status: 'Qualificado', source: 'E-mail Frio', lastContacted: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), createdAt: new Date().toISOString() },
+  { id: 'lead-004', name: 'Diana Prince', email: 'diana@themyscira.gov', company: 'Amazonian Exports', status: 'Proposta Enviada', source: 'Evento', assignedTo: 'João Silva', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString(), notes: "Interessada no pacote completo. Acompanhar na próxima semana." },
 ];
 
 
@@ -33,7 +35,6 @@ export function LeadList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | 'all'>('all');
   
-  // For column visibility toggle
   const [columnVisibility, setColumnVisibility] = useState({
     company: true,
     email: true,
@@ -59,18 +60,17 @@ export function LeadList() {
   }, [leads, searchTerm, statusFilter]);
 
   const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this lead?")) {
+    if (window.confirm("Tem certeza que deseja excluir este lead?")) {
       setLeads(prev => prev.filter(l => l.id !== id));
     }
   };
 
   const handleExportCSV = () => {
-    alert("Export to CSV functionality to be implemented.");
-    // Basic CSV export logic can be added here
-    const headers = ["ID", "Name", "Company", "Email", "Phone", "Status", "Source", "Assigned To", "Last Contacted", "Created At", "Notes"];
+    alert("Funcionalidade de exportar para CSV a ser implementada.");
+    const headers = ["ID", "Nome", "Empresa", "Email", "Telefone", "Status", "Fonte", "Atribuído a", "Último Contato", "Criado em", "Notas"];
     const rows = filteredLeads.map(lead => [
       lead.id, lead.name, lead.company, lead.email, lead.phone, lead.status, lead.source, lead.assignedTo, 
-      format(new Date(lead.lastContacted), "PPP"), format(new Date(lead.createdAt), "PPP"), lead.notes
+      format(new Date(lead.lastContacted), "PPP", { locale: ptBR }), format(new Date(lead.createdAt), "PPP", { locale: ptBR }), lead.notes
     ].map(field => `"${String(field || '').replace(/"/g, '""')}"`).join(','));
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
     const encodedUri = encodeURI(csvContent);
@@ -86,7 +86,7 @@ export function LeadList() {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-2 justify-between items-center">
         <Input
-          placeholder="Search leads (name, email, company)..."
+          placeholder="Buscar leads (nome, email, empresa)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
@@ -94,10 +94,10 @@ export function LeadList() {
         <div className="flex gap-2 w-full md:w-auto">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder="Filtrar por status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="all">Todos os Status</SelectItem>
               {PIPELINE_STAGES.map(stage => (
                 <SelectItem key={stage} value={stage}>{stage}</SelectItem>
               ))}
@@ -107,11 +107,11 @@ export function LeadList() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
-                <ListFilter className="mr-2 h-4 w-4" /> Columns
+                <ListFilter className="mr-2 h-4 w-4" /> Colunas
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+              <DropdownMenuLabel>Alternar colunas</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {Object.entries(columnVisibility).map(([key, value]) => (
                 <DropdownMenuCheckboxItem
@@ -122,13 +122,20 @@ export function LeadList() {
                     setColumnVisibility(prev => ({ ...prev, [key]: Boolean(checked) }))
                   }
                 >
-                  {key.replace(/([A-Z])/g, ' $1')}
+                  {key === 'company' ? 'Empresa' : 
+                   key === 'email' ? 'Email' : 
+                   key === 'phone' ? 'Telefone' :
+                   key === 'source' ? 'Fonte' :
+                   key === 'assignedTo' ? 'Atribuído a' :
+                   key === 'lastContacted' ? 'Último Contato' :
+                   key === 'createdAt' ? 'Criado em' :
+                   key.replace(/([A-Z])/g, ' $1')}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
           <Button onClick={handleExportCSV} variant="outline">
-            <FileDown className="mr-2 h-4 w-4" /> Export CSV
+            <FileDown className="mr-2 h-4 w-4" /> Exportar CSV
           </Button>
         </div>
       </div>
@@ -137,21 +144,21 @@ export function LeadList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              {columnVisibility.company && <TableHead>Company</TableHead>}
+              <TableHead>Nome</TableHead>
+              {columnVisibility.company && <TableHead>Empresa</TableHead>}
               {columnVisibility.email && <TableHead>Email</TableHead>}
               <TableHead>Status</TableHead>
-              {columnVisibility.source && <TableHead>Source</TableHead>}
-              {columnVisibility.assignedTo && <TableHead>Assigned To</TableHead>}
-              {columnVisibility.lastContacted && <TableHead>Last Contacted</TableHead>}
-              <TableHead className="text-right">Actions</TableHead>
+              {columnVisibility.source && <TableHead>Fonte</TableHead>}
+              {columnVisibility.assignedTo && <TableHead>Atribuído a</TableHead>}
+              {columnVisibility.lastContacted && <TableHead>Último Contato</TableHead>}
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredLeads.length === 0 && (
               <TableRow>
                 <TableCell colSpan={Object.values(columnVisibility).filter(Boolean).length + 3} className="h-24 text-center text-muted-foreground">
-                  No leads found.
+                  Nenhum lead encontrado.
                 </TableCell>
               </TableRow>
             )}
@@ -162,32 +169,32 @@ export function LeadList() {
                 {columnVisibility.email && <TableCell>{lead.email}</TableCell>}
                 <TableCell><Badge variant="secondary">{lead.status}</Badge></TableCell>
                 {columnVisibility.source && <TableCell>{lead.source || '-'}</TableCell>}
-                {columnVisibility.assignedTo && <TableCell>{lead.assignedTo || 'Unassigned'}</TableCell>}
-                {columnVisibility.lastContacted && <TableCell>{format(new Date(lead.lastContacted), "PPP")}</TableCell>}
+                {columnVisibility.assignedTo && <TableCell>{lead.assignedTo || 'Não atribuído'}</TableCell>}
+                {columnVisibility.lastContacted && <TableCell>{format(new Date(lead.lastContacted), "PPP", { locale: ptBR })}</TableCell>}
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">Abrir menu</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => alert(`View/Edit lead ${lead.id}`)}>
-                        <Edit className="mr-2 h-4 w-4" /> Edit Lead
+                      <DropdownMenuItem onClick={() => alert(`Visualizar/Editar lead ${lead.id}`)}>
+                        <Edit className="mr-2 h-4 w-4" /> Editar Lead
                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => alert(`Log interaction for ${lead.id}`)}>
-                        <CheckCircle className="mr-2 h-4 w-4" /> Log Interaction
+                       <DropdownMenuItem onClick={() => alert(`Registrar interação para ${lead.id}`)}>
+                        <CheckCircle className="mr-2 h-4 w-4" /> Registrar Interação
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => alert(`Assign task for ${lead.id}`)}>
-                        <PlusCircle className="mr-2 h-4 w-4" /> Assign Task
+                      <DropdownMenuItem onClick={() => alert(`Atribuir tarefa para ${lead.id}`)}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Atribuir Tarefa
                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => alert(`Assign lead ${lead.id} to user...`)}>
-                        <UserPlus className="mr-2 h-4 w-4" /> Assign To...
+                       <DropdownMenuItem onClick={() => alert(`Atribuir lead ${lead.id} para usuário...`)}>
+                        <UserPlus className="mr-2 h-4 w-4" /> Atribuir Para...
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => handleDelete(lead.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                        <Trash2 className="mr-2 h-4 w-4" /> Delete Lead
+                        <Trash2 className="mr-2 h-4 w-4" /> Excluir Lead
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

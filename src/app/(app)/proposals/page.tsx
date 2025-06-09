@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { ProposalList } from "@/components/proposals/ProposalList";
@@ -10,12 +11,12 @@ export default function ProposalsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Proposals"
-        description="Manage your client proposals from creation to acceptance."
+        title="Propostas"
+        description="Gerencie suas propostas de clientes, da criação à aceitação."
         actions={
           <Button asChild>
             <Link href="/proposals?tab=create">
-              <PlusCircle className="mr-2 h-4 w-4" /> Create New Proposal
+              <PlusCircle className="mr-2 h-4 w-4" /> Criar Nova Proposta
             </Link>
           </Button>
         }
@@ -23,8 +24,8 @@ export default function ProposalsPage() {
 
       <Tabs defaultValue="all-proposals">
         <TabsList className="grid w-full grid-cols-2 md:w-[400px]">
-          <TabsTrigger value="all-proposals">All Proposals</TabsTrigger>
-          <TabsTrigger value="create-proposal">Create New</TabsTrigger>
+          <TabsTrigger value="all-proposals">Todas as Propostas</TabsTrigger>
+          <TabsTrigger value="create-proposal">Criar Nova</TabsTrigger>
         </TabsList>
         <TabsContent value="all-proposals" className="mt-6">
           <ProposalList />

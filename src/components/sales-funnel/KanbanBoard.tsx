@@ -1,20 +1,20 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card"; // Removed CardHeader, CardTitle as they are not directly used in this translated version of KanbanCard
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PIPELINE_STAGES } from "@/lib/constants";
 import type { Lead, KanbanItem } from "@/types";
 import { PlusCircle, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Mock data - replace with actual data fetching and state management
 const initialLeads: Lead[] = [
-  { id: 'lead-1', name: 'Alpha Corp', email: 'contact@alpha.co', status: 'New Lead', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-2', name: 'Beta LLC', email: 'info@beta.llc', status: 'Contacted', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-3', name: 'Gamma Inc', email: 'sales@gamma.inc', status: 'Qualified', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-4', name: 'Delta Solutions', email: 'support@delta.com', status: 'New Lead', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
-  { id: 'lead-5', name: 'Epsilon Group', email: 'partners@epsilon.org', status: 'Proposal Sent', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: 'lead-1', name: 'Alpha Corp', email: 'contact@alpha.co', status: 'Novo Lead', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: 'lead-2', name: 'Beta LLC', email: 'info@beta.llc', status: 'Contactado', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: 'lead-3', name: 'Gamma Inc', email: 'sales@gamma.inc', status: 'Qualificado', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: 'lead-4', name: 'Delta Solutions', email: 'support@delta.com', status: 'Novo Lead', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
+  { id: 'lead-5', name: 'Epsilon Group', email: 'partners@epsilon.org', status: 'Proposta Enviada', lastContacted: new Date().toISOString(), createdAt: new Date().toISOString() },
 ];
 
 
@@ -61,9 +61,9 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, items, onDragOver, o
         <span className="text-sm text-muted-foreground">{items.length}</span>
       </div>
       <Button variant="outline" size="sm" className="w-full mb-3">
-        <PlusCircle className="mr-2 h-4 w-4" /> Add Lead
+        <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Lead
       </Button>
-      <ScrollArea className="h-[calc(100vh-20rem)]">
+      <ScrollArea className="h-[calc(100vh-20rem)]"> {/* Adjusted height to better fit content */}
         {items.map(item => <KanbanCard key={item.id} item={item} onDragStart={onDragStartCard} />)}
       </ScrollArea>
     </div>
@@ -75,7 +75,6 @@ export function KanbanBoard() {
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate fetching data
     setLeads(initialLeads);
   }, []);
 

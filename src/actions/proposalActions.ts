@@ -1,14 +1,15 @@
+
 'use server';
 
 import { generateProposalDraft, type GenerateProposalDraftInput, type GenerateProposalDraftOutput } from '@/ai/flows/generate-proposal-draft';
 import { z } from 'zod';
 
 const CreateProposalSchema = z.object({
-  clientName: z.string().min(1, "Client name is required."),
-  clientDetails: z.string().min(1, "Client details are required."),
-  serviceDescription: z.string().min(1, "Service description is required."),
-  amount: z.string().min(1, "Amount is required."), // AI flow expects string
-  deadline: z.string().min(1, "Deadline is required."), // AI flow expects string
+  clientName: z.string().min(1, "O nome do cliente é obrigatório."),
+  clientDetails: z.string().min(1, "Os detalhes do cliente são obrigatórios."),
+  serviceDescription: z.string().min(1, "A descrição do serviço é obrigatória."),
+  amount: z.string().min(1, "O valor é obrigatório."), 
+  deadline: z.string().min(1, "O prazo é obrigatório."), 
 });
 
 export type CreateProposalFormData = z.infer<typeof CreateProposalSchema>;
@@ -26,7 +27,7 @@ export async function generateAIProposalAction(formData: CreateProposalFormData)
   if (!validationResult.success) {
     return {
       success: false,
-      error: "Invalid form data.",
+      error: "Dados do formulário inválidos.",
       fieldErrors: validationResult.error.flatten().fieldErrors,
     };
   }
@@ -35,8 +36,8 @@ export async function generateAIProposalAction(formData: CreateProposalFormData)
     clientName: validationResult.data.clientName,
     clientDetails: validationResult.data.clientDetails,
     serviceDescription: validationResult.data.serviceDescription,
-    amount: validationResult.data.amount, // Already string
-    deadline: validationResult.data.deadline, // Already string
+    amount: validationResult.data.amount,
+    deadline: validationResult.data.deadline, 
   };
 
   try {
@@ -44,10 +45,10 @@ export async function generateAIProposalAction(formData: CreateProposalFormData)
     if (result && result.proposalDraft) {
       return { success: true, data: result };
     } else {
-      return { success: false, error: "AI failed to generate proposal draft." };
+      return { success: false, error: "A IA falhou ao gerar o rascunho da proposta." };
     }
   } catch (error) {
-    console.error("Error generating AI proposal:", error);
-    return { success: false, error: "An unexpected error occurred while generating the proposal." };
+    console.error("Erro ao gerar proposta com IA:", error);
+    return { success: false, error: "Ocorreu um erro inesperado ao gerar a proposta." };
   }
 }

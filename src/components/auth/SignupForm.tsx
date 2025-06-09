@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -19,9 +20,9 @@ import { useRouter } from "next/navigation";
 import { UserPlus } from "lucide-react";
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
+  email: z.string().email({ message: "Endereço de e-mail inválido." }),
+  password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres." }),
 });
 
 export function SignupForm() {
@@ -37,17 +38,17 @@ export function SignupForm() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Mock signup
-    console.log("Signup attempt:", values);
+    console.log("Tentativa de cadastro:", values);
     // Simulate successful signup and redirect (e.g., to a verification pending page or login)
-    alert("Signup successful! Please check your email for verification. (This is a mock verification)");
+    alert("Cadastro realizado com sucesso! Por favor, verifique seu e-mail para confirmação. (Esta é uma verificação simulada)");
     router.push("/login");
   }
 
   return (
     <Card className="w-full shadow-xl">
       <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
-        <CardDescription>Join AgencyFlow to streamline your workflow</CardDescription>
+        <CardTitle className="text-2xl font-headline">Crie uma Conta</CardTitle>
+        <CardDescription>Junte-se ao AgencyFlow para otimizar seu fluxo de trabalho</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -57,9 +58,9 @@ export function SignupForm() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>Nome Completo</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="João Silva" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -72,7 +73,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <Input placeholder="nome@exemplo.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -83,7 +84,7 @@ export function SignupForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
@@ -92,16 +93,16 @@ export function SignupForm() {
               )}
             />
             <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-              <UserPlus className="mr-2 h-4 w-4" /> Sign Up
+              <UserPlus className="mr-2 h-4 w-4" /> Cadastrar
             </Button>
           </form>
         </Form>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2 text-center text-sm">
         <p>
-          Already have an account?{" "}
+          Já tem uma conta?{" "}
           <Link href="/login" className="font-medium text-primary hover:underline">
-            Sign in
+            Entrar
           </Link>
         </p>
       </CardFooter>

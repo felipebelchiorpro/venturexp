@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -10,13 +11,8 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
-import { APP_ICON, APP_NAME, navItems, NavItem, MOCK_USER } from "@/lib/constants";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { APP_ICON, APP_NAME, navItems, MOCK_USER } from "@/lib/constants";
 import { LogOut, Settings } from "lucide-react";
 
 export function AppSidebar() {
@@ -61,17 +57,17 @@ export function AppSidebar() {
       <SidebarFooter className="p-2">
          <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={{ children: "Settings", className: "group-data-[collapsible=icon]:block hidden"  }}>
+              <SidebarMenuButton asChild tooltip={{ children: "Configurações", className: "group-data-[collapsible=icon]:block hidden"  }}>
                 <Link href="/settings">
                   <Settings />
-                  <span>Settings</span>
+                  <span>Configurações</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-               <SidebarMenuButton onClick={() => alert('Logout clicked. Implement actual logout.')} tooltip={{ children: "Log out", className: "group-data-[collapsible=icon]:block hidden"  }}>
+               <SidebarMenuButton onClick={() => alert('Logout clicado. Implementar logout real.')} tooltip={{ children: "Sair", className: "group-data-[collapsible=icon]:block hidden"  }}>
                   <LogOut />
-                  <span>Log out</span>
+                  <span>Sair</span>
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu>

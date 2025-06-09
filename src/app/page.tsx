@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -12,7 +13,7 @@ export default function RootPage() {
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-background">
-      <p className="text-foreground">Loading AgencyFlow...</p>
+      <p className="text-foreground">Carregando AgencyFlow...</p>
     </div>
   );
 }

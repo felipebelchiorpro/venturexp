@@ -1,3 +1,4 @@
+
 import { APP_ICON, APP_NAME } from "@/lib/constants";
 import Link from "next/link";
 
@@ -17,7 +18,7 @@ export default function AuthLayout({
         {children}
       </div>
       <p className="mt-8 text-center text-sm text-muted-foreground">
-        Back to <Link href="/" className="font-medium text-primary hover:underline">Homepage</Link>
+        Voltar para a <Link href="/" className="font-medium text-primary hover:underline">Página Inicial</Link>
       </p>
     </div>
   );

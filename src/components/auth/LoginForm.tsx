@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -19,8 +20,8 @@ import { useRouter } from "next/navigation";
 import { LogIn } from "lucide-react";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  email: z.string().email({ message: "Endereço de e-mail inválido." }),
+  password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres." }),
 });
 
 export function LoginForm() {
@@ -35,7 +36,7 @@ export function LoginForm() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Mock login
-    console.log("Login attempt:", values);
+    console.log("Tentativa de login:", values);
     // Simulate successful login
     router.push("/dashboard"); 
   }
@@ -43,8 +44,8 @@ export function LoginForm() {
   return (
     <Card className="w-full shadow-xl">
       <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-headline">Welcome Back!</CardTitle>
-        <CardDescription>Enter your credentials to access your account</CardDescription>
+        <CardTitle className="text-2xl font-headline">Bem-vindo(a) de Volta!</CardTitle>
+        <CardDescription>Digite suas credenciais para acessar sua conta</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -56,7 +57,7 @@ export function LoginForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <Input placeholder="nome@exemplo.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -67,7 +68,7 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
@@ -77,20 +78,20 @@ export function LoginForm() {
             />
             <div className="text-sm">
               <Link href="/forgot-password" className="font-medium text-primary hover:underline">
-                Forgot your password?
+                Esqueceu sua senha?
               </Link>
             </div>
             <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-              <LogIn className="mr-2 h-4 w-4" /> Sign In
+              <LogIn className="mr-2 h-4 w-4" /> Entrar
             </Button>
           </form>
         </Form>
       </CardContent>
       <CardFooter className="flex flex-col space-y-2 text-center text-sm">
         <p>
-          Don&apos;t have an account?{" "}
+          Não tem uma conta?{" "}
           <Link href="/signup" className="font-medium text-primary hover:underline">
-            Sign up
+            Cadastre-se
           </Link>
         </p>
       </CardFooter>

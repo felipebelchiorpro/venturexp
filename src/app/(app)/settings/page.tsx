@@ -1,3 +1,4 @@
+
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -9,59 +10,59 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Settings"
-        description="Manage your account and application settings."
+        title="Configurações"
+        description="Gerencie sua conta e as configurações do aplicativo."
       />
       
       <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-            <CardDescription>Update your personal details.</CardDescription>
+            <CardTitle>Informações do Perfil</CardTitle>
+            <CardDescription>Atualize seus dados pessoais.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1">
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" defaultValue="John Doe" />
+              <Label htmlFor="name">Nome Completo</Label>
+              <Input id="name" defaultValue="João Silva" />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" defaultValue="john.doe@agencyflow.com" />
+              <Label htmlFor="email">Endereço de Email</Label>
+              <Input id="email" type="email" defaultValue="joao.silva@agencyflow.com" />
             </div>
-            <Button>Save Profile</Button>
+            <Button>Salvar Perfil</Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Password</CardTitle>
-            <CardDescription>Change your account password.</CardDescription>
+            <CardTitle>Senha</CardTitle>
+            <CardDescription>Altere a senha da sua conta.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1">
-              <Label htmlFor="currentPassword">Current Password</Label>
+              <Label htmlFor="currentPassword">Senha Atual</Label>
               <Input id="currentPassword" type="password" />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="newPassword">Nova Senha</Label>
               <Input id="newPassword" type="password" />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
               <Input id="confirmPassword" type="password" />
             </div>
-            <Button>Change Password</Button>
+            <Button>Alterar Senha</Button>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Application Settings</CardTitle>
-          <CardDescription>Configure application preferences.</CardDescription>
+          <CardTitle>Configurações do Aplicativo</CardTitle>
+          <CardDescription>Configure as preferências do aplicativo.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Theme settings, notification preferences, etc. will be here.</p>
+          <p className="text-muted-foreground">Configurações de tema, preferências de notificação, etc. estarão aqui.</p>
         </CardContent>
       </Card>
     </div>

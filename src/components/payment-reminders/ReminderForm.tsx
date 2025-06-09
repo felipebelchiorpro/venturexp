@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,10 +29,10 @@ const mockClients = [
 ];
 
 const formSchema = z.object({
-  templateType: z.string().min(1, { message: "Template type is required." }),
-  clientId: z.string().min(1, { message: "Client is required." }),
-  subject: z.string().min(5, { message: "Subject must be at least 5 characters." }),
-  body: z.string().min(20, { message: "Body must be at least 20 characters." }),
+  templateType: z.string().min(1, { message: "O tipo de modelo é obrigatório." }),
+  clientId: z.string().min(1, { message: "O cliente é obrigatório." }),
+  subject: z.string().min(5, { message: "O assunto deve ter pelo menos 5 caracteres." }),
+  body: z.string().min(20, { message: "O corpo deve ter pelo menos 20 caracteres." }),
 });
 
 type ReminderFormValues = z.infer<typeof formSchema>;
@@ -49,16 +50,15 @@ export function ReminderForm() {
   });
 
   const handleTemplateChange = (templateType: string) => {
-    // Mock: Populate subject and body based on template type
-    if (templateType === "First Reminder") {
-      form.setValue("subject", "Friendly Reminder: Invoice Due Soon");
-      form.setValue("body", "Hi [Client Name],\n\nThis is a friendly reminder that your invoice [Invoice Number] for [Amount] is due on [Due Date].\n\nPlease let us know if you have any questions.\n\nThanks,\n[Your Name/Company]");
-    } else if (templateType === "Second Reminder") {
-      form.setValue("subject", "Action Required: Invoice Overdue");
-      form.setValue("body", "Hi [Client Name],\n\nOur records show that invoice [Invoice Number] for [Amount] is now overdue. The original due date was [Due Date].\n\nPlease arrange for payment at your earliest convenience.\n\nThanks,\n[Your Name/Company]");
-    } else if (templateType === "Final Notice") {
-       form.setValue("subject", "URGENT: Final Notice - Invoice Overdue");
-       form.setValue("body", "Hi [Client Name],\n\nThis is a final notice regarding the overdue invoice [Invoice Number] for [Amount], originally due on [Due Date].\n\nFailure to make payment by [New Deadline] may result in [Consequences].\n\nPlease contact us immediately to resolve this matter.\n\nRegards,\n[Your Name/Company]");
+    if (templateType === "Primeiro Lembrete") {
+      form.setValue("subject", "Lembrete Amigável: Fatura Próxima ao Vencimento");
+      form.setValue("body", "Olá [Nome do Cliente],\n\nEste é um lembrete amigável de que sua fatura [Número da Fatura] no valor de [Valor] vence em [Data de Vencimento].\n\nPor favor, nos avise se tiver alguma dúvida.\n\nObrigado(a),\n[Seu Nome/Empresa]");
+    } else if (templateType === "Segundo Lembrete") {
+      form.setValue("subject", "Ação Necessária: Fatura Vencida");
+      form.setValue("body", "Olá [Nome do Cliente],\n\nNossos registros mostram que a fatura [Número da Fatura] no valor de [Valor] está vencida. A data de vencimento original era [Data de Vencimento].\n\nPor favor, providencie o pagamento assim que possível.\n\nObrigado(a),\n[Seu Nome/Empresa]");
+    } else if (templateType === "Aviso Final") {
+       form.setValue("subject", "URGENTE: Aviso Final - Fatura Vencida");
+       form.setValue("body", "Olá [Nome do Cliente],\n\nEste é um aviso final referente à fatura vencida [Número da Fatura] no valor de [Valor], originalmente com vencimento em [Data de Vencimento].\n\nA falta de pagamento até [Novo Prazo] pode resultar em [Consequências].\n\nPor favor, entre em contato conosco imediatamente para resolver este assunto.\n\nAtenciosamente,\n[Seu Nome/Empresa]");
     } else {
       form.setValue("subject", "");
       form.setValue("body", "");
@@ -67,12 +67,11 @@ export function ReminderForm() {
 
 
   function onSubmit(values: ReminderFormValues) {
-    // Mock sending reminder
-    const clientName = mockClients.find(c => c.id === values.clientId)?.name || "Client";
-    console.log("Sending reminder:", values);
+    const clientName = mockClients.find(c => c.id === values.clientId)?.name || "Cliente";
+    console.log("Enviando lembrete:", values);
     toast({
-      title: "Payment Reminder Sent!",
-      description: `Reminder sent to ${clientName} with subject: "${values.subject}". (Mock send)`,
+      title: "Lembrete de Pagamento Enviado!",
+      description: `Lembrete enviado para ${clientName} com o assunto: "${values.subject}". (Envio simulado)`,
     });
     form.reset();
   }
@@ -80,8 +79,8 @@ export function ReminderForm() {
   return (
     <Card className="w-full max-w-2xl mx-auto shadow-xl">
       <CardHeader>
-        <CardTitle className="text-xl font-headline">Send Payment Reminder</CardTitle>
-        <CardDescription>Compose and send automated payment reminders to clients.</CardDescription>
+        <CardTitle className="text-xl font-headline">Enviar Lembrete de Pagamento</CardTitle>
+        <CardDescription>Crie e envie lembretes de pagamento automatizados para os clientes.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -92,7 +91,7 @@ export function ReminderForm() {
                 name="templateType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Template Type</FormLabel>
+                    <FormLabel>Tipo de Modelo</FormLabel>
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -100,7 +99,7 @@ export function ReminderForm() {
                       }} 
                       defaultValue={field.value}
                     >
-                      <FormControl><SelectTrigger><SelectValue placeholder="Select template" /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Selecione o modelo" /></SelectTrigger></FormControl>
                       <SelectContent>
                         {PAYMENT_TEMPLATE_TYPES.map(type => (
                           <SelectItem key={type} value={type}>{type}</SelectItem>
@@ -116,9 +115,9 @@ export function ReminderForm() {
                 name="clientId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client</FormLabel>
+                    <FormLabel>Cliente</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger></FormControl>
                       <SelectContent>
                         {mockClients.map(client => (
                           <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
@@ -136,8 +135,8 @@ export function ReminderForm() {
               name="subject"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Subject</FormLabel>
-                  <FormControl><Input placeholder="Reminder: Invoice #123 Due" {...field} /></FormControl>
+                  <FormLabel>Assunto</FormLabel>
+                  <FormControl><Input placeholder="Lembrete: Fatura nº 123 Vencida" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -147,15 +146,15 @@ export function ReminderForm() {
               name="body"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Body</FormLabel>
-                  <FormControl><Textarea placeholder="Dear Client..." {...field} rows={10} /></FormControl>
+                  <FormLabel>Corpo do Email</FormLabel>
+                  <FormControl><Textarea placeholder="Prezado(a) Cliente..." {...field} rows={10} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <CardFooter className="p-0 pt-6">
               <Button type="submit" className="w-full md:w-auto">
-                <Send className="mr-2 h-4 w-4" /> Send Reminder
+                <Send className="mr-2 h-4 w-4" /> Enviar Lembrete
               </Button>
             </CardFooter>
           </form>

@@ -1,3 +1,4 @@
+
 import { PageHeader } from "@/components/PageHeader";
 import { LeadList } from "@/components/leads/LeadList";
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,11 @@ export default function LeadsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Lead Prospecting"
-        description="Track, manage, and segment your leads effectively."
+        title="Prospecção de Leads"
+        description="Monitore, gerencie e segmente seus leads de forma eficaz."
         actions={
           <Button>
-            <PlusCircle className="mr-2 h-4 w-4" /> Add New Lead
+            <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Novo Lead
           </Button>
         }
       />

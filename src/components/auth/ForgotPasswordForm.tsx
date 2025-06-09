@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -18,7 +19,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { KeyRound } from "lucide-react";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
+  email: z.string().email({ message: "Endereço de e-mail inválido." }),
 });
 
 export function ForgotPasswordForm() {
@@ -31,16 +32,16 @@ export function ForgotPasswordForm() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Mock password reset request
-    console.log("Password reset request for:", values.email);
-    alert("If an account exists for this email, a password reset link has been sent. (This is a mock process)");
+    console.log("Solicitação de redefinição de senha para:", values.email);
+    alert("Se existir uma conta para este e-mail, um link de redefinição de senha foi enviado. (Este é um processo simulado)");
     form.reset();
   }
 
   return (
     <Card className="w-full shadow-xl">
       <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-headline">Forgot Password?</CardTitle>
-        <CardDescription>Enter your email to receive a reset link</CardDescription>
+        <CardTitle className="text-2xl font-headline">Esqueceu a Senha?</CardTitle>
+        <CardDescription>Digite seu e-mail para receber um link de redefinição</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -52,23 +53,23 @@ export function ForgotPasswordForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <Input placeholder="nome@exemplo.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-              <KeyRound className="mr-2 h-4 w-4" /> Send Reset Link
+              <KeyRound className="mr-2 h-4 w-4" /> Enviar Link de Redefinição
             </Button>
           </form>
         </Form>
       </CardContent>
       <CardFooter className="text-center text-sm">
         <p>
-          Remember your password?{" "}
+          Lembrou sua senha?{" "}
           <Link href="/login" className="font-medium text-primary hover:underline">
-            Sign in
+            Entrar
           </Link>
         </p>
       </CardFooter>

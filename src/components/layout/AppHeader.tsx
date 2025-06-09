@@ -1,7 +1,8 @@
+
 "use client";
 
 import Link from "next/link";
-import React from "react"; // Added React import
+import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { APP_ICON, APP_NAME, MOCK_USER } from "@/lib/constants"; // Removed navItems as it's not used here
+import { APP_ICON, APP_NAME, MOCK_USER } from "@/lib/constants";
 import { LogOut, User, Settings, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes"; 
 
@@ -25,7 +26,7 @@ const ThemeToggle = () => {
   React.useEffect(() => setMounted(true), []);
 
   if (!mounted || !useTheme) {
-    return <Button variant="ghost" size="icon" disabled><Sun className="h-[1.2rem] w-[1.2rem]" /></Button>;
+    return <Button variant="ghost" size="icon" disabled aria-label="Alternar tema"><Sun className="h-[1.2rem] w-[1.2rem]" /></Button>;
   }
 
   return (
@@ -33,7 +34,7 @@ const ThemeToggle = () => {
       variant="ghost" 
       size="icon" 
       onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      aria-label="Toggle theme"
+      aria-label="Alternar tema"
     >
       {theme === "light" ? (
         <Moon className="h-[1.2rem] w-[1.2rem]" />
@@ -69,17 +70,17 @@ const UserNav = () => {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+            <span>Perfil</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+            <span>Configurações</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => alert('Logout clicked. Implement actual logout.')}>
+        <DropdownMenuItem onClick={() => alert('Logout clicado. Implementar logout real.')}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>Sair</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -103,7 +104,7 @@ export function AppHeader() {
           <SidebarTrigger />
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <ThemeToggle /> {/* Uncommented ThemeToggle */}
+          <ThemeToggle />
           <UserNav />
         </div>
       </div>

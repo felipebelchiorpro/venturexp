@@ -1,27 +1,28 @@
+
 'use server';
 
 /**
- * @fileOverview Generates an initial draft of a proposal based on client data and service descriptions.
+ * @fileOverview Gera um rascunho inicial de uma proposta com base nos dados do cliente e descrições de serviço.
  *
- * - generateProposalDraft - A function that generates the proposal draft.
- * - GenerateProposalDraftInput - The input type for the generateProposalDraft function.
- * - GenerateProposalDraftOutput - The return type for the generateProposalDraft function.
+ * - generateProposalDraft - Uma função que gera o rascunho da proposta.
+ * - GenerateProposalDraftInput - O tipo de entrada para a função generateProposalDraft.
+ * - GenerateProposalDraftOutput - O tipo de retorno para a função generateProposalDraft.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateProposalDraftInputSchema = z.object({
-  clientName: z.string().describe('The name of the client.'),
-  clientDetails: z.string().describe('Details about the client, such as their industry, size, and needs.'),
-  serviceDescription: z.string().describe('A description of the services being proposed.'),
-  amount: z.string().describe('The amount of money being proposed, including currency.'),
-  deadline: z.string().describe('The deadline for the proposal.'),
+  clientName: z.string().describe('O nome do cliente.'),
+  clientDetails: z.string().describe('Detalhes sobre o cliente, como sua indústria, tamanho e necessidades.'),
+  serviceDescription: z.string().describe('Uma descrição dos serviços sendo propostos.'),
+  amount: z.string().describe('O valor monetário sendo proposto, incluindo a moeda.'),
+  deadline: z.string().describe('O prazo para a proposta.'),
 });
 export type GenerateProposalDraftInput = z.infer<typeof GenerateProposalDraftInputSchema>;
 
 const GenerateProposalDraftOutputSchema = z.object({
-  proposalDraft: z.string().describe('The generated proposal draft.'),
+  proposalDraft: z.string().describe('O rascunho da proposta gerado.'),
 });
 export type GenerateProposalDraftOutput = z.infer<typeof GenerateProposalDraftOutputSchema>;
 
@@ -33,17 +34,21 @@ const generateProposalDraftPrompt = ai.definePrompt({
   name: 'generateProposalDraftPrompt',
   input: {schema: GenerateProposalDraftInputSchema},
   output: {schema: GenerateProposalDraftOutputSchema},
-  prompt: `You are an expert proposal writer.
+  prompt: `Você é um redator de propostas especialista.
 
-  Based on the following client data and service descriptions, generate an initial draft of a proposal.
+  Com base nos seguintes dados do cliente e descrições de serviço, gere um rascunho inicial de uma proposta.
+  A proposta deve ser profissional, concisa e persuasiva.
+  Adapte o tom e o conteúdo para um cliente corporativo.
+  Use marcadores para listar os principais entregáveis ou benefícios, se apropriado.
+  Certifique-se de que o valor e o prazo estejam claramente declarados.
 
-  Client Name: {{{clientName}}}
-  Client Details: {{{clientDetails}}}
-  Service Description: {{{serviceDescription}}}
-  Amount: {{{amount}}}
-  Deadline: {{{deadline}}}
+  Nome do Cliente: {{{clientName}}}
+  Detalhes do Cliente: {{{clientDetails}}}
+  Descrição do Serviço: {{{serviceDescription}}}
+  Valor: {{{amount}}}
+  Prazo: {{{deadline}}}
 
-  Proposal Draft:`,
+  Rascunho da Proposta:`,
 });
 
 const generateProposalDraftFlow = ai.defineFlow(
