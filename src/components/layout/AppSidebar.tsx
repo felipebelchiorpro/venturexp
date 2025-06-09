@@ -14,7 +14,7 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
-import { APP_ICON, APP_NAME, navItems, NavItem } from "@/lib/constants";
+import { APP_ICON, APP_NAME, navItems, NavItem, MOCK_USER } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogOut, Settings } from "lucide-react";
@@ -22,6 +22,13 @@ import { LogOut, Settings } from "lucide-react";
 export function AppSidebar() {
   const pathname = usePathname();
   const AppLogoIcon = APP_ICON;
+
+  const availableNavItems = navItems.filter(item => {
+    if (item.executiveOnly) {
+      return MOCK_USER.role === 'Executive';
+    }
+    return true;
+  });
 
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
@@ -35,7 +42,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {navItems.map((item) => (
+          {availableNavItems.map((item) => (
             <SidebarMenuItem key={item.label}>
               <SidebarMenuButton
                 asChild

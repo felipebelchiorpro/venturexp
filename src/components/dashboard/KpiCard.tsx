@@ -1,6 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { ArrowDownRight, ArrowUpRight, ClipboardList, Users, FileText, TrendingUp, CalendarClock, Minus } from "lucide-react";
+import { 
+  ArrowDownRight, 
+  ArrowUpRight, 
+  ClipboardList, 
+  Users, 
+  FileText, 
+  TrendingUp, 
+  CalendarClock, 
+  Minus,
+  DollarSign,
+  CreditCard,
+  Award,
+  Activity,
+  CheckCircle,
+  XCircle,
+  CalendarCheck2,
+  CalendarX2
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface KpiCardProps {
@@ -8,18 +25,42 @@ interface KpiCardProps {
   value: string;
   change?: string;
   trend?: "up" | "down" | "neutral";
-  iconName: "ClipboardList" | "Users" | "FileText" | "TrendingUp" | "CalendarClock";
+  iconName: IconName;
+  description?: string;
 }
 
-const iconMap: Record<KpiCardProps["iconName"], LucideIcon> = {
+export type IconName = 
+  | "ClipboardList" 
+  | "Users" 
+  | "FileText" 
+  | "TrendingUp" 
+  | "CalendarClock"
+  | "DollarSign"
+  | "CreditCard"
+  | "Award"
+  | "Activity"
+  | "CheckCircle"
+  | "XCircle"
+  | "CalendarCheck2"
+  | "CalendarX2";
+
+const iconMap: Record<IconName, LucideIcon> = {
   ClipboardList,
   Users,
   FileText,
   TrendingUp,
   CalendarClock,
+  DollarSign,
+  CreditCard,
+  Award,
+  Activity,
+  CheckCircle,
+  XCircle,
+  CalendarCheck2,
+  CalendarX2,
 };
 
-export function KpiCard({ title, value, change, trend, iconName }: KpiCardProps) {
+export function KpiCard({ title, value, change, trend, iconName, description }: KpiCardProps) {
   const IconComponent = iconMap[iconName];
   const TrendIcon = trend === "up" ? ArrowUpRight : trend === "down" ? ArrowDownRight : Minus;
   
@@ -29,7 +70,7 @@ export function KpiCard({ title, value, change, trend, iconName }: KpiCardProps)
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
-        <IconComponent className="h-5 w-5 text-muted-foreground" />
+        {IconComponent && <IconComponent className="h-5 w-5 text-muted-foreground" />}
       </CardHeader>
       <CardContent>
         <div className="text-3xl font-bold text-foreground">{value}</div>
@@ -44,8 +85,11 @@ export function KpiCard({ title, value, change, trend, iconName }: KpiCardProps)
               trend === "up" && "fill-green-600/20",
               trend === "down" && "fill-red-600/20",
             )} />
-            {change} from last month
+            {change}
           </p>
+        )}
+        {description && !change && (
+          <p className="text-xs text-muted-foreground">{description}</p>
         )}
       </CardContent>
     </Card>
