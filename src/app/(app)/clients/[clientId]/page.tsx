@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock } from "lucide-react";
 import { useParams, useRouter } from "next/navigation"; // Added useRouter
 import { useEffect, useState } from "react";
-import type { Client, Invoice, ServiceOrder } from "@/types";
+import type { Client, Invoice, ServiceOrder, InvoiceStatusType, PaymentMethodType } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -18,9 +18,9 @@ import { Badge } from "@/components/ui/badge";
 
 // Mock data for invoices and service orders
 const mockInvoices: Invoice[] = [
-    { id: 'inv-001', clientId: 'client-001', invoiceNumber: '2024-001', amount: 1500, currency: 'BRL', issueDate: new Date(2024, 4, 1).toISOString(), dueDate: new Date(2024, 4, 15).toISOString(), status: 'Paga', items: [{id: 'item-1', description: 'Consultoria SEO', quantity:1, unitPrice: 1500, total: 1500}] },
-    { id: 'inv-002', clientId: 'client-001', invoiceNumber: '2024-002', amount: 2500, currency: 'BRL', issueDate: new Date(2024, 5, 1).toISOString(), dueDate: new Date(2024, 5, 15).toISOString(), status: 'Pendente', items: [{id: 'item-2', description: 'Desenvolvimento Web - Fase 1', quantity:1, unitPrice: 2500, total: 2500}] },
-    { id: 'inv-003', clientId: 'client-002', invoiceNumber: '2024-003', amount: 800, currency: 'USD', issueDate: new Date(2024, 5, 5).toISOString(), dueDate: new Date(2024, 5, 20).toISOString(), status: 'Atrasada', items: [{id: 'item-3', description: 'Campanha de Ads', quantity:1, unitPrice: 800, total: 800}] },
+    { id: 'inv-001', clientId: 'client-001', invoiceNumber: '2024-001', amount: 1500, currency: 'BRL', issueDate: new Date(2024, 4, 1).toISOString(), dueDate: new Date(2024, 4, 15).toISOString(), status: 'Paga', items: [{id: 'item-1', description: 'Consultoria SEO', quantity:1, unitPrice: 1500, total: 1500}], paymentMethod: 'PIX' },
+    { id: 'inv-002', clientId: 'client-001', invoiceNumber: '2024-002', amount: 2500, currency: 'BRL', issueDate: new Date(2024, 5, 1).toISOString(), dueDate: new Date(2024, 5, 15).toISOString(), status: 'Pendente', items: [{id: 'item-2', description: 'Desenvolvimento Web - Fase 1', quantity:1, unitPrice: 2500, total: 2500}], paymentMethod: 'Cartão de Crédito', paymentCondition: 'Parcelado', installments: '2x' },
+    { id: 'inv-003', clientId: 'client-002', invoiceNumber: '2024-003', amount: 800, currency: 'USD', issueDate: new Date(2024, 5, 5).toISOString(), dueDate: new Date(2024, 5, 20).toISOString(), status: 'Atrasada', items: [{id: 'item-3', description: 'Campanha de Ads', quantity:1, unitPrice: 800, total: 800}], paymentMethod: 'Dinheiro' },
 ];
 
 const mockServiceOrders: ServiceOrder[] = [
@@ -78,6 +78,16 @@ export default function ClientDetailPage() {
   const handleEditClient = () => {
      toast({ title: "Editar Cliente", description: `Editando informações de ${client.name}. (Simulação)`});
   }
+  
+  const getInvoiceStatusBadgeVariant = (status: InvoiceStatusType) => {
+    switch (status) {
+      case 'Paga': return 'default'; // Usually green
+      case 'Pendente': return 'secondary'; // Yellow or neutral
+      case 'Atrasada': return 'destructive'; // Red
+      case 'Cancelada': return 'outline'; // Gray
+      default: return 'outline';
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -157,10 +167,12 @@ export default function ClientDetailPage() {
                         <div>
                             <span className="font-medium text-base">Fatura {invoice.invoiceNumber}</span>
                             <p className="text-sm text-muted-foreground">{invoice.currency} {invoice.amount.toFixed(2)} - Venc. {format(parseISO(invoice.dueDate), "dd/MM/yy", { locale: ptBR })}</p>
+                            {invoice.paymentMethod && <p className="text-xs text-muted-foreground">Método: {invoice.paymentMethod} {invoice.paymentCondition ? `(${invoice.paymentCondition}${invoice.installments ? ` - ${invoice.installments}`: ''})` : ''}</p>}
                         </div>
                         <div className="flex items-center space-x-2">
-                            <Badge variant={invoice.status === 'Paga' ? 'default' : invoice.status === 'Pendente' ? 'secondary' : 'destructive'} 
-                                   className={`text-xs ${invoice.status === 'Paga' ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}>
+                            <Badge 
+                                variant={getInvoiceStatusBadgeVariant(invoice.status)}
+                                className={`text-xs ${invoice.status === 'Paga' ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}>
                                 {invoice.status}
                             </Badge>
                             <Button variant="ghost" size="sm" onClick={() => handleViewInvoice(invoice.invoiceNumber)} aria-label="Visualizar Fatura">

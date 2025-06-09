@@ -19,31 +19,46 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Send } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CalendarIcon, Send, CreditCard, Package, Barcode, CircleDollarSign, HelpCircle, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from 'date-fns/locale';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { INVOICE_STATUSES, PAYMENT_METHODS, PAYMENT_CONDITIONS, type InvoiceStatusType, type PaymentMethodType, type PaymentConditionType } from "@/types";
+
 
 const formSchema = z.object({
   productsAndQuantities: z.string().min(1, "É necessário informar os produtos e quantidades."),
-  paymentMethod: z.enum(["avista", "parcelado"], {
+  paymentMethod: z.enum(PAYMENT_METHODS, {
     required_error: "Escolha uma forma de pagamento.",
   }),
+  paymentCondition: z.enum(PAYMENT_CONDITIONS).optional(),
   installments: z.string().optional(),
   dueDate: z.date({
     required_error: "A data de vencimento é obrigatória.",
   }),
+  status: z.enum(INVOICE_STATUSES, {
+    required_error: "O status da fatura é obrigatório.",
+  }),
 }).refine(data => {
-  if (data.paymentMethod === "parcelado" && (!data.installments || data.installments.trim() === "")) {
+  if (data.paymentMethod === "Cartão de Crédito" && data.paymentCondition === "Parcelado" && (!data.installments || data.installments.trim() === "")) {
     return false;
   }
   return true;
 }, {
-  message: "Informe o número de parcelas para pagamento parcelado.",
+  message: "Informe o número de parcelas para pagamento parcelado com cartão.",
   path: ["installments"],
+}).refine(data => {
+    if (data.paymentMethod === "Cartão de Crédito" && !data.paymentCondition) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Escolha se o pagamento com cartão é à vista ou parcelado.",
+    path: ["paymentCondition"],
 });
 
 type CreateInvoiceFormValues = z.infer<typeof formSchema>;
@@ -62,17 +77,19 @@ export function CreateInvoiceForm({ clientName, clientId }: CreateInvoiceFormPro
     defaultValues: {
       productsAndQuantities: "",
       paymentMethod: undefined,
+      paymentCondition: undefined,
       installments: "",
       dueDate: undefined,
+      status: "Pendente",
     },
   });
 
-  const paymentMethod = form.watch("paymentMethod");
+  const watchedPaymentMethod = form.watch("paymentMethod");
+  const watchedPaymentCondition = form.watch("paymentCondition");
 
   function onSubmit(values: CreateInvoiceFormValues) {
-    console.log("Nova Fatura Data:", values);
-    // Aqui você adicionaria a lógica para salvar a fatura, por exemplo, em um estado global, localStorage ou API.
-    // Por enquanto, apenas uma simulação:
+    console.log("Dados da Nova Fatura (Logs de Transição):", values);
+    
     const newInvoiceData = {
       id: `inv-${Date.now()}`,
       clientId: clientId,
@@ -81,17 +98,22 @@ export function CreateInvoiceForm({ clientName, clientId }: CreateInvoiceFormPro
       currency: "BRL",
       issueDate: new Date().toISOString(),
       dueDate: values.dueDate.toISOString(),
-      status: 'Pendente' as 'Pendente' | 'Paga' | 'Atrasada' | 'Cancelada',
+      status: values.status as InvoiceStatusType,
       items: [{id: 'item-temp', description: values.productsAndQuantities, quantity: 1, unitPrice: 0, total: 0}], // Simplificado
-      notes: `Forma de pgto: ${values.paymentMethod}${values.paymentMethod === 'parcelado' ? ' em ' + values.installments : ''}`
+      paymentMethod: values.paymentMethod as PaymentMethodType,
+      paymentCondition: values.paymentMethod === 'Cartão de Crédito' ? values.paymentCondition as PaymentConditionType : undefined,
+      installments: values.paymentMethod === 'Cartão de Crédito' && values.paymentCondition === 'Parcelado' ? values.installments : undefined,
+      notes: `Status: ${values.status}. Forma de pgto: ${values.paymentMethod}${values.paymentMethod === 'Cartão de Crédito' ? ` (${values.paymentCondition}${values.paymentCondition === 'Parcelado' ? ' em ' + values.installments : ''})` : ''}`
     };
-    console.log("Simulando criação de fatura: ", newInvoiceData);
+    console.log("Simulando criação de fatura com dados completos: ", newInvoiceData);
 
     toast({
       title: "Fatura em Processamento!",
-      description: `A fatura para ${clientName} com vencimento em ${format(values.dueDate, "PPP", { locale: ptBR })} está sendo gerada. (Simulação)`,
+      description: `A fatura para ${clientName} (${values.status}) com vencimento em ${format(values.dueDate, "PPP", { locale: ptBR })} está sendo gerada. (Simulação)`,
     });
     form.reset();
+    // Idealmente, aqui você adicionaria a fatura a uma lista de faturas do cliente,
+    // por exemplo, usando MOCK_INVOICES ou um estado global/API.
     router.push(`/clients/${clientId}`);
   }
 
@@ -102,15 +124,40 @@ export function CreateInvoiceForm({ clientName, clientId }: CreateInvoiceFormPro
         <CardDescription>Vamos criar sua nova fatura. Preencha as informações abaixo:</CardDescription>
       </CardHeader>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <CardContent className="space-y-6 pt-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <CardContent className="space-y-8 pt-6">
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center">
+                    <ListChecks className="mr-2 h-5 w-5 text-primary" /> Status da Fatura
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o status inicial" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {INVOICE_STATUSES.map(status => (
+                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="productsAndQuantities"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center">
-                    <span className="mr-2 text-lg">📦</span> Produtos e Quantidades
+                    <Package className="mr-2 h-5 w-5 text-primary" /> Produtos e Quantidades
                   </FormLabel>
                   <FormControl>
                     <Textarea
@@ -120,6 +167,7 @@ export function CreateInvoiceForm({ clientName, clientId }: CreateInvoiceFormPro
                       className="resize-none"
                     />
                   </FormControl>
+                   <FormDescription>Escreva os produtos e suas respectivas quantidades.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -129,57 +177,102 @@ export function CreateInvoiceForm({ clientName, clientId }: CreateInvoiceFormPro
               control={form.control}
               name="paymentMethod"
               render={({ field }) => (
-                <FormItem className="space-y-3">
+                <FormItem>
                   <FormLabel className="flex items-center">
-                     <span className="mr-2 text-lg">💳</span> Forma de Pagamento
+                     <CircleDollarSign className="mr-2 h-5 w-5 text-primary" /> Forma de Pagamento
                   </FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-2 pt-1"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="avista" id="avista" />
-                        </FormControl>
-                        <FormLabel htmlFor="avista" className="font-normal cursor-pointer">
-                          À vista
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="parcelado" id="parcelado" />
-                        </FormControl>
-                        <FormLabel htmlFor="parcelado" className="font-normal cursor-pointer">
-                          Parcelado
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
+                   <Select 
+                     onValueChange={(value) => {
+                        field.onChange(value);
+                        if (value !== "Cartão de Crédito") {
+                            form.setValue("paymentCondition", undefined);
+                            form.setValue("installments", "");
+                        }
+                     }} 
+                     defaultValue={field.value}
+                   >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a forma de pagamento" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PAYMENT_METHODS.map(method => (
+                        <SelectItem key={method} value={method}>{method}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>Escolha uma opção.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {paymentMethod === "parcelado" && (
-              <FormField
-                control={form.control}
-                name="installments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                       <span className="mr-2 text-lg">🔢</span> Parcelamento (se aplicável)
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: 3x, 6x, 12x" {...field} />
-                    </FormControl>
-                    <FormDescription>Em quantas parcelas deseja dividir?</FormDescription>
-                    <FormMessage />
-                  </FormItem>
+            {watchedPaymentMethod === "Cartão de Crédito" && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="paymentCondition"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel className="flex items-center">
+                        <CreditCard className="mr-2 h-5 w-5 text-primary" /> Condição de Pagamento (Cartão)
+                      </FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            if (value === "À vista") {
+                                form.setValue("installments", "");
+                            }
+                          }}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-2 pt-1"
+                        >
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="À vista" id="avista" />
+                            </FormControl>
+                            <FormLabel htmlFor="avista" className="font-normal cursor-pointer">
+                              À vista
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="Parcelado" id="parcelado" />
+                            </FormControl>
+                            <FormLabel htmlFor="parcelado" className="font-normal cursor-pointer">
+                              Parcelado
+                            </FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {watchedPaymentCondition === "Parcelado" && (
+                  <FormField
+                    control={form.control}
+                    name="installments"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          <Barcode className="mr-2 h-5 w-5 text-primary" /> Parcelamento
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: 3x, 6x, 12x" {...field} />
+                        </FormControl>
+                        <FormDescription>Em quantas parcelas deseja dividir?</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
+              </>
             )}
+            
 
             <FormField
               control={form.control}
@@ -187,7 +280,7 @@ export function CreateInvoiceForm({ clientName, clientId }: CreateInvoiceFormPro
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel className="flex items-center">
-                     <span className="mr-2 text-lg">📅</span> Data de Vencimento
+                     <CalendarIcon className="mr-2 h-5 w-5 text-primary" /> Data de Vencimento
                   </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>

@@ -1,6 +1,19 @@
 
 import type { UserRole, TeamMemberStatus, ClientStatus } from "@/lib/constants";
 
+export const PROPOSAL_STATUSES = ['Rascunho', 'Enviada', 'Aceita', 'Recusada', 'Arquivada'] as const;
+export type ProposalStatusType = typeof PROPOSAL_STATUSES[number];
+
+export const INVOICE_STATUSES = ['Pendente', 'Paga', 'Atrasada', 'Cancelada'] as const;
+export type InvoiceStatusType = typeof INVOICE_STATUSES[number];
+
+export const PAYMENT_METHODS = ['Cartão de Crédito', 'PIX', 'Dinheiro'] as const;
+export type PaymentMethodType = typeof PAYMENT_METHODS[number];
+
+export const PAYMENT_CONDITIONS = ['À vista', 'Parcelado'] as const;
+export type PaymentConditionType = typeof PAYMENT_CONDITIONS[number];
+
+
 export interface Proposal {
   id: string;
   clientName: string;
@@ -8,9 +21,10 @@ export interface Proposal {
   amount: number;
   currency: string;
   deadline: string; // ISO date string
-  status: typeof PROPOSAL_STATUSES[number];
+  status: ProposalStatusType;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
+  aiGeneratedDraft?: string;
 }
 
 export interface Lead {
@@ -78,8 +92,11 @@ export interface Invoice {
   currency: string;
   issueDate: string; // ISO date string
   dueDate: string; // ISO date string
-  status: 'Pendente' | 'Paga' | 'Atrasada' | 'Cancelada';
+  status: InvoiceStatusType;
   items: InvoiceItem[];
+  paymentMethod?: PaymentMethodType | string; // string for flexibility if other methods are added manually
+  paymentCondition?: PaymentConditionType;
+  installments?: string;
   notes?: string;
 }
 
@@ -102,3 +119,4 @@ export interface ServiceOrder {
   assignedTo?: string; // Team member ID or name
   notes?: string;
 }
+
