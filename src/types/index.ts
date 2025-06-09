@@ -1,3 +1,5 @@
+import type { UserRole, TeamMemberStatus } from "@/lib/constants";
+
 export interface Proposal {
   id: string;
   clientName: string;
@@ -38,4 +40,14 @@ export interface KanbanItem {
   id: string;
   content: string; // Could be Lead name or short description
   leadId?: string; // To link back to full lead details
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: TeamMemberStatus;
+  joinedDate: string; // ISO date string
+  avatarUrl?: string;
 }
