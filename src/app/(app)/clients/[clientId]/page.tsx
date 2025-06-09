@@ -7,13 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { MOCK_CLIENTS } from "@/lib/constants"; // Assuming clients might be fetched here in the future
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History } from "lucide-react";
+import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Client, Invoice, ServiceOrder } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Badge } from "@/components/ui/badge";
 
 // Mock data for invoices and service orders
 const mockInvoices: Invoice[] = [
@@ -204,3 +205,5 @@ export default function ClientDetailPage() {
     </div>
   );
 }
+
+    
