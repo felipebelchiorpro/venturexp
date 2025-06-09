@@ -5,9 +5,9 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MOCK_CLIENTS, SERVICE_ORDER_STATUSES_PT } from "@/lib/constants"; 
+import { MOCK_CLIENTS, SERVICE_ORDER_STATUSES_PT, CLIENT_TYPES_PT } from "@/lib/constants"; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock } from "lucide-react";
+import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock, MapPin, FileType, Tag, Package, Edit3 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation"; 
 import { useEffect, useState } from "react";
 import type { Client, Invoice, ServiceOrder, InvoiceStatusType, PaymentMethodType, ServiceOrderStatusType } from "@/types";
@@ -77,7 +77,8 @@ export default function ClientDetailPage() {
   }
   
   const handleEditClient = () => {
-     toast({ title: "Editar Cliente", description: `Editando informações de ${client.name}. (Simulação)`});
+     // Futuramente: router.push(`/clients/${client.id}/edit`);
+     toast({ title: "Editar Cliente", description: `Funcionalidade para editar ${client.name} será implementada. (Simulação)`});
   }
   
   const getInvoiceStatusBadgeVariant = (status: InvoiceStatusType) => {
@@ -92,12 +93,12 @@ export default function ClientDetailPage() {
 
   const getServiceOrderStatusBadgeVariant = (status: ServiceOrderStatusType) => {
     switch (status) {
-      case 'Finalizada': return 'default'; // Green
-      case 'Em Andamento': return 'secondary'; // Yellow or neutral
-      case 'Aberta': return 'outline'; // Blue or primary
+      case 'Finalizada': return 'default'; 
+      case 'Em Andamento': return 'secondary'; 
+      case 'Aberta': return 'outline'; 
       case 'Aguardando Peças': return 'secondary';
       case 'Aguardando Aprovação': return 'secondary';
-      case 'Cancelada': return 'destructive'; // Red
+      case 'Cancelada': return 'destructive'; 
       default: return 'outline';
     }
   };
@@ -132,6 +133,24 @@ export default function ClientDetailPage() {
                 <span>{client.phone}</span>
               </div>
             )}
+             {client.address && (
+              <div className="flex items-start">
+                <MapPin className="mr-3 h-4 w-4 text-muted-foreground mt-0.5" />
+                <span>{client.address}</span>
+              </div>
+            )}
+            {client.document && (
+              <div className="flex items-center">
+                <FileType className="mr-3 h-4 w-4 text-muted-foreground" />
+                <span>{client.clientType === 'Pessoa Jurídica' ? 'CNPJ' : 'CPF'}: {client.document}</span>
+              </div>
+            )}
+            {client.clientType && (
+              <div className="flex items-center">
+                <Tag className="mr-3 h-4 w-4 text-muted-foreground" />
+                <span>Tipo: {client.clientType}</span>
+              </div>
+            )}
             {client.segment && (
               <div className="flex items-center">
                 <Briefcase className="mr-3 h-4 w-4 text-muted-foreground" />
@@ -150,7 +169,7 @@ export default function ClientDetailPage() {
             )}
              <div className="flex items-center">
                 <CalendarClock className="mr-3 h-4 w-4 text-muted-foreground" />
-                <span>Cliente desde: {format(parseISO(client.createdAt), "PPP", { locale: ptBR })}</span>
+                <span>Data de Cadastro: {format(parseISO(client.registrationDate), "PPP", { locale: ptBR })}</span>
             </div>
           </CardContent>
            <CardFooter className="pt-4">
@@ -161,6 +180,29 @@ export default function ClientDetailPage() {
         </Card>
 
         <div className="lg:col-span-2 space-y-6">
+            {client.frequentServices && (
+                <Card className="shadow-md hover:shadow-lg transition-shadow rounded-lg">
+                    <CardHeader className="flex flex-row items-center pb-4">
+                        <Package className="mr-2 h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">Produtos/Serviços Frequentes</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{client.frequentServices}</p>
+                    </CardContent>
+                </Card>
+            )}
+            {client.internalNotes && (
+                <Card className="shadow-md hover:shadow-lg transition-shadow rounded-lg">
+                    <CardHeader className="flex flex-row items-center pb-4">
+                        <Edit3 className="mr-2 h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">Observações Internas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{client.internalNotes}</p>
+                    </CardContent>
+                </Card>
+            )}
+
             <Card className="shadow-md hover:shadow-lg transition-shadow rounded-lg">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
                 <div className="flex items-center">
@@ -219,7 +261,7 @@ export default function ClientDetailPage() {
                     <li key={os.id} className="flex justify-between items-center p-3 border rounded-md hover:bg-muted/50 transition-colors">
                         <div>
                             <span className="font-medium text-base">OS {os.orderNumber}</span>
-                            <p className="text-sm text-muted-foreground">{os.serviceType}</p> {/* Changed from serviceDescription */}
+                            <p className="text-sm text-muted-foreground">{os.serviceType}</p> 
                         </div>
                          <div className="flex items-center space-x-2">
                             <Badge variant={getServiceOrderStatusBadgeVariant(os.status)} 

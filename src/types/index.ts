@@ -16,6 +16,9 @@ export type PaymentConditionType = typeof PAYMENT_CONDITIONS[number];
 export const SERVICE_ORDER_STATUSES = ['Aberta', 'Em Andamento', 'Finalizada', 'Aguardando Peças', 'Aguardando Aprovação', 'Cancelada'] as const;
 export type ServiceOrderStatusType = typeof SERVICE_ORDER_STATUSES[number];
 
+export const CLIENT_TYPES = ['Pessoa Física', 'Pessoa Jurídica'] as const;
+export type ClientType = typeof CLIENT_TYPES[number];
+
 
 export interface Proposal {
   id: string;
@@ -72,19 +75,21 @@ export interface TeamMember {
 
 export interface Client {
   id: string;
-  name: string;
+  name: string; // Nome Completo ou Razão Social
   email: string;
-  company?: string;
-  phone?: string;
+  company?: string; // Can be derived from name if Pessoa Jurídica
+  phone?: string; // Telefone / WhatsApp
   status: ClientStatus;
   responsable?: string;
   segment?: string;
   createdAt: string; // ISO date string
   avatarUrl?: string;
-  // Future fields:
-  // address?: string;
-  // website?: string;
-  // notes?: string;
+  address?: string; // Endereço Completo
+  document?: string; // CPF ou CNPJ
+  clientType?: ClientType; // Pessoa Física / Pessoa Jurídica
+  frequentServices?: string; // Produtos ou Serviços Contratados com Frequência
+  internalNotes?: string; // Observações / Anotações internas
+  registrationDate: string; // Data de Cadastro (ISO date string)
 }
 
 export interface Invoice {
