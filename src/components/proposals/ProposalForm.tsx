@@ -28,6 +28,7 @@ import { generateAIProposalAction, type CreateProposalFormData } from "@/actions
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import type { Proposal } from "@/types";
 
 const formSchema = z.object({
   clientName: z.string().min(2, { message: "O nome do cliente deve ter pelo menos 2 caracteres." }),
@@ -36,7 +37,7 @@ const formSchema = z.object({
   amount: z.coerce.number().positive({ message: "O valor deve ser um número positivo." }),
   currency: z.string().default("BRL"),
   deadline: z.date({ required_error: "O prazo é obrigatório." }),
-  status: z.enum(PROPOSAL_STATUSES as [string, ...string[]], { required_error: "O status é obrigatório." }),
+  status: z.enum(PROPOSAL_STATUSES, { required_error: "O status é obrigatório." }),
   aiGeneratedDraft: z.string().optional(),
 });
 
@@ -52,31 +53,44 @@ export function ProposalForm() {
       clientName: "",
       clientDetails: "",
       serviceDescription: "",
-      amount: 0,
+      amount: undefined, // Initialize as undefined for better placeholder behavior
       currency: "BRL",
       status: "Rascunho",
       aiGeneratedDraft: "",
+      deadline: undefined,
     },
   });
 
   const handleGenerateDraft = async () => {
     const values = form.getValues();
+    // Trigger validation for specific fields needed for AI draft
+    const fieldsToValidate: (keyof ProposalFormValues)[] = ["clientName", "clientDetails", "serviceDescription", "amount", "deadline"];
+    const validationPromises = fieldsToValidate.map(field => form.trigger(field));
+    const validationResults = await Promise.all(validationPromises);
+
+    if (!validationResults.every(Boolean)) {
+         toast({
+            variant: "destructive",
+            title: "Campos Obrigatórios Faltando",
+            description: "Por favor, preencha todos os campos marcados antes de gerar o rascunho com IA.",
+        });
+        // Highlight fields with errors
+        fieldsToValidate.forEach(field => {
+            if (form.formState.errors[field]) {
+                form.setFocus(field);
+            }
+        });
+        return;
+    }
+
+
     const aiFormData: CreateProposalFormData = {
       clientName: values.clientName,
       clientDetails: values.clientDetails,
       serviceDescription: values.serviceDescription,
       amount: `${values.currency} ${values.amount}`,
-      deadline: values.deadline ? format(values.deadline, "PPP", { locale: ptBR }) : "",
+      deadline: values.deadline ? format(values.deadline, "PPP", { locale: ptBR }) : "Não definido",
     };
-
-    if (!aiFormData.clientName || !aiFormData.clientDetails || !aiFormData.serviceDescription || !values.amount || !values.deadline) {
-      toast({
-        variant: "destructive",
-        title: "Informações Faltando",
-        description: "Por favor, preencha Nome do Cliente, Detalhes, Serviços, Valor e Prazo antes de gerar o rascunho.",
-      });
-      return;
-    }
 
     setIsGenerating(true);
     const result = await generateAIProposalAction(aiFormData);
@@ -99,10 +113,26 @@ export function ProposalForm() {
 
   function onSubmit(values: ProposalFormValues) {
     console.log("Proposta enviada:", values);
+
+    // Simular salvamento no localStorage (ou envio para API no futuro)
+    const newProposal: Proposal = {
+        id: `prop-${Date.now()}`, // Simple unique ID
+        ...values,
+        deadline: values.deadline.toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+
+    if (typeof window !== "undefined") {
+        const existingProposals: Proposal[] = JSON.parse(localStorage.getItem("proposals") || "[]");
+        localStorage.setItem("proposals", JSON.stringify([newProposal, ...existingProposals]));
+    }
+    
     toast({
       title: "Proposta Salva!",
-      description: `A proposta para ${values.clientName} foi salva como rascunho.`,
+      description: `A proposta para ${values.clientName} foi salva como ${values.status}. Você pode vê-la na lista 'Todas as Propostas'.`,
     });
+    form.reset(); // Limpa o formulário
   }
 
   return (
@@ -120,7 +150,7 @@ export function ProposalForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nome do Cliente</FormLabel>
-                    <FormControl><Input placeholder="Acme Corporation" {...field} /></FormControl>
+                    <FormControl><Input placeholder="Ex: Acme Corporation" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -151,7 +181,7 @@ export function ProposalForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Detalhes do Cliente</FormLabel>
-                  <FormControl><Textarea placeholder="Indústria do cliente, tamanho, necessidades específicas..." {...field} rows={3} /></FormControl>
+                  <FormControl><Textarea placeholder="Indústria do cliente, tamanho, necessidades específicas, pontos problemáticos..." {...field} rows={3} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -161,8 +191,8 @@ export function ProposalForm() {
               name="serviceDescription"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descrição do Serviço</FormLabel>
-                  <FormControl><Textarea placeholder="Descrição detalhada dos serviços oferecidos..." {...field} rows={5} /></FormControl>
+                  <FormLabel>Descrição do Serviço/Projeto</FormLabel>
+                  <FormControl><Textarea placeholder="Descrição detalhada dos serviços oferecidos, escopo do projeto, entregáveis..." {...field} rows={5} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -175,7 +205,7 @@ export function ProposalForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Valor</FormLabel>
-                    <FormControl><Input type="number" placeholder="5000" {...field} /></FormControl>
+                    <FormControl><Input type="number" placeholder="Ex: 5000" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -189,11 +219,10 @@ export function ProposalForm() {
                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Selecione a moeda" /></SelectTrigger></FormControl>
                       <SelectContent>
-                        <SelectItem value="BRL">BRL</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                        <SelectItem value="CAD">CAD</SelectItem>
+                        <SelectItem value="BRL">BRL (R$)</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                        <SelectItem value="GBP">GBP (£)</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -205,7 +234,7 @@ export function ProposalForm() {
                 name="deadline"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel className="mb-1.5">Prazo</FormLabel>
+                    <FormLabel className="mb-1.5">Prazo de Entrega/Validade</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -222,7 +251,7 @@ export function ProposalForm() {
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={ptBR} />
+                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={ptBR} disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}/>
                       </PopoverContent>
                     </Popover>
                     <FormMessage />
@@ -245,8 +274,8 @@ export function ProposalForm() {
               name="aiGeneratedDraft"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Rascunho da Proposta</FormLabel>
-                  <FormControl><Textarea placeholder="O conteúdo da sua proposta aparecerá aqui. Você pode editá-lo diretamente." {...field} rows={15} /></FormControl>
+                  <FormLabel>Conteúdo da Proposta (Editável)</FormLabel>
+                  <FormControl><Textarea placeholder="O conteúdo da sua proposta aparecerá aqui (se gerado por IA) ou pode ser digitado diretamente." {...field} rows={15} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}

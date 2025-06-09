@@ -18,6 +18,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { APP_ICON, APP_NAME, MOCK_USER } from "@/lib/constants";
 import { LogOut, User, Settings, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes"; 
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme ? useTheme() : { setTheme: () => {}, theme: 'light' };
@@ -26,6 +28,7 @@ const ThemeToggle = () => {
   React.useEffect(() => setMounted(true), []);
 
   if (!mounted || !useTheme) {
+    // Fallback or loading state for theme toggle if useTheme is not available
     return <Button variant="ghost" size="icon" disabled aria-label="Alternar tema"><Sun className="h-[1.2rem] w-[1.2rem]" /></Button>;
   }
 
@@ -47,6 +50,27 @@ const ThemeToggle = () => {
 
 
 const UserNav = () => {
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    toast({
+      title: "Logout Realizado",
+      description: "Você foi desconectado. (Simulação)",
+    });
+    console.log("Logout simulado a partir do UserNav");
+    // router.push('/login'); // Idealmente, redirecionar para o login
+  };
+  
+  const handleProfileClick = () => {
+    toast({ title: "Perfil", description: "Navegando para a página de perfil (a ser implementada)." });
+    // router.push('/profile'); // Exemplo de navegação futura
+  };
+
+  const handleSettingsClick = () => {
+    router.push('/settings');
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -68,17 +92,17 @@ const UserNav = () => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleProfileClick}>
             <User className="mr-2 h-4 w-4" />
             <span>Perfil</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSettingsClick}>
             <Settings className="mr-2 h-4 w-4" />
             <span>Configurações</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => alert('Logout clicado. Implementar logout real.')}>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>

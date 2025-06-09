@@ -16,10 +16,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2, PlusCircle, ListFilter, FileDown, UserPlus, CheckCircle } from "lucide-react";
 import type { Lead } from "@/types";
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { PIPELINE_STAGES } from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock data
 const mockLeads: Lead[] = [
@@ -34,6 +35,7 @@ export function LeadList() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | 'all'>('all');
+  const { toast } = useToast();
   
   const [columnVisibility, setColumnVisibility] = useState({
     company: true,
@@ -59,19 +61,30 @@ export function LeadList() {
     });
   }, [leads, searchTerm, statusFilter]);
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Tem certeza que deseja excluir este lead?")) {
+  const handleDelete = (id: string, name: string) => {
+    if (window.confirm(`Tem certeza que deseja excluir o lead "${name}"?`)) {
       setLeads(prev => prev.filter(l => l.id !== id));
+      toast({
+        title: "Lead Excluído",
+        description: `Lead "${name}" excluído com sucesso. (Simulação)`,
+        variant: "destructive"
+      });
     }
   };
 
   const handleExportCSV = () => {
-    alert("Funcionalidade de exportar para CSV a ser implementada.");
+    toast({
+        title: "Exportar CSV",
+        description: "Gerando arquivo CSV dos leads filtrados... (Simulação)",
+    });
     const headers = ["ID", "Nome", "Empresa", "Email", "Telefone", "Status", "Fonte", "Atribuído a", "Último Contato", "Criado em", "Notas"];
     const rows = filteredLeads.map(lead => [
       lead.id, lead.name, lead.company, lead.email, lead.phone, lead.status, lead.source, lead.assignedTo, 
-      format(new Date(lead.lastContacted), "PPP", { locale: ptBR }), format(new Date(lead.createdAt), "PPP", { locale: ptBR }), lead.notes
+      lead.lastContacted ? format(parseISO(lead.lastContacted), "PPP p", { locale: ptBR }) : '-', 
+      lead.createdAt ? format(parseISO(lead.createdAt), "PPP", { locale: ptBR }) : '-',
+      lead.notes
     ].map(field => `"${String(field || '').replace(/"/g, '""')}"`).join(','));
+    
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -81,6 +94,14 @@ export function LeadList() {
     link.click();
     document.body.removeChild(link);
   };
+
+  const handleAction = (action: string, leadName: string) => {
+    toast({
+        title: action,
+        description: `${action} para o lead ${leadName}. (Simulação)`,
+    });
+  };
+
 
   return (
     <div className="space-y-4">
@@ -170,7 +191,7 @@ export function LeadList() {
                 <TableCell><Badge variant="secondary">{lead.status}</Badge></TableCell>
                 {columnVisibility.source && <TableCell>{lead.source || '-'}</TableCell>}
                 {columnVisibility.assignedTo && <TableCell>{lead.assignedTo || 'Não atribuído'}</TableCell>}
-                {columnVisibility.lastContacted && <TableCell>{format(new Date(lead.lastContacted), "PPP", { locale: ptBR })}</TableCell>}
+                {columnVisibility.lastContacted && <TableCell>{lead.lastContacted ? format(parseISO(lead.lastContacted), "PPP p", { locale: ptBR }) : '-'}</TableCell>}
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -180,20 +201,20 @@ export function LeadList() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => alert(`Visualizar/Editar lead ${lead.id}`)}>
+                      <DropdownMenuItem onClick={() => handleAction('Visualizar/Editar lead', lead.name)}>
                         <Edit className="mr-2 h-4 w-4" /> Editar Lead
                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => alert(`Registrar interação para ${lead.id}`)}>
+                       <DropdownMenuItem onClick={() => handleAction('Registrar interação', lead.name)}>
                         <CheckCircle className="mr-2 h-4 w-4" /> Registrar Interação
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => alert(`Atribuir tarefa para ${lead.id}`)}>
+                      <DropdownMenuItem onClick={() => handleAction('Atribuir tarefa', lead.name)}>
                         <PlusCircle className="mr-2 h-4 w-4" /> Atribuir Tarefa
                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => alert(`Atribuir lead ${lead.id} para usuário...`)}>
+                       <DropdownMenuItem onClick={() => handleAction('Atribuir lead para usuário', lead.name)}>
                         <UserPlus className="mr-2 h-4 w-4" /> Atribuir Para...
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleDelete(lead.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                      <DropdownMenuItem onClick={() => handleDelete(lead.id, lead.name)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
                         <Trash2 className="mr-2 h-4 w-4" /> Excluir Lead
                       </DropdownMenuItem>
                     </DropdownMenuContent>

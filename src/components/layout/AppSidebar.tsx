@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_ICON, APP_NAME, navItems, MOCK_USER } from "@/lib/constants";
 import { LogOut, Settings } from "lucide-react";
+import { useToast } from "@/hooks/use-toast"; // Import useToast
 
 export function AppSidebar() {
   const pathname = usePathname();
   const AppLogoIcon = APP_ICON;
+  const { toast } = useToast(); // Initialize useToast
 
   const availableNavItems = navItems.filter(item => {
     if (item.executiveOnly) {
@@ -25,6 +27,21 @@ export function AppSidebar() {
     }
     return true;
   });
+
+  const handleLogout = () => {
+    // No futuro, isso chamaria uma API de logout e redirecionaria.
+    // Por agora, apenas um toast.
+    toast({
+      title: "Logout Realizado",
+      description: "Você foi desconectado. (Simulação)",
+    });
+    // Idealmente, redirecionar para a página de login:
+    // import { useRouter } from 'next/navigation';
+    // const router = useRouter();
+    // router.push('/login'); 
+    console.log("Logout simulado");
+  };
+
 
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
@@ -57,7 +74,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-2">
          <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={{ children: "Configurações", className: "group-data-[collapsible=icon]:block hidden"  }}>
+              <SidebarMenuButton asChild tooltip={{ children: "Configurações", className: "group-data-[collapsible=icon]:block hidden"  }} isActive={pathname === '/settings'}>
                 <Link href="/settings">
                   <Settings />
                   <span>Configurações</span>
@@ -65,7 +82,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-               <SidebarMenuButton onClick={() => alert('Logout clicado. Implementar logout real.')} tooltip={{ children: "Sair", className: "group-data-[collapsible=icon]:block hidden"  }}>
+               <SidebarMenuButton onClick={handleLogout} tooltip={{ children: "Sair", className: "group-data-[collapsible=icon]:block hidden"  }}>
                   <LogOut />
                   <span>Sair</span>
                 </SidebarMenuButton>

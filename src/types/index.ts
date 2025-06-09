@@ -1,4 +1,5 @@
-import type { UserRole, TeamMemberStatus } from "@/lib/constants";
+
+import type { UserRole, TeamMemberStatus, ClientStatus } from "@/lib/constants";
 
 export interface Proposal {
   id: string;
@@ -7,7 +8,7 @@ export interface Proposal {
   amount: number;
   currency: string;
   deadline: string; // ISO date string
-  status: 'Draft' | 'Sent' | 'Accepted' | 'Declined' | 'Archived';
+  status: typeof PROPOSAL_STATUSES[number];
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
 }
@@ -50,4 +51,54 @@ export interface TeamMember {
   status: TeamMemberStatus;
   joinedDate: string; // ISO date string
   avatarUrl?: string;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  company?: string;
+  phone?: string;
+  status: ClientStatus;
+  responsable?: string;
+  segment?: string;
+  createdAt: string; // ISO date string
+  avatarUrl?: string;
+  // Future fields:
+  // address?: string;
+  // website?: string;
+  // notes?: string;
+}
+
+export interface Invoice {
+  id: string;
+  clientId: string;
+  invoiceNumber: string;
+  amount: number;
+  currency: string;
+  issueDate: string; // ISO date string
+  dueDate: string; // ISO date string
+  status: 'Pendente' | 'Paga' | 'Atrasada' | 'Cancelada';
+  items: InvoiceItem[];
+  notes?: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface ServiceOrder {
+  id: string;
+  clientId: string;
+  orderNumber: string;
+  serviceDescription: string;
+  creationDate: string; // ISO date string
+  expectedCompletionDate?: string; // ISO date string
+  status: 'Aberta' | 'Em Progresso' | 'Concluída' | 'Cancelada';
+  assignedTo?: string; // Team member ID or name
+  notes?: string;
 }

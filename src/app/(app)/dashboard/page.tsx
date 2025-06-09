@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale'; // Import ptBR locale
+import { ptBR } from 'date-fns/locale'; 
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { KPI_DATA, MOCK_USER } from "@/lib/constants";
@@ -11,13 +11,22 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, BarChartHorizontalBig, LineChart, TrendingUp, Activity, CalendarClock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExecutivePlaceholderContent } from '@/components/dashboard/ExecutivePlaceholderContent';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardPage() {
   const [currentDateTime, setCurrentDateTime] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    setCurrentDateTime(format(new Date(), "PPP, p", { locale: ptBR })); // Format example: 29 de out. de 2023, 16:30
+    setCurrentDateTime(format(new Date(), "PPP, p", { locale: ptBR })); 
   }, []);
+
+  const handleAddWidget = () => {
+    toast({
+        title: "Adicionar Widget",
+        description: "Funcionalidade para adicionar novos widgets ao painel será implementada futuramente.",
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -30,7 +39,7 @@ export default function DashboardPage() {
         title="Painel Principal" 
         description={currentDateTime ? `Hoje é ${currentDateTime}. Veja o desempenho da sua agência.` : "Carregando data... Veja o desempenho da sua agência."}
         actions={
-          <Button>
+          <Button onClick={handleAddWidget}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Adicionar Widget
           </Button>
