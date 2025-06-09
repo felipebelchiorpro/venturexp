@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { KPI_DATA, MOCK_USER } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, BarChartHorizontalBig, LineChart, TrendingUp, Activity } from "lucide-react";
+import { PlusCircle, BarChartHorizontalBig, LineChart, TrendingUp, Activity, CalendarClock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExecutivePlaceholderContent } from '@/components/dashboard/ExecutivePlaceholderContent';
 
