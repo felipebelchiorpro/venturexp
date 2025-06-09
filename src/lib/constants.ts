@@ -1,7 +1,7 @@
 
 import type { LucideIcon } from 'lucide-react';
 import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck } from 'lucide-react'; // Adicionado Contact e ShieldCheck
-import type { ServiceOrderStatusType, ClientType, AccessPermissionModuleIdType, AccessRestrictionType, AccessStatusType } from '@/types';
+import type { ServiceOrderStatusType, ClientType, AccessPermissionModuleIdType, AccessRestrictionType, AccessStatusType, AccessProfile } from '@/types';
 
 
 export interface NavItem {
@@ -15,7 +15,7 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { label: 'Painel Principal', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Painel Executivo', href: '/executive-dashboard', icon: Building, executiveOnly: true },
-  { label: 'Clientes', href: '/clients', icon: Contact }, 
+  { label: 'Clientes', href: '/clients', icon: Contact },
   { label: 'Funil de Vendas', href: '/sales-funnel', icon: GanttChartSquare },
   { label: 'Propostas', href: '/proposals', icon: FileText },
   { label: 'Leads', href: '/leads', icon: Users },
@@ -44,7 +44,7 @@ export const KPI_DATA = [
 
 export const PIPELINE_STAGES = ['Novo Lead', 'Contactado', 'Qualificado', 'Proposta Enviada', 'Negociação', 'Ganho', 'Perdido'];
 
-export const PROPOSAL_STATUSES = ['Rascunho', 'Enviada', 'Aceita', 'Recusada', 'Arquivada'] as [string, ...string[]]; 
+export const PROPOSAL_STATUSES = ['Rascunho', 'Enviada', 'Aceita', 'Recusada', 'Arquivada'] as [string, ...string[]];
 export const PAYMENT_TEMPLATE_TYPES = ['Primeiro Lembrete', 'Segundo Lembrete', 'Aviso Final'];
 
 export const USER_ROLES = ['Admin', 'Executive', 'Manager', 'Member', 'Analyst'] as const;
@@ -86,3 +86,58 @@ export const ACCESS_RESTRICTION_LEVELS_PT: { id: AccessRestrictionType; label: s
 ];
 
 export const ACCESS_STATUSES_PT: AccessStatusType[] = ['Ativo', 'Inativo', 'Aguardando Ativação'];
+
+export const MOCK_ACCESS_PROFILES: AccessProfile[] = [
+    {
+        id: 'ap-vendedor',
+        collaboratorName: 'Perfil Vendedor Padrão', // Nome genérico para o perfil
+        loginEmail: '', // Não aplicável para um template de perfil
+        roleOrFunction: 'Vendedor',
+        permissions: { clients: true, serviceOrders: true, productsAndStock: false, financial: false, reportsAndDashboard: true, systemSettings: false, collaboratorManagement: false },
+        activateIndividualDashboard: true,
+        restrictions: { viewOwnOnly: true, editOwnOnly: true },
+        activationDate: new Date().toISOString(),
+        accessStatus: 'Ativo',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        id: 'ap-gerente',
+        collaboratorName: 'Perfil Gerente Padrão',
+        loginEmail: '',
+        roleOrFunction: 'Gerente',
+        permissions: { clients: true, serviceOrders: true, productsAndStock: true, financial: true, reportsAndDashboard: true, systemSettings: true, collaboratorManagement: true },
+        activateIndividualDashboard: false, // Gerentes geralmente veem tudo
+        restrictions: { viewAllAsManager: true },
+        activationDate: new Date().toISOString(),
+        accessStatus: 'Ativo',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        id: 'ap-tecnico',
+        collaboratorName: 'Perfil Técnico Padrão',
+        loginEmail: '',
+        roleOrFunction: 'Técnico',
+        permissions: { clients: false, serviceOrders: true, productsAndStock: true, financial: false, reportsAndDashboard: false, systemSettings: false, collaboratorManagement: false },
+        activateIndividualDashboard: true,
+        restrictions: { viewOwnOnly: true, editOwnOnly: true },
+        activationDate: new Date().toISOString(),
+        accessStatus: 'Ativo',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        id: 'ap-financeiro',
+        collaboratorName: 'Perfil Financeiro Padrão',
+        loginEmail: '',
+        roleOrFunction: 'Financeiro',
+        permissions: { clients: true, serviceOrders: false, productsAndStock: false, financial: true, reportsAndDashboard: true, systemSettings: false, collaboratorManagement: false },
+        activateIndividualDashboard: false,
+        restrictions: {},
+        activationDate: new Date().toISOString(),
+        accessStatus: 'Ativo',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    }
+];

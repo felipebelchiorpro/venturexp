@@ -18,13 +18,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { USER_ROLES, type UserRole } from "@/lib/constants";
+import { MOCK_ACCESS_PROFILES } from "@/lib/constants"; // Importar perfis mocados
 
 const formSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um endereço de e-mail válido." }),
-  role: z.enum(USER_ROLES, {
-    required_error: "Por favor, selecione uma função.",
-  }),
+  accessProfileId: z.string().min(1, { message: "Por favor, selecione um perfil de acesso." }),
 });
 
 type InviteMemberFormValues = z.infer<typeof formSchema>;
@@ -35,16 +33,18 @@ export function InviteMemberForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      role: "Member",
+      accessProfileId: "",
     },
   });
 
   function onSubmit(values: InviteMemberFormValues) {
-    // Mock sending invitation
-    console.log("Sending invitation:", values);
+    const selectedProfile = MOCK_ACCESS_PROFILES.find(p => p.id === values.accessProfileId);
+    const profileName = selectedProfile ? selectedProfile.roleOrFunction : "Perfil Desconhecido";
+    
+    console.log("Enviando convite:", { email: values.email, accessProfileId: values.accessProfileId, profileName });
     toast({
       title: "Convite Enviado!",
-      description: `Um convite foi enviado para ${values.email} com a função de ${values.role}. (Simulação)`,
+      description: `Um convite foi enviado para ${values.email} com o perfil de acesso: ${profileName}. (Simulação)`,
     });
     form.reset();
   }
@@ -56,7 +56,7 @@ export function InviteMemberForm() {
           <UserPlus className="h-6 w-6 text-primary" />
           <CardTitle className="text-xl font-headline">Convidar Novo Membro</CardTitle>
         </div>
-        <CardDescription>Envie um convite para um novo membro se juntar à sua equipe.</CardDescription>
+        <CardDescription>Envie um convite para um novo membro se juntar à sua equipe, atribuindo um perfil de acesso.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -76,20 +76,20 @@ export function InviteMemberForm() {
             />
             <FormField
               control={form.control}
-              name="role"
+              name="accessProfileId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Função</FormLabel>
+                  <FormLabel>Perfil de Acesso</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma função" />
+                        <SelectValue placeholder="Selecione um perfil de acesso" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {USER_ROLES.map((role) => (
-                        <SelectItem key={role} value={role}>
-                          {role}
+                      {MOCK_ACCESS_PROFILES.map((profile) => (
+                        <SelectItem key={profile.id} value={profile.id}>
+                          {profile.roleOrFunction} (Perfil)
                         </SelectItem>
                       ))}
                     </SelectContent>
