@@ -25,13 +25,14 @@ export const navItems: NavItem[] = [
 ];
 
 export const APP_NAME = "Venture XP";
-export const APP_ICON = Briefcase;
+export const APP_ICON = Briefcase; // This can be the small "V" icon from your logo if available as an SVG component
+export const APP_LOGO_URL = "https://placehold.co/180x40.png"; // Placeholder for your full logo image
 
 export const MOCK_USER = {
   name: "Usuário Padrão",
   email: "usuario@venturexp.com",
-  avatarUrl: "https://placehold.co/100x100.png", // Pode ser removido ou deixado como placeholder
-  role: "Executive" as UserRole, // Mantido como Executive para acesso a todas as áreas
+  avatarUrl: "https://placehold.co/100x100.png", 
+  role: "Executive" as UserRole, 
 };
 
 export const KPI_DATA: { title: string; value: string; change: string; trend: "up" | "down" | "neutral"; iconName: string; }[] = [];

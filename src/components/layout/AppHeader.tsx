@@ -15,11 +15,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { APP_ICON, APP_NAME, MOCK_USER } from "@/lib/constants";
+import { APP_LOGO_URL, MOCK_USER, APP_ICON } from "@/lib/constants";
 import { LogOut, User, Settings, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes"; 
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme ? useTheme() : { setTheme: () => {}, theme: 'light' };
@@ -28,7 +29,6 @@ const ThemeToggle = () => {
   React.useEffect(() => setMounted(true), []);
 
   if (!mounted || !useTheme) {
-    // Fallback or loading state for theme toggle if useTheme is not available
     return <Button variant="ghost" size="icon" disabled aria-label="Alternar tema"><Sun className="h-[1.2rem] w-[1.2rem]" /></Button>;
   }
 
@@ -59,12 +59,12 @@ const UserNav = () => {
       description: "Você foi desconectado. (Simulação)",
     });
     console.log("Logout simulado a partir do UserNav");
-    // router.push('/login'); // Idealmente, redirecionar para o login
+    // router.push('/login'); 
   };
   
   const handleProfileClick = () => {
     toast({ title: "Perfil", description: "Navegando para a página de perfil (a ser implementada)." });
-    // router.push('/profile'); // Exemplo de navegação futura
+    // router.push('/profile'); 
   };
 
   const handleSettingsClick = () => {
@@ -112,16 +112,19 @@ const UserNav = () => {
 };
 
 export function AppHeader() {
-  const AppLogoIcon = APP_ICON;
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/dashboard" className="mr-6 flex items-center space-x-2">
-            <AppLogoIcon className="h-6 w-6 text-primary" />
-            <span className="hidden font-bold sm:inline-block">
-              {APP_NAME}
-            </span>
+            <Image 
+              src={APP_LOGO_URL} 
+              alt="Venture XP Logo" 
+              width={150} 
+              height={33}  // Approx ratio for 180x40 -> 150x33.33
+              data-ai-hint="logo venture xp" 
+              className="h-auto" 
+            />
           </Link>
         </div>
         <div className="md:hidden">
