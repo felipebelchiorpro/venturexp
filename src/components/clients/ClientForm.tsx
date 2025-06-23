@@ -28,8 +28,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import type { Client, ClientStatus, ClientType } from "@/types";
-import { CLIENT_STATUSES } from "@/types";
-import { CLIENT_TYPES_PT, MOCK_CLIENTS } from "@/lib/constants";
+import { CLIENT_STATUSES, CLIENT_TYPES } from "@/types";
+import { MOCK_CLIENTS } from "@/lib/constants";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "🧾 O nome/razão social deve ter pelo menos 2 caracteres." }),
@@ -37,7 +37,7 @@ const formSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   document: z.string().optional(),
-  clientType: z.enum(CLIENT_TYPES_PT, {
+  clientType: z.enum(CLIENT_TYPES, {
     required_error: "🏷️ Selecione o tipo de cliente.",
   }),
   frequentServices: z.string().optional(),
@@ -229,7 +229,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
                         defaultValue={field.value}
                         className="flex space-x-4 pt-2"
                       >
-                        {CLIENT_TYPES_PT.map(type => (
+                        {CLIENT_TYPES.map(type => (
                           <FormItem key={type} className="flex items-center space-x-2 space-y-0">
                             <FormControl><RadioGroupItem value={type} id={`clientType-${type}`} /></FormControl>
                             <FormLabel htmlFor={`clientType-${type}`} className="font-normal cursor-pointer">{type}</FormLabel>

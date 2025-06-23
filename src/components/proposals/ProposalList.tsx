@@ -17,7 +17,7 @@ import { MoreHorizontal, Edit, Trash2, FileText, Eye } from "lucide-react";
 import type { Proposal } from "@/types";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { PROPOSAL_STATUSES } from '@/lib/constants';
+import { PROPOSAL_STATUSES } from '@/types';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 

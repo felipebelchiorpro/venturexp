@@ -25,7 +25,8 @@ import { format } from "date-fns";
 import { ptBR } from 'date-fns/locale';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { ACCESS_PERMISSION_MODULES_PT, ACCESS_RESTRICTION_LEVELS_PT, ACCESS_STATUSES_PT } from "@/lib/constants";
+import { ACCESS_PERMISSION_MODULES_PT, ACCESS_RESTRICTION_LEVELS_PT } from "@/lib/constants";
+import { ACCESS_STATUSES } from "@/types";
 import type { AccessPermissions, AccessRestrictions, AccessStatusType, AccessProfile } from "@/types";
 
 const permissionSchema = z.object(
@@ -46,7 +47,7 @@ const formSchema = z.object({
   activateIndividualDashboard: z.boolean().default(false),
   restrictions: restrictionSchema,
   activationDate: z.date({ required_error: "📆 A data de ativação é obrigatória." }),
-  accessStatus: z.enum(ACCESS_STATUSES_PT, { required_error: "✅ O status do acesso é obrigatório." }),
+  accessStatus: z.enum(ACCESS_STATUSES, { required_error: "✅ O status do acesso é obrigatório." }),
 });
 
 type AccessProfileFormValues = z.infer<typeof formSchema>;
@@ -237,7 +238,7 @@ export function AccessProfileForm() {
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger></FormControl>
                       <SelectContent>
-                        {ACCESS_STATUSES_PT.map(status => (
+                        {ACCESS_STATUSES.map(status => (
                           <SelectItem key={status} value={status}>{status}</SelectItem>
                         ))}
                       </SelectContent>

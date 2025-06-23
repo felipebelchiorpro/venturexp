@@ -27,7 +27,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { SERVICE_ORDER_STATUSES, type ServiceOrderStatusType, type ServiceOrder } from "@/types";
-import { SERVICE_ORDER_STATUSES_PT } from "@/lib/constants";
 
 const formSchema = z.object({
   contactPhone: z.string().optional(),
@@ -327,7 +326,7 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {SERVICE_ORDER_STATUSES_PT.map(status => (
+                      {SERVICE_ORDER_STATUSES.map(status => (
                         <SelectItem key={status} value={status}>{status}</SelectItem>
                       ))}
                     </SelectContent>

@@ -1,7 +1,7 @@
 
 import type { LucideIcon } from 'lucide-react';
 import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck } from 'lucide-react';
-import type { ServiceOrderStatusType, ClientType, AccessPermissionModuleIdType, AccessRestrictionType, AccessStatusType, AccessProfile, Client, UserRole } from '@/types';
+import type { AccessPermissionModuleIdType, AccessRestrictionType, AccessProfile, Client, UserRole } from '@/types';
 
 
 export interface NavItem {
@@ -39,14 +39,7 @@ export const KPI_DATA: { title: string; value: string; change: string; trend: "u
 
 export const PIPELINE_STAGES = ['Novo Lead', 'Contactado', 'Qualificado', 'Proposta Enviada', 'Negociação', 'Ganho', 'Perdido'];
 
-export const PROPOSAL_STATUSES = ['Rascunho', 'Enviada', 'Aceita', 'Recusada', 'Arquivada'] as [string, ...string[]];
 export const PAYMENT_TEMPLATE_TYPES = ['Primeiro Lembrete', 'Segundo Lembrete', 'Aviso Final'];
-
-export const CLIENT_TYPES_PT: ClientType[] = ['Pessoa Física', 'Pessoa Jurídica'];
-
-
-export const SERVICE_ORDER_STATUSES_PT: ServiceOrderStatusType[] = ['Aberta', 'Em Andamento', 'Finalizada', 'Aguardando Peças', 'Aguardando Aprovação', 'Cancelada'];
-
 
 export const MOCK_CLIENTS: Client[] = [];
 
@@ -65,8 +58,6 @@ export const ACCESS_RESTRICTION_LEVELS_PT: { id: AccessRestrictionType; label: s
     { id: 'editOwnOnly', label: 'Pode editar apenas seus próprios registros' },
     { id: 'viewAllAsManager', label: 'Pode ver dados de outros colaboradores (nível gestor)' },
 ];
-
-export const ACCESS_STATUSES_PT: AccessStatusType[] = ['Ativo', 'Inativo', 'Aguardando Ativação'];
 
 export const MOCK_ACCESS_PROFILES: AccessProfile[] = [];
     

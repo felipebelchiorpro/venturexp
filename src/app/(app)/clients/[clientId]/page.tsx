@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MOCK_CLIENTS, SERVICE_ORDER_STATUSES_PT, CLIENT_TYPES_PT } from "@/lib/constants"; 
+import { MOCK_CLIENTS } from "@/lib/constants"; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock, MapPin, FileType, Tag, Package, Edit3 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation"; 
@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";
+import { CLIENT_TYPES, SERVICE_ORDER_STATUSES } from "@/types";
 
 // Mock data for invoices and service orders - now initialized empty
 const mockInvoices: Invoice[] = [];

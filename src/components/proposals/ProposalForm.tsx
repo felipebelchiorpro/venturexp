@@ -23,7 +23,7 @@ import { CalendarIcon, Sparkles, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from 'date-fns/locale';
-import { PROPOSAL_STATUSES } from "@/lib/constants";
+import { PROPOSAL_STATUSES } from "@/types";
 import { generateAIProposalAction, type CreateProposalFormData } from "@/actions/proposalActions";
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
