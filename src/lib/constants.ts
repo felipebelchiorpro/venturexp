@@ -1,7 +1,7 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck } from 'lucide-react'; // Adicionado Contact e ShieldCheck
-import type { ServiceOrderStatusType, ClientType, AccessPermissionModuleIdType, AccessRestrictionType, AccessStatusType, AccessProfile, Client } from '@/types';
+import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck } from 'lucide-react';
+import type { ServiceOrderStatusType, ClientType, AccessPermissionModuleIdType, AccessRestrictionType, AccessStatusType, AccessProfile, Client, UserRole } from '@/types';
 
 
 export interface NavItem {
@@ -25,12 +25,12 @@ export const navItems: NavItem[] = [
 ];
 
 export const APP_NAME = "Venture XP";
-export const APP_ICON = Briefcase; // This can be the small "V" icon from your logo if available as an SVG component
-export const APP_LOGO_URL = "https://placehold.co/180x40.png"; // Placeholder for your full logo image
+export const APP_ICON = Briefcase; 
+export const APP_LOGO_URL = "https://placehold.co/180x40.png";
 
 export const MOCK_USER = {
   name: "Usuário Padrão",
-  email: "usuario@venturexp.com",
+  email: "usuario@exemplo.com",
   avatarUrl: "https://placehold.co/100x100.png", 
   role: "Executive" as UserRole, 
 };
@@ -41,15 +41,6 @@ export const PIPELINE_STAGES = ['Novo Lead', 'Contactado', 'Qualificado', 'Propo
 
 export const PROPOSAL_STATUSES = ['Rascunho', 'Enviada', 'Aceita', 'Recusada', 'Arquivada'] as [string, ...string[]];
 export const PAYMENT_TEMPLATE_TYPES = ['Primeiro Lembrete', 'Segundo Lembrete', 'Aviso Final'];
-
-export const USER_ROLES = ['Admin', 'Executive', 'Manager', 'Member', 'Analyst'] as const;
-export type UserRole = typeof USER_ROLES[number];
-
-export const TEAM_MEMBER_STATUSES = ['Ativo', 'Convite Pendente', 'Inativo'] as const;
-export type TeamMemberStatus = typeof TEAM_MEMBER_STATUSES[number];
-
-export const CLIENT_STATUSES = ['Ativo', 'Inativo', 'Potencial'] as const;
-export type ClientStatus = typeof CLIENT_STATUSES[number];
 
 export const CLIENT_TYPES_PT: ClientType[] = ['Pessoa Física', 'Pessoa Jurídica'];
 

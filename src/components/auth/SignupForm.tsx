@@ -48,7 +48,7 @@ export function SignupForm() {
     <Card className="w-full shadow-xl">
       <CardHeader className="space-y-1 text-center">
         <CardTitle className="text-2xl font-headline">Crie uma Conta</CardTitle>
-        <CardDescription>Junte-se ao AgencyFlow para otimizar seu fluxo de trabalho</CardDescription>
+        <CardDescription>Junte-se ao Venture XP para otimizar seu fluxo de trabalho</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>

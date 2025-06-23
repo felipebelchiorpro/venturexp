@@ -28,7 +28,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import type { Client, ClientStatus, ClientType } from "@/types";
-import { CLIENT_STATUSES, CLIENT_TYPES_PT, MOCK_CLIENTS } from "@/lib/constants";
+import { CLIENT_STATUSES } from "@/types";
+import { CLIENT_TYPES_PT, MOCK_CLIENTS } from "@/lib/constants";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "🧾 O nome/razão social deve ter pelo menos 2 caracteres." }),

@@ -1,5 +1,12 @@
 
-import type { UserRole, TeamMemberStatus, ClientStatus } from "@/lib/constants";
+export const USER_ROLES = ['Admin', 'Executive', 'Manager', 'Member', 'Analyst'] as const;
+export type UserRole = typeof USER_ROLES[number];
+
+export const TEAM_MEMBER_STATUSES = ['Active', 'Pending Invitation', 'Inactive'] as const;
+export type TeamMemberStatus = typeof TEAM_MEMBER_STATUSES[number];
+
+export const CLIENT_STATUSES = ['Ativo', 'Inativo', 'Potencial'] as const;
+export type ClientStatus = typeof CLIENT_STATUSES[number];
 
 export const PROPOSAL_STATUSES = ['Rascunho', 'Enviada', 'Aceita', 'Recusada', 'Arquivada'] as const;
 export type ProposalStatusType = typeof PROPOSAL_STATUSES[number];
