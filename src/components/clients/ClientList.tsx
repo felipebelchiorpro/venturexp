@@ -18,7 +18,6 @@ import { MoreHorizontal, Edit, Trash2, FileText, Eye, DollarSign, Briefcase } fr
 import type { Client, ClientStatus } from "@/types";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { MOCK_CLIENTS } from '@/lib/constants';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -38,7 +37,9 @@ export function ClientList() {
   const { toast } = useToast();
 
   useEffect(() => {
-    setClients(MOCK_CLIENTS);
+    // In a real app, this data would be fetched from an API.
+    // For a clean state, we initialize with an empty array.
+    setClients([]);
   }, []);
 
   const filteredClients = clients.filter(client =>

@@ -4,15 +4,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { PIPELINE_STAGES } from "@/lib/constants";
+import { PIPELINE_STAGES } from "@/types";
 import type { Lead, KanbanItem } from "@/types";
 import { PlusCircle, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-
-// Initial leads - now initialized empty
-const initialLeads: Lead[] = [];
-
 
 interface KanbanCardProps {
   item: KanbanItem;
@@ -79,7 +75,8 @@ export function KanbanBoard() {
   const { toast } = useToast();
 
   useEffect(() => {
-    setLeads(initialLeads); // Will set to empty array
+    // In a real app, this would be fetched from an API.
+    setLeads([]);
   }, []);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, itemId: string) => {

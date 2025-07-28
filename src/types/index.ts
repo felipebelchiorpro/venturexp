@@ -43,6 +43,12 @@ export type AccessRestrictions = {
 export const ACCESS_STATUSES = ['Ativo', 'Inativo', 'Aguardando Ativação'] as const;
 export type AccessStatusType = typeof ACCESS_STATUSES[number];
 
+export interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ElementType;
+  executiveOnly?: boolean;
+}
 
 export interface Proposal {
   id: string;
@@ -151,7 +157,7 @@ export interface ServiceOrder {
   productsUsed?: string;
   creationDate: string; // ISO date string
   executionDeadline?: string; // ISO date string
-  serviceValue?: number | null; // Allow null if value is not set
+  serviceValue?: number;
   currency?: string;
   additionalNotes?: string;
   status: ServiceOrderStatusType;
@@ -172,3 +178,31 @@ export interface AccessProfile {
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
 }
+
+export const ACCESS_PERMISSION_MODULES_PT: { id: AccessPermissionModuleIdType; label: string; icon: string; }[] = [
+  { id: 'clients', label: 'Clientes', icon: '📁' },
+  { id: 'serviceOrders', label: 'Ordens de Serviço', icon: '🛠️' },
+  { id: 'productsAndStock', label: 'Produtos e Estoque', icon: '📦' },
+  { id: 'financial', label: 'Financeiro', icon: '💰' },
+  { id: 'reportsAndDashboard', label: 'Relatórios e Dashboard', icon: '📈' },
+  { id: 'systemSettings', label: 'Configurações do Sistema', icon: '⚙️' },
+  { id: 'collaboratorManagement', label: 'Gestão de Colaboradores', icon: '🧑‍🤝‍🧑' },
+];
+
+export const ACCESS_RESTRICTION_LEVELS_PT: { id: AccessRestrictionType; label: string }[] = [
+    { id: 'viewOwnOnly', label: 'Pode ver apenas seus próprios atendimentos/vendas' },
+    { id: 'editOwnOnly', label: 'Pode editar apenas seus próprios registros' },
+    { id: 'viewAllAsManager', label: 'Pode ver dados de outros colaboradores (nível gestor)' },
+];
+
+export const PAYMENT_TEMPLATE_TYPES: string[] = ['Primeiro Lembrete', 'Segundo Lembrete', 'Aviso Final'];
+
+export const PIPELINE_STAGES = [
+  'Novo Lead',
+  'Contato Inicial',
+  'Qualificação',
+  'Apresentação',
+  'Negociação',
+  'Fechamento Ganho',
+  'Fechamento Perdido',
+];

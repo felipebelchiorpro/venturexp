@@ -25,12 +25,11 @@ import { format } from "date-fns";
 import { ptBR } from 'date-fns/locale';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { ACCESS_PERMISSION_MODULES_PT, ACCESS_RESTRICTION_LEVELS_PT } from "@/lib/constants";
-import { ACCESS_STATUSES } from "@/types";
+import { ACCESS_PERMISSION_MODULES_PT, ACCESS_RESTRICTION_LEVELS_PT, ACCESS_STATUSES, ACCESS_PERMISSION_MODULE_IDS } from "@/types";
 import type { AccessPermissions, AccessRestrictions, AccessStatusType, AccessProfile } from "@/types";
 
 const permissionSchema = z.object(
-  Object.fromEntries(ACCESS_PERMISSION_MODULES_PT.map(module => [module.id, z.boolean().optional()]))
+  Object.fromEntries(ACCESS_PERMISSION_MODULE_IDS.map(id => [id, z.boolean().optional()]))
 ) as z.ZodType<AccessPermissions>;
 
 const restrictionSchema = z.object(

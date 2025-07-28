@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { APP_LOGO_URL, MOCK_USER, APP_ICON } from "@/lib/constants";
+import { APP_LOGO_URL, APP_ICON } from "@/lib/constants";
 import { LogOut, User, Settings, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes"; 
 import { useToast } from "@/hooks/use-toast";
@@ -76,17 +76,17 @@ const UserNav = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={MOCK_USER.avatarUrl} alt={MOCK_USER.name} data-ai-hint="user avatar" />
-            <AvatarFallback>{MOCK_USER.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={"https://placehold.co/100x100.png"} alt={"Usuário"} data-ai-hint="user avatar" />
+            <AvatarFallback>U</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{MOCK_USER.name}</p>
+            <p className="text-sm font-medium leading-none">Usuário Logado</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {MOCK_USER.email}
+              email@exemplo.com
             </p>
           </div>
         </DropdownMenuLabel>

@@ -6,12 +6,13 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale'; 
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/dashboard/KpiCard";
-import { KPI_DATA, MOCK_USER } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, BarChartHorizontalBig, LineChart, TrendingUp, Activity, CalendarClock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExecutivePlaceholderContent } from '@/components/dashboard/ExecutivePlaceholderContent';
 import { useToast } from '@/hooks/use-toast';
+
+const KPI_DATA: { title: string; value: string; change: string; trend: "up" | "down" | "neutral"; iconName: string; }[] = [];
 
 export default function DashboardPage() {
   const [currentDateTime, setCurrentDateTime] = useState<string | null>(null);
@@ -30,11 +31,9 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {currentDateTime && (
         <p className="text-xl text-muted-foreground mb-2">
-          Bem-vindo(a) de volta, {MOCK_USER.name}!
+          Bem-vindo(a) de volta!
         </p>
-      )}
       <PageHeader 
         title="Painel Principal" 
         description={currentDateTime ? `Hoje é ${currentDateTime}. Veja o desempenho da sua agência.` : "Carregando data... Veja o desempenho da sua agência."}

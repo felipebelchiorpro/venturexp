@@ -18,7 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { MOCK_ACCESS_PROFILES } from "@/lib/constants"; // Importar perfis mocados
+import type { AccessProfile } from "@/types";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um endereço de e-mail válido." }),
@@ -29,6 +30,14 @@ type InviteMemberFormValues = z.infer<typeof formSchema>;
 
 export function InviteMemberForm() {
   const { toast } = useToast();
+  const [accessProfiles, setAccessProfiles] = useState<AccessProfile[]>([]);
+  
+  useEffect(() => {
+    // In a real app, this would be fetched from an API.
+    // For a clean state, we initialize with an empty array.
+    setAccessProfiles([]);
+  }, []);
+  
   const form = useForm<InviteMemberFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,7 +47,7 @@ export function InviteMemberForm() {
   });
 
   function onSubmit(values: InviteMemberFormValues) {
-    const selectedProfile = MOCK_ACCESS_PROFILES.find(p => p.id === values.accessProfileId);
+    const selectedProfile = accessProfiles.find(p => p.id === values.accessProfileId);
     const profileName = selectedProfile ? selectedProfile.roleOrFunction : "Perfil Desconhecido";
     
     console.log("Enviando convite:", { email: values.email, accessProfileId: values.accessProfileId, profileName });
@@ -83,22 +92,26 @@ export function InviteMemberForm() {
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione um perfil de acesso" />
+                        <SelectValue placeholder={accessProfiles.length === 0 ? "Nenhum perfil de acesso criado" : "Selecione um perfil de acesso"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {MOCK_ACCESS_PROFILES.map((profile) => (
-                        <SelectItem key={profile.id} value={profile.id}>
-                          {profile.roleOrFunction} (Perfil)
-                        </SelectItem>
-                      ))}
+                      {accessProfiles.length > 0 ? (
+                        accessProfiles.map((profile) => (
+                          <SelectItem key={profile.id} value={profile.id}>
+                            {profile.roleOrFunction} (Perfil)
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="p-2 text-sm text-muted-foreground">Crie um perfil de acesso primeiro.</div>
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full md:w-auto">
+            <Button type="submit" className="w-full md:w-auto" disabled={accessProfiles.length === 0}>
               <Send className="mr-2 h-4 w-4" /> Enviar Convite
             </Button>
           </form>

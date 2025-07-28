@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { APP_ICON, APP_LOGO_URL, navItems, MOCK_USER } from "@/lib/constants";
+import { APP_ICON, APP_LOGO_URL, navItems } from "@/lib/constants";
 import { LogOut, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast"; 
 import Image from "next/image";
@@ -22,9 +22,13 @@ export function AppSidebar() {
   const AppLogoIcon = APP_ICON;
   const { toast } = useToast(); 
 
+  // In a real app, role would come from an auth context.
+  // For now, we assume a role that can see everything.
+  const userRole = 'Executive';
+
   const availableNavItems = navItems.filter(item => {
     if (item.executiveOnly) {
-      return MOCK_USER.role === 'Executive';
+      return userRole === 'Executive';
     }
     return true;
   });

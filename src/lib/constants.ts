@@ -1,8 +1,7 @@
 
 import type { LucideIcon } from 'lucide-react';
 import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck } from 'lucide-react';
-import type { AccessProfile, Client, UserRole, NavItem } from '@/types';
-
+import type { NavItem } from '@/types';
 
 export const navItems: NavItem[] = [
   { label: 'Painel Principal', href: '/dashboard', icon: LayoutDashboard },
@@ -19,17 +18,3 @@ export const navItems: NavItem[] = [
 export const APP_NAME = "Venture XP";
 export const APP_ICON = Briefcase; 
 export const APP_LOGO_URL = "https://placehold.co/180x40.png";
-
-export const MOCK_USER = {
-  name: "Usuário Padrão",
-  email: "usuario@exemplo.com",
-  avatarUrl: "https://placehold.co/100x100.png", 
-  role: "Executive" as UserRole, 
-};
-
-export const KPI_DATA: { title: string; value: string; change: string; trend: "up" | "down" | "neutral"; iconName: string; }[] = [];
-
-export const MOCK_CLIENTS: Client[] = [];
-
-export const MOCK_ACCESS_PROFILES: AccessProfile[] = [];
-    

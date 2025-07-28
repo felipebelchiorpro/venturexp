@@ -27,9 +27,8 @@ import { ptBR } from 'date-fns/locale';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import type { Client, ClientStatus, ClientType } from "@/types";
+import type { Client } from "@/types";
 import { CLIENT_STATUSES, CLIENT_TYPES } from "@/types";
-import { MOCK_CLIENTS } from "@/lib/constants";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "🧾 O nome/razão social deve ter pelo menos 2 caracteres." }),
@@ -92,27 +91,19 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
   function onSubmit(values: ClientFormValues) {
     const clientData: Client = {
       id: clientId || `client-${Date.now()}`,
-      createdAt: clientId ? (MOCK_CLIENTS.find(c => c.id === clientId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
-      avatarUrl: clientId ? (MOCK_CLIENTS.find(c => c.id === clientId)?.avatarUrl || `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`) : `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`,
+      createdAt: clientId ? (initialData?.registrationDate || new Date().toISOString()) : new Date().toISOString(),
+      avatarUrl: `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`,
       ...values,
       registrationDate: values.registrationDate.toISOString(),
-      company: values.clientType === 'Pessoa Jurídica' ? values.name : values.company, // Use company if provided, else name for PJ
+      company: values.clientType === 'Pessoa Jurídica' ? values.name : values.company,
     };
 
     console.log("Dados do cliente:", clientData);
 
-    // Simulate saving
     if (onSave) {
         onSave(clientData);
     } else {
-        // Default behavior if no onSave prop (e.g., direct page usage)
-        // This will add to an empty MOCK_CLIENTS array if it's cleared
-        if (clientId) {
-            const index = MOCK_CLIENTS.findIndex(c => c.id === clientId);
-            if (index !== -1) MOCK_CLIENTS[index] = clientData;
-        } else {
-            MOCK_CLIENTS.unshift(clientData); // Add to the beginning
-        }
+      console.log("Simulando salvamento no MOCK_CLIENTS (apenas para desenvolvimento).")
     }
 
 
@@ -121,7 +112,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
       description: `O cliente "${values.name}" foi ${clientId ? 'atualizado' : 'cadastrado'} com sucesso. (Simulação)`,
     });
 
-    if (!clientId) { // Only reset form on creation
+    if (!clientId) { 
       form.reset({
         name: "",
         email: "",

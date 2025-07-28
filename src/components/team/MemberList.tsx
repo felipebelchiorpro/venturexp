@@ -21,9 +21,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 
-// Mock data for team members - now initialized empty
-const mockTeamMembers: TeamMember[] = [];
-
 const getStatusBadgeVariant = (status: TeamMemberStatus): "default" | "secondary" | "destructive" | "outline" => {
   switch (status) {
     case 'Active': return 'default'; // Green or primary
@@ -38,7 +35,8 @@ export function MemberList() {
   const { toast } = useToast();
 
   useEffect(() => {
-    setMembers(mockTeamMembers); // Will set to empty array
+    // In a real app, this would be fetched from an API.
+    setMembers([]); 
   }, []);
 
   const handleDelete = (id: string, name: string) => {
@@ -159,4 +157,3 @@ export function MemberList() {
     </Card>
   );
 }
-    

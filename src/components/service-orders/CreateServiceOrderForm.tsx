@@ -65,7 +65,7 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
       productsUsed: "",
       osCreationDate: new Date(),
       executionDeadline: undefined,
-      serviceValue: "",
+      serviceValue: undefined,
       additionalNotes: "",
       initialStatus: "Aberta",
     },

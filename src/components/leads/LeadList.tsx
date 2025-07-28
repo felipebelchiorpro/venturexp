@@ -13,18 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2, PlusCircle, ListFilter, FileDown, UserPlus, CheckCircle } from "lucide-react";
 import type { Lead } from "@/types";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { PIPELINE_STAGES } from '@/lib/constants';
+import { PIPELINE_STAGES } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-
-// Mock data - now initialized empty
-const mockLeads: Lead[] = [];
-
 
 export function LeadList() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -43,7 +39,8 @@ export function LeadList() {
   });
 
   useEffect(() => {
-    setLeads(mockLeads); // Will set to empty array
+    // In a real app, this would be fetched from an API.
+    setLeads([]); 
   }, []);
 
   const filteredLeads = useMemo(() => {

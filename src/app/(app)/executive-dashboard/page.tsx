@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard, IconName } from "@/components/dashboard/KpiCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { MOCK_USER } from "@/lib/constants";
 import { BarChart3, DollarSign, FileText, Users, CreditCard, Award, TrendingUp, Activity, AlertTriangle, GanttChartSquare, ListChecks } from 'lucide-react';
 import { ExecutivePlaceholderContent } from '@/components/dashboard/ExecutivePlaceholderContent';
 
@@ -37,22 +36,8 @@ const executiveKpiData = {
 export default function ExecutiveDashboardPage() {
   const router = useRouter();
 
-  useEffect(() => {
-    if (MOCK_USER.role !== 'Executive') {
-      router.replace('/dashboard'); // Redirect to general dashboard if not an executive
-    }
-  }, [router]);
-
-  if (MOCK_USER.role !== 'Executive') {
-    // Render a loading/access denied message while redirecting or if JS is disabled (though redirect handles it)
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] text-center p-4">
-        <AlertTriangle className="h-16 w-16 text-destructive mb-4" />
-        <h2 className="text-2xl font-bold text-destructive mb-2">Acesso Negado</h2>
-        <p className="text-muted-foreground">Você não tem permissão para acessar esta página.</p>
-      </div>
-    );
-  }
+  // The role-based redirect logic is removed to keep the page accessible without mock data.
+  // In a real application, this would be handled by a proper authentication context.
 
   return (
     <div className="space-y-8">

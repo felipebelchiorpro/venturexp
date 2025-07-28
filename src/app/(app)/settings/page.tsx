@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { MOCK_USER } from "@/lib/constants";
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -29,7 +28,7 @@ export default function SettingsPage() {
     const formData = new FormData(event.currentTarget);
     const currentPassword = formData.get("currentPassword");
     // No mundo real, aqui haveria validação e envio para API
-    console.log("Tentativa de alteração de senha para o usuário:", MOCK_USER.email, { currentPasswordProvided: !!currentPassword });
+    console.log("Tentativa de alteração de senha.", { currentPasswordProvided: !!currentPassword });
     toast({
       title: "Senha Alterada!",
       description: "Sua senha foi alterada com sucesso. (Simulação - não verificamos a senha atual)",
@@ -54,11 +53,11 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-1">
                 <Label htmlFor="name">Nome Completo</Label>
-                <Input id="name" name="name" defaultValue={MOCK_USER.name} />
+                <Input id="name" name="name" placeholder="Seu Nome Completo" />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="email">Endereço de Email</Label>
-                <Input id="email" name="email" type="email" defaultValue={MOCK_USER.email} />
+                <Input id="email" name="email" type="email" placeholder="seu-email@exemplo.com" />
               </div>
               <Button type="submit">Salvar Perfil</Button>
             </CardContent>
