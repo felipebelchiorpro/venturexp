@@ -3,7 +3,6 @@
 
 import { PageHeader } from "@/components/PageHeader";
 import { CreateInvoiceForm } from "@/components/invoices/CreateInvoiceForm";
-import { MOCK_CLIENTS } from "@/lib/constants";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Client } from "@/types";
@@ -15,11 +14,27 @@ export default function NewInvoicePage() {
   const router = useRouter();
   const clientId = params.clientId as string;
   const [client, setClient] = useState<Client | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const foundClient = MOCK_CLIENTS.find(c => c.id === clientId);
-    setClient(foundClient || null);
+    // In a real app, you would fetch the client from an API
+    // const foundClient = MOCK_CLIENTS.find(c => c.id === clientId);
+    // For now, we simulate a loading state and show a generic name.
+    // Replace this logic with your actual data fetching.
+    setTimeout(() => { // Simulating API call
+      // setClient(foundClient || null);
+      setClient({ id: clientId, name: `Cliente ${clientId.substring(0,4)}` } as Client);
+      setLoading(false);
+    }, 500);
   }, [clientId]);
+
+  if (loading) {
+    return (
+       <div className="space-y-6">
+        <PageHeader title="Carregando Cliente..." description="Aguarde enquanto carregamos os dados do cliente." />
+      </div>
+    )
+  }
 
   if (!client) {
     return (

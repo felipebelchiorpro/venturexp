@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MOCK_CLIENTS } from "@/lib/constants"; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock, MapPin, FileType, Tag, Package, Edit3 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation"; 
@@ -29,18 +28,46 @@ export default function ClientDetailPage() {
   const [client, setClient] = useState<Client | null>(null);
   const [clientInvoices, setClientInvoices] = useState<Invoice[]>([]);
   const [clientServiceOrders, setClientServiceOrders] = useState<ServiceOrder[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const { toast } = useToast();
 
   useEffect(() => {
-    const foundClient = MOCK_CLIENTS.find(c => c.id === clientId);
-    setClient(foundClient || null);
-    if (foundClient) {
-        // Filter from the global empty mocks, will result in empty lists
-        setClientInvoices(mockInvoices.filter(inv => inv.clientId === clientId));
-        setClientServiceOrders(mockServiceOrders.filter(os => os.clientId === clientId));
-    }
+    // In a real app, this data would be fetched from an API
+    // For now, we create a placeholder client to avoid crashing
+    setTimeout(() => { // Simulating API call
+      const placeholderClient: Client = {
+        id: clientId,
+        name: `Cliente ${clientId.substring(0,4)}`,
+        email: 'cliente@exemplo.com',
+        company: 'Empresa Exemplo',
+        phone: '(11) 99999-8888',
+        status: 'Ativo',
+        responsable: 'Responsável Padrão',
+        segment: 'Tecnologia',
+        createdAt: new Date().toISOString(),
+        registrationDate: new Date().toISOString(),
+        address: 'Rua Exemplo, 123, Bairro, Cidade-UF',
+        document: '12.345.678/0001-99',
+        clientType: 'Pessoa Jurídica',
+      };
+      setClient(placeholderClient);
+
+      // Filter from the global empty mocks, will result in empty lists
+      setClientInvoices(mockInvoices.filter(inv => inv.clientId === clientId));
+      setClientServiceOrders(mockServiceOrders.filter(os => os.clientId === clientId));
+      setLoading(false);
+    }, 500);
   }, [clientId]);
+  
+  if (loading) {
+    return (
+       <div className="space-y-6">
+        <PageHeader title="Carregando Cliente..." description="Aguarde enquanto carregamos os dados do cliente." />
+      </div>
+    )
+  }
+
 
   if (!client) {
     return (
