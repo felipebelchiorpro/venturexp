@@ -36,3 +36,53 @@ Para rodar o projeto localmente, siga estes passos:
 Abra [http://localhost:9002](http://localhost:9002) no seu navegador para ver o resultado.
 
 Você pode começar a editar a página principal em `src/app/page.tsx`. A página é atualizada automaticamente conforme você edita o arquivo.
+
+---
+
+## Deploy com Coolify
+
+Para fazer o deploy desta aplicação no [Coolify](https://coolify.io/), siga estes passos:
+
+### 1. Preparação
+
+- **Envie seu código para o GitHub:** Certifique-se de que seu projeto está em um repositório no GitHub, incluindo o `Dockerfile` e o `.dockerignore` que foram adicionados.
+- **Tenha uma instância do Coolify rodando:** Você pode usar a versão em nuvem ou auto-hospedada.
+
+### 2. Configuração no Coolify
+
+1.  **Crie um Novo Recurso (New Resource):**
+    *   No seu painel do Coolify, vá para o projeto desejado e clique em "New Resource".
+    *   Selecione "Application" como o tipo de recurso.
+
+2.  **Selecione a Fonte (Source):**
+    *   Escolha "GitHub" como a fonte.
+    *   Selecione o repositório onde seu projeto está hospedado e a branch que deseja usar (ex: `main` ou `master`).
+
+3.  **Configurações de Build:**
+    *   **Build Pack:** O Coolify detectará automaticamente o `Dockerfile`. Selecione **"Dockerfile"** como o "Build Pack".
+    *   **Install Command:** Deixe em branco, pois o `Dockerfile` cuida disso.
+    *   **Build Command:** Deixe em branco.
+    *   **Start Command:** Deixe em branco.
+
+4.  **Configurações de Rede (Networking):**
+    *   **Port:** O `Dockerfile` expõe a porta `3000`. O Coolify deve detectar isso. Configure o valor para **`3000`**.
+    *   Você pode configurar um domínio personalizado na aba "FQDN(s)".
+
+5.  **Variáveis de Ambiente (Environment Variables):**
+    *   Esta é a parte mais importante para conectar ao Supabase e Gemini.
+    *   Vá para a aba "Environment Variables".
+    *   Clique em "Add a new variable".
+    *   Adicione as seguintes variáveis, uma por uma, com os seus valores secretos. **Marque-as como "Build-time"** para que fiquem disponíveis durante o processo de build do Next.js.
+        *   `NEXT_PUBLIC_SUPABASE_URL`: A URL do seu projeto Supabase.
+        *   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: A chave `anon` do seu projeto Supabase.
+        *   `GEMINI_API_KEY`: Sua chave da API do Google Gemini.
+    *   Adicione também `PORT` com o valor `3000`.
+
+### 4. Salvar e Fazer o Deploy
+
+- Clique em **"Save"** para salvar suas configurações.
+- Clique em **"Deploy"** para iniciar o processo de build e deploy.
+
+O Coolify irá buscar seu código do GitHub, construir a imagem Docker usando o `Dockerfile`, injetar as variáveis de ambiente e iniciar sua aplicação. Você poderá acompanhar os logs de deploy diretamente na interface do Coolify.
+
+Após a conclusão, sua aplicação "Venture XP" estará online e acessível através do domínio que você configurou!
