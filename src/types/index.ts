@@ -104,22 +104,22 @@ export interface TeamMember {
 }
 
 export interface Client {
-  id: string;
-  name: string; // Nome Completo ou Razão Social
-  email: string;
-  company?: string; // Can be derived from name if Pessoa Jurídica
-  phone?: string; // Telefone / WhatsApp
-  status: ClientStatus;
-  responsable?: string;
-  segment?: string;
-  createdAt: string; // ISO date string
-  avatarUrl?: string;
-  address?: string; // Endereço Completo
-  document?: string; // CPF ou CNPJ
-  clientType?: ClientType; // Pessoa Física / Pessoa Jurídica
-  frequentServices?: string; // Produtos ou Serviços Contratados com Frequência
-  internalNotes?: string; // Observações / Anotações internas
-  registrationDate: string; // Data de Cadastro (ISO date string)
+    id: string;
+    created_at: string;
+    name: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    document?: string;
+    client_type: ClientType;
+    frequent_services?: string;
+    internal_notes?: string;
+    registration_date: string;
+    status: ClientStatus;
+    company?: string;
+    responsable?: string;
+    segment?: string;
+    avatar_url?: string;
 }
 
 export interface Invoice {

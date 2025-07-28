@@ -29,6 +29,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { useRouter } from "next/navigation";
 import type { Client } from "@/types";
 import { CLIENT_STATUSES, CLIENT_TYPES } from "@/types";
+import { supabase } from "@/lib/supabaseClient";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "🧾 O nome/razão social deve ter pelo menos 2 caracteres." }),
@@ -36,18 +37,18 @@ const formSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   document: z.string().optional(),
-  clientType: z.enum(CLIENT_TYPES, {
+  client_type: z.enum(CLIENT_TYPES, {
     required_error: "🏷️ Selecione o tipo de cliente.",
   }),
-  frequentServices: z.string().optional(),
-  internalNotes: z.string().optional(),
-  registrationDate: z.date({
+  frequent_services: z.string().optional(),
+  internal_notes: z.string().optional(),
+  registration_date: z.date({
     required_error: "📆 A data de cadastro é obrigatória.",
   }),
   status: z.enum(CLIENT_STATUSES, {
     required_error: "✅ O status é obrigatório.",
   }),
-  company: z.string().optional(), // Adicionado para consistência com o tipo Client
+  company: z.string().optional(),
   responsable: z.string().optional(),
   segment: z.string().optional(),
 });
@@ -57,10 +58,10 @@ type ClientFormValues = z.infer<typeof formSchema>;
 interface ClientFormProps {
   clientId?: string; // For editing existing client
   initialData?: Partial<ClientFormValues>;
-  onSave?: (data: Client) => void; // Callback after saving
+  onSave?: (data: any) => void;
 }
 
-export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
+export function ClientForm({ clientId, initialData }: ClientFormProps) {
   const { toast } = useToast();
   const router = useRouter();
 
@@ -70,16 +71,16 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
     phone: "",
     address: "",
     document: "",
-    clientType: undefined,
-    frequentServices: "",
-    internalNotes: "",
-    registrationDate: new Date(),
+    client_type: undefined,
+    frequent_services: "",
+    internal_notes: "",
+    registration_date: new Date(),
     status: "Ativo",
     company: "",
     responsable: "",
     segment: "",
     ...initialData,
-    registrationDate: initialData?.registrationDate ? new Date(initialData.registrationDate) : new Date(),
+    registration_date: initialData?.registration_date ? new Date(initialData.registration_date) : new Date(),
   };
 
 
@@ -88,48 +89,38 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
     defaultValues,
   });
 
-  function onSubmit(values: ClientFormValues) {
-    const clientData: Client = {
-      id: clientId || `client-${Date.now()}`,
-      createdAt: clientId ? (initialData?.registrationDate || new Date().toISOString()) : new Date().toISOString(),
-      avatarUrl: `https://placehold.co/100x100.png?text=${values.name.charAt(0)}`,
+  async function onSubmit(values: ClientFormValues) {
+    
+    const clientData = {
       ...values,
-      registrationDate: values.registrationDate.toISOString(),
-      company: values.clientType === 'Pessoa Jurídica' ? values.name : values.company,
+      company: values.client_type === 'Pessoa Jurídica' ? values.name : values.company,
     };
+    
+    const { data, error } = await supabase
+      .from('clients')
+      .insert([clientData])
+      .select();
 
-    console.log("Dados do cliente:", clientData);
-
-    if (onSave) {
-        onSave(clientData);
-    } else {
-      console.log("Simulando salvamento no MOCK_CLIENTS (apenas para desenvolvimento).")
+    if (error) {
+      toast({
+        title: "Erro ao cadastrar cliente",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
     }
-
 
     toast({
-      title: clientId ? "Cliente Atualizado!" : "Cliente Cadastrado!",
-      description: `O cliente "${values.name}" foi ${clientId ? 'atualizado' : 'cadastrado'} com sucesso. (Simulação)`,
+      title: "Cliente Cadastrado!",
+      description: `O cliente "${values.name}" foi cadastrado com sucesso.`,
     });
 
-    if (!clientId) { 
-      form.reset({
-        name: "",
-        email: "",
-        phone: "",
-        address: "",
-        document: "",
-        clientType: undefined,
-        frequentServices: "",
-        internalNotes: "",
-        registrationDate: new Date(),
-        status: "Ativo",
-        company: "",
-        responsable: "",
-        segment: "",
-      });
+    if (onSave) {
+      onSave(data[0]);
     }
+    
     router.push("/clients");
+    router.refresh();
   }
 
   return (
@@ -210,7 +201,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
               />
               <FormField
                 control={form.control}
-                name="clientType"
+                name="client_type"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center"><Tag className="mr-2 h-4 w-4 text-primary" /> 🏷️ Tipo de Cliente</FormLabel>
@@ -236,7 +227,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
 
             <FormField
               control={form.control}
-              name="frequentServices"
+              name="frequent_services"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center"><Package className="mr-2 h-4 w-4 text-primary" /> 📦 Produtos ou Serviços Contratados com Frequência</FormLabel>
@@ -248,7 +239,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
 
             <FormField
               control={form.control}
-              name="internalNotes"
+              name="internal_notes"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center"><Edit3 className="mr-2 h-4 w-4 text-primary" /> 🗂️ Observações / Anotações internas</FormLabel>
@@ -261,7 +252,7 @@ export function ClientForm({ clientId, initialData, onSave }: ClientFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
-                name="registrationDate"
+                name="registration_date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="flex items-center"><CalendarIcon className="mr-2 h-4 w-4 text-primary" /> 📆 Data de Cadastro</FormLabel>
