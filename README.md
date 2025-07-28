@@ -3,6 +3,23 @@
 
 Este é um projeto inicial NextJS chamado Venture XP, construído no Firebase Studio.
 
+## Pré-requisitos: Criando seu Projeto no Supabase
+
+Antes de rodar a aplicação, você precisa ter um projeto no [Supabase](https://supabase.com/) para servir como seu banco de dados e backend.
+
+1.  **Acesse o Supabase:** Vá para [app.supabase.com](https://app.supabase.com) e faça login.
+2.  **Crie um Novo Projeto:**
+    *   Na página principal, clique no botão verde **"New project"**.
+    *   Escolha uma organização (ou crie uma nova, se for sua primeira vez).
+    *   Preencha os detalhes do projeto:
+        *   **Project name:** Recomendamos usar `Venture XP` para consistência.
+        *   **Database Password:** Crie uma senha segura e guarde-a em um local seguro.
+        *   **Region:** Escolha a região de servidor mais próxima de você ou de seus usuários.
+        *   **Pricing Plan:** Selecione o plano `Free` (Grátis).
+    *   Clique em **"Create new project"** e aguarde alguns minutos para a configuração ser concluída.
+
+Com o projeto criado, você pode seguir para os "Primeiros Passos".
+
 ## Primeiros Passos
 
 Para rodar o projeto localmente, siga estes passos:
@@ -13,9 +30,9 @@ Para rodar o projeto localmente, siga estes passos:
    ```
 
 2. **Configure as Variáveis de Ambiente:**
-   - Crie um arquivo chamado `.env` na raiz do projeto (se não existir).
-   - Copie o conteúdo do exemplo abaixo para o seu arquivo `.env`.
-   - Substitua os valores pelos dados do seu projeto Supabase e da sua chave da API do Gemini.
+   *   Crie um arquivo chamado `.env` na raiz do projeto (se não existir).
+   *   Copie o conteúdo do exemplo abaixo para o seu arquivo `.env`.
+   *   Substitua os valores pelos dados do seu projeto Supabase e da sua chave da API do Gemini.
    ```
    # Cole aqui as variáveis de ambiente do seu projeto Supabase
    # Você pode encontrá-las em "Project Settings" > "API" no seu painel Supabase
