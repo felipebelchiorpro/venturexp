@@ -108,18 +108,18 @@ export interface Client {
     created_at: string;
     name: string;
     email: string;
-    phone?: string;
-    address?: string;
-    document?: string;
+    phone?: string | null;
+    address?: string | null;
+    document?: string | null;
     client_type: ClientType;
-    frequent_services?: string;
-    internal_notes?: string;
+    frequent_services?: string | null;
+    internal_notes?: string | null;
     registration_date: string;
     status: ClientStatus;
-    company?: string;
-    responsable?: string;
-    segment?: string;
-    avatar_url?: string;
+    company?: string | null;
+    responsable?: string | null;
+    segment?: string | null;
+    avatar_url?: string | null;
 }
 
 export interface Invoice {

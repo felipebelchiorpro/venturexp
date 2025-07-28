@@ -55,13 +55,7 @@ const formSchema = z.object({
 
 type ClientFormValues = z.infer<typeof formSchema>;
 
-interface ClientFormProps {
-  clientId?: string; // For editing existing client
-  initialData?: Partial<ClientFormValues>;
-  onSave?: (data: any) => void;
-}
-
-export function ClientForm({ clientId, initialData }: ClientFormProps) {
+export function ClientForm() {
   const { toast } = useToast();
   const router = useRouter();
 
@@ -79,8 +73,6 @@ export function ClientForm({ clientId, initialData }: ClientFormProps) {
     company: "",
     responsable: "",
     segment: "",
-    ...initialData,
-    registration_date: initialData?.registration_date ? new Date(initialData.registration_date) : new Date(),
   };
 
 
@@ -93,6 +85,7 @@ export function ClientForm({ clientId, initialData }: ClientFormProps) {
     
     const clientData = {
       ...values,
+      registration_date: values.registration_date.toISOString(),
       company: values.client_type === 'Pessoa Jurídica' ? values.name : values.company,
     };
     
@@ -114,10 +107,6 @@ export function ClientForm({ clientId, initialData }: ClientFormProps) {
       title: "Cliente Cadastrado!",
       description: `O cliente "${values.name}" foi cadastrado com sucesso.`,
     });
-
-    if (onSave) {
-      onSave(data[0]);
-    }
     
     router.push("/clients");
     router.refresh();
@@ -127,11 +116,11 @@ export function ClientForm({ clientId, initialData }: ClientFormProps) {
     <Card className="w-full max-w-3xl mx-auto shadow-xl rounded-lg">
       <CardHeader>
         <CardTitle className="text-xl font-semibold flex items-center">
-            {clientId ? <Edit3 className="mr-2 h-5 w-5 text-primary" /> : <User className="mr-2 h-5 w-5 text-primary" />}
-            {clientId ? "Editar Cliente" : "Cadastrar Novo Cliente"}
+            <User className="mr-2 h-5 w-5 text-primary" />
+            Cadastrar Novo Cliente
         </CardTitle>
         <CardDescription>
-          {clientId ? "Atualize os dados do cliente abaixo." : "Preencha os dados abaixo para cadastrar um novo cliente."}
+          Preencha os dados abaixo para cadastrar um novo cliente.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -308,7 +297,7 @@ export function ClientForm({ clientId, initialData }: ClientFormProps) {
           </CardContent>
           <CardFooter className="border-t px-6 py-4">
             <Button type="submit" className="w-full md:w-auto">
-              <Save className="mr-2 h-4 w-4" /> {clientId ? "Salvar Alterações" : "Cadastrar Cliente"}
+              <Save className="mr-2 h-4 w-4" /> Cadastrar Cliente
             </Button>
           </CardFooter>
         </form>
