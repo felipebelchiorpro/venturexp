@@ -1,16 +1,8 @@
 
 import type { LucideIcon } from 'lucide-react';
 import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck } from 'lucide-react';
-import type { AccessPermissionModuleIdType, AccessRestrictionType, AccessProfile, Client, UserRole } from '@/types';
+import type { AccessProfile, Client, UserRole, NavItem } from '@/types';
 
-
-export interface NavItem {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  disabled?: boolean;
-  executiveOnly?: boolean;
-}
 
 export const navItems: NavItem[] = [
   { label: 'Painel Principal', href: '/dashboard', icon: LayoutDashboard },
@@ -37,27 +29,7 @@ export const MOCK_USER = {
 
 export const KPI_DATA: { title: string; value: string; change: string; trend: "up" | "down" | "neutral"; iconName: string; }[] = [];
 
-export const PIPELINE_STAGES = ['Novo Lead', 'Contactado', 'Qualificado', 'Proposta Enviada', 'Negociação', 'Ganho', 'Perdido'];
-
-export const PAYMENT_TEMPLATE_TYPES = ['Primeiro Lembrete', 'Segundo Lembrete', 'Aviso Final'];
-
 export const MOCK_CLIENTS: Client[] = [];
-
-export const ACCESS_PERMISSION_MODULES_PT: { id: AccessPermissionModuleIdType; label: string; icon: string; }[] = [
-    { id: 'clients', label: 'Clientes', icon: '📁' },
-    { id: 'serviceOrders', label: 'Ordens de Serviço', icon: '🛠️' },
-    { id: 'productsAndStock', label: 'Produtos e Estoque', icon: '📦' },
-    { id: 'financial', label: 'Financeiro', icon: '💰' },
-    { id: 'reportsAndDashboard', label: 'Relatórios e Dashboard', icon: '📈' },
-    { id: 'systemSettings', label: 'Configurações do Sistema', icon: '⚙️' },
-    { id: 'collaboratorManagement', label: 'Gestão de Colaboradores', icon: '🧑‍🤝‍🧑' },
-];
-
-export const ACCESS_RESTRICTION_LEVELS_PT: { id: AccessRestrictionType; label: string; }[] = [
-    { id: 'viewOwnOnly', label: 'Pode ver apenas seus próprios atendimentos/vendas' },
-    { id: 'editOwnOnly', label: 'Pode editar apenas seus próprios registros' },
-    { id: 'viewAllAsManager', label: 'Pode ver dados de outros colaboradores (nível gestor)' },
-];
 
 export const MOCK_ACCESS_PROFILES: AccessProfile[] = [];
     
