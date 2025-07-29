@@ -51,6 +51,7 @@ const formSchema = z.object({
   company: z.string().optional(),
   responsable: z.string().optional(),
   segment: z.string().optional(),
+  avatar_url: z.string().optional(),
 });
 
 type ClientFormValues = z.infer<typeof formSchema>;
