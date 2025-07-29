@@ -1,66 +1,55 @@
-# Dockerfile para uma aplicação Next.js
-
-# Estágio 1: Instalação das dependências
-FROM node:20-alpine AS deps
+# 1. Fase de Instalação de Dependências
+FROM node:18-alpine AS deps
 WORKDIR /app
 
-# Instala dependências do SO necessárias para o Next.js
-RUN apk add --no-cache libc6-compat openssl
-
-# Copia package.json e lockfiles
-COPY package.json package-lock.json* ./
+# Copia package.json e package-lock.json
+COPY package.json package-lock.json ./
 
 # Instala as dependências de produção
-RUN npm install
+RUN npm ci
 
-# Estágio 2: Build da aplicação
-FROM node:20-alpine AS builder
+# 2. Fase de Build
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copia as dependências instaladas do estágio anterior
+# Copia as dependências da fase anterior
 COPY --from=deps /app/node_modules ./node_modules
 # Copia o restante do código da aplicação
 COPY . .
 
-# Define as variáveis de ambiente que serão usadas durante o build
-# O Coolify irá injetar os valores aqui.
+# Expõe as variáveis de ambiente públicas para o processo de build do Next.js
+# Certifique-se de que essas variáveis estão configuradas como "Build-time" no seu provedor de hospedagem (Coolify)
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG GEMINI_API_KEY
 
-ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV GEMINI_API_KEY=$GEMINI_API_KEY
 
-
-# Executa o script de build do Next.js
+# Executa o script de build
 RUN npm run build
 
-# Estágio 3: Produção (Runner)
-FROM node:20-alpine AS runner
+# 3. Fase Final - Produção
+FROM node:18-alpine AS runner
 WORKDIR /app
 
+# Define o ambiente como produção
 ENV NODE_ENV=production
-
-# Copia o usuário e grupo 'nextjs'
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
-
-# Cria um diretório para o cache do Next.js
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Copia os arquivos de build do estágio 'builder'
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Muda para o usuário não-root 'nextjs'
-USER nextjs
-
-EXPOSE 3000
-
 ENV PORT=3000
 
-# Inicia o servidor Next.js
-CMD ["node", "server.js"]
+# Remove o package-lock.json e instala apenas as dependências de produção
+# para uma imagem final menor.
+COPY package.json .
+RUN npm install --omit=dev --ignore-scripts
+
+# Copia os artefatos de build da fase de builder
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.ts ./
+
+# Expõe a porta que a aplicação vai rodar
+EXPOSE 3000
+
+# Comando para iniciar a aplicação
+CMD ["npm", "start"]
