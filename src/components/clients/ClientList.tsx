@@ -21,10 +21,11 @@ import { ptBR } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from "@/lib/supabase/client";
 import { Skeleton } from '../ui/skeleton';
 
 const getStatusBadgeVariant = (status: Client['status']): "default" | "secondary" | "destructive" | "outline" => {
+  if (!status) return 'outline';
   switch (status) {
     case 'Ativo': return 'default';
     case 'Inativo': return 'destructive';
@@ -38,6 +39,7 @@ export function ClientList() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
+  const supabase = createClient();
 
   useEffect(() => {
     async function fetchClients() {
@@ -62,7 +64,7 @@ export function ClientList() {
     }
 
     fetchClients();
-  }, [toast]);
+  }, [toast, supabase]);
 
   const filteredClients = clients.filter(client =>
     (client.name && client.name.toLowerCase().includes(searchTerm.toLowerCase())) ||

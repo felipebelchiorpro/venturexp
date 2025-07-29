@@ -29,7 +29,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { useRouter } from "next/navigation";
 import type { Client } from "@/types";
 import { CLIENT_STATUSES, CLIENT_TYPES } from "@/types";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "🧾 O nome/razão social deve ter pelo menos 2 caracteres." }),
@@ -58,6 +58,7 @@ type ClientFormValues = z.infer<typeof formSchema>;
 export function ClientForm() {
   const { toast } = useToast();
   const router = useRouter();
+  const supabase = createClient();
 
   const defaultValues: Partial<ClientFormValues> = {
     name: "",
