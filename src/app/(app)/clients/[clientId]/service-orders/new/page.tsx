@@ -9,6 +9,8 @@ import type { Client } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 export default function NewServiceOrderPage() {
   const params = useParams();
   const router = useRouter();

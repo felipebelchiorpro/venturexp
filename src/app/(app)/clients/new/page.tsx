@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 export default function NewClientPage() {
   const router = useRouter();
 

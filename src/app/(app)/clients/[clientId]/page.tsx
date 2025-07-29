@@ -16,6 +16,8 @@ import { ptBR } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";
 import { CLIENT_TYPES, SERVICE_ORDER_STATUSES } from "@/types";
 
+export const dynamic = 'force-dynamic';
+
 // Mock data for invoices and service orders - now initialized empty
 const mockInvoices: Invoice[] = [];
 const mockServiceOrders: ServiceOrder[] = [];
@@ -45,11 +47,14 @@ export default function ClientDetailPage() {
         status: 'Ativo',
         responsable: 'Responsável Padrão',
         segment: 'Tecnologia',
-        createdAt: new Date().toISOString(),
-        registrationDate: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        registration_date: new Date().toISOString(),
         address: 'Rua Exemplo, 123, Bairro, Cidade-UF',
         document: '12.345.678/0001-99',
-        clientType: 'Pessoa Jurídica',
+        client_type: 'Pessoa Jurídica',
+        avatar_url: null,
+        frequent_services: null,
+        internal_notes: null,
       };
       setClient(placeholderClient);
 
@@ -134,7 +139,7 @@ export default function ClientDetailPage() {
           <CardHeader>
             <div className="flex items-center space-x-4 mb-4">
                 <Avatar className="h-20 w-20 border">
-                    <AvatarImage src={client.avatarUrl || `https://placehold.co/100x100.png?text=${client.name.charAt(0)}`} alt={client.name} data-ai-hint="company logo"/>
+                    <AvatarImage src={client.avatar_url || `https://placehold.co/100x100.png?text=${client.name.charAt(0)}`} alt={client.name} data-ai-hint="company logo"/>
                     <AvatarFallback>{client.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -163,13 +168,13 @@ export default function ClientDetailPage() {
             {client.document && (
               <div className="flex items-center">
                 <FileType className="mr-3 h-4 w-4 text-muted-foreground" />
-                <span>{client.clientType === 'Pessoa Jurídica' ? 'CNPJ' : 'CPF'}: {client.document}</span>
+                <span>{client.client_type === 'Pessoa Jurídica' ? 'CNPJ' : 'CPF'}: {client.document}</span>
               </div>
             )}
-            {client.clientType && (
+            {client.client_type && (
               <div className="flex items-center">
                 <Tag className="mr-3 h-4 w-4 text-muted-foreground" />
-                <span>Tipo: {client.clientType}</span>
+                <span>Tipo: {client.client_type}</span>
               </div>
             )}
             {client.segment && (
@@ -190,7 +195,7 @@ export default function ClientDetailPage() {
             )}
              <div className="flex items-center">
                 <CalendarClock className="mr-3 h-4 w-4 text-muted-foreground" />
-                <span>Data de Cadastro: {format(parseISO(client.registrationDate), "PPP", { locale: ptBR })}</span>
+                <span>Data de Cadastro: {format(parseISO(client.registration_date), "PPP", { locale: ptBR })}</span>
             </div>
           </CardContent>
            <CardFooter className="pt-4">
@@ -201,25 +206,25 @@ export default function ClientDetailPage() {
         </Card>
 
         <div className="lg:col-span-2 space-y-6">
-            {client.frequentServices && (
+            {client.frequent_services && (
                 <Card className="shadow-md hover:shadow-lg transition-shadow rounded-lg">
                     <CardHeader className="flex flex-row items-center pb-4">
                         <Package className="mr-2 h-5 w-5 text-primary" />
                         <CardTitle className="text-lg">Produtos/Serviços Frequentes</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{client.frequentServices}</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{client.frequent_services}</p>
                     </CardContent>
                 </Card>
             )}
-            {client.internalNotes && (
+            {client.internal_notes && (
                 <Card className="shadow-md hover:shadow-lg transition-shadow rounded-lg">
                     <CardHeader className="flex flex-row items-center pb-4">
                         <Edit3 className="mr-2 h-5 w-5 text-primary" />
                         <CardTitle className="text-lg">Observações Internas</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{client.internalNotes}</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{client.internal_notes}</p>
                     </CardContent>
                 </Card>
             )}
