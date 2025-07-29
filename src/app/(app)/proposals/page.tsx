@@ -7,6 +7,8 @@ import { PlusCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProposalForm } from "@/components/proposals/ProposalForm";
 
+export const dynamic = 'force-dynamic';
+
 export default function ProposalsPage() {
   return (
     <div className="space-y-6">

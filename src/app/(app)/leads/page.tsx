@@ -7,6 +7,8 @@ import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 // import { useRouter } from "next/navigation"; // Se for redirecionar para um formulário
 
+export const dynamic = 'force-dynamic';
+
 export default function LeadsPage() {
   const { toast } = useToast();
   // const router = useRouter(); // Descomente se for usar navegação

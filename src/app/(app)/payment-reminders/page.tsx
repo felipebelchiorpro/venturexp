@@ -2,6 +2,8 @@
 import { PageHeader } from "@/components/PageHeader";
 import { ReminderForm } from "@/components/payment-reminders/ReminderForm";
 
+export const dynamic = 'force-dynamic';
+
 export default function PaymentRemindersPage() {
   return (
     <div className="space-y-6">

@@ -3,6 +3,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { InviteMemberForm } from "@/components/team/InviteMemberForm";
 import { MemberList } from "@/components/team/MemberList";
 
+export const dynamic = 'force-dynamic';
+
 export default function TeamManagementPage() {
   return (
     <div className="space-y-8">

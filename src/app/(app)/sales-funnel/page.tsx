@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+export const dynamic = 'force-dynamic';
+
 export default function SalesFunnelPage() {
   const { toast } = useToast();
 
