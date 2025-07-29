@@ -45,12 +45,11 @@ Para rodar o projeto localmente, siga estes passos:
    GEMINI_API_KEY="your-gemini-api-key"
    ```
 
-3. **Gere os Tipos do Banco de Dados Supabase (Opcional, mas Recomendado):**
-   Para obter autocompletar e segurança de tipos ao interagir com seu banco de dados, rode o comando abaixo na sua máquina local (requer [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started)):
-   ```bash
-   npx supabase gen types typescript --project-id <your-project-id> > src/types/database.types.ts
-   ```
-   Isso irá popular o arquivo `src/types/database.types.ts` com o esquema do seu banco de dados.
+3. **Configure o Banco de Dados com o Schema:**
+   * Vá para o seu [Painel Supabase](https://app.supabase.com/).
+   * No menu esquerdo, clique no ícone de banco de dados para abrir o **"SQL Editor"**.
+   * Abra o arquivo `supabase/schema.sql` do seu projeto local, copie todo o seu conteúdo.
+   * Cole o conteúdo no editor SQL do Supabase e clique em **"RUN"**. Isso criará todas as tabelas necessárias.
 
 4. **Rode o servidor de desenvolvimento:**
    ```bash
@@ -60,12 +59,6 @@ Para rodar o projeto localmente, siga estes passos:
 Abra [http://localhost:9002](http://localhost:9002) no seu navegador para ver o resultado.
 
 Você pode começar a editar a página principal em `src/app/page.tsx`. A página é atualizada automaticamente conforme você edita o arquivo.
-
----
-
-## Conexão com o Supabase
-
-O projeto está configurado para se conectar a um banco de dados Supabase. A conexão é gerenciada pelo cliente Supabase inicializado em `src/lib/supabaseClient.ts`, que usa as variáveis de ambiente do seu arquivo `.env`.
 
 ---
 

@@ -95,6 +95,7 @@ export function ClientForm() {
       .select();
 
     if (error) {
+      console.error("Erro ao cadastrar cliente:", error);
       toast({
         title: "Erro ao cadastrar cliente",
         description: error.message,

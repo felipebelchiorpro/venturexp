@@ -1,4 +1,6 @@
 
+import type { Database as DB } from './database.types';
+
 export const USER_ROLES = ['Admin', 'Executive', 'Manager', 'Member', 'Analyst'] as const;
 export type UserRole = typeof USER_ROLES[number];
 
@@ -103,24 +105,29 @@ export interface TeamMember {
   avatarUrl?: string;
 }
 
-export interface Client {
-    id: string;
-    created_at: string;
-    name: string;
-    email: string;
-    phone?: string | null;
-    address?: string | null;
-    document?: string | null;
-    client_type: ClientType;
-    frequent_services?: string | null;
-    internal_notes?: string | null;
-    registration_date: string;
-    status: ClientStatus;
-    company?: string | null;
-    responsable?: string | null;
-    segment?: string | null;
-    avatar_url?: string | null;
-}
+// Removido tipo Client manual
+// export interface Client {
+//     id: string;
+//     created_at: string;
+//     name: string;
+//     email: string;
+//     phone?: string | null;
+//     address?: string | null;
+//     document?: string | null;
+//     client_type: ClientType;
+//     frequent_services?: string | null;
+//     internal_notes?: string | null;
+//     registration_date: string;
+//     status: ClientStatus;
+//     company?: string | null;
+//     responsable?: string | null;
+//     segment?: string | null;
+//     avatar_url?: string | null;
+// }
+
+// Novo tipo Client gerado a partir do schema do Supabase
+export type Client = DB['public']['Tables']['clients']['Row'];
+
 
 export interface Invoice {
   id: string;

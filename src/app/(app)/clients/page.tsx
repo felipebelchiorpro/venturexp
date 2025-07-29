@@ -1,4 +1,3 @@
-
 import { PageHeader } from "@/components/PageHeader";
 import { ClientList } from "@/components/clients/ClientList";
 import { Button } from "@/components/ui/button";

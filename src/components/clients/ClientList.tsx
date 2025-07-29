@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Eye, DollarSign, Briefcase } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import type { Client } from "@/types";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -55,8 +55,8 @@ export function ClientList() {
           variant: "destructive",
         });
         setClients([]);
-      } else {
-        setClients(data as Client[]);
+      } else if (data) {
+        setClients(data as unknown as Client[]);
       }
       setLoading(false);
     }
