@@ -27,7 +27,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-body antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
@@ -38,5 +38,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-    

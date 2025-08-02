@@ -16,15 +16,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { APP_LOGO_URL } from "@/lib/constants";
-import { LogOut, User, Settings, Sun, Moon } from "lucide-react";
+import { LogOut, User, Settings, Sun, Moon, Bell } from "lucide-react";
 import { useTheme } from "next-themes"; 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { useToast } from "@/hooks/use-toast";
 
 const ThemeToggle = () => {
-  const { setTheme, theme } = useTheme ? useTheme() : { setTheme: () => {}, theme: 'light' };
+  const { setTheme, theme } = useTheme ? useTheme() : { setTheme: () => {}, theme: 'dark' };
 
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
@@ -72,7 +73,7 @@ const UserNav = ({ user }: { user: SupabaseUser | null }) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-8 w-8 border-2 border-primary/50 hover:border-primary transition-colors">
             <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email || "Usuário"} data-ai-hint="user avatar" />
             <AvatarFallback>{user ? getInitials(user.email!) : 'U'}</AvatarFallback>
           </Avatar>
@@ -112,6 +113,7 @@ const UserNav = ({ user }: { user: SupabaseUser | null }) => {
 
 export function AppHeader() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const supabase = createClient();
@@ -122,8 +124,15 @@ export function AppHeader() {
     fetchUser();
   }, []);
 
+  const handleNotifications = () => {
+    toast({
+      title: "Notificações",
+      description: "Nenhuma notificação nova. (Placeholder)",
+    });
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-sm">
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/dashboard" className="mr-6 flex items-center space-x-2">
@@ -141,6 +150,10 @@ export function AppHeader() {
           <SidebarTrigger />
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
+          <Button variant="ghost" size="icon" onClick={handleNotifications}>
+            <Bell className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">Notificações</span>
+          </Button>
           <ThemeToggle />
           <UserNav user={user} />
         </div>

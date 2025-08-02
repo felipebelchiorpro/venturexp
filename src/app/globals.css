@@ -8,97 +8,98 @@ body {
 
 @layer base {
   :root {
-    --background: 210 33% 96%; /* #F0F4F8 Light Gray */
-    --foreground: 210 10% 23%; /* Dark Gray for text #333A42 */
+    --background: 224 71% 4%; /* Deep Dark Blue */
+    --foreground: 210 40% 98%; /* Almost White */
 
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 210 10% 23%; /* Dark Gray for text */
+    --card: 240 10% 3.9%; /* Placeholder for light theme, dark is more complex */
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%; /* White */
-    --popover-foreground: 210 10% 23%; /* Dark Gray for text */
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 199 77% 53%; /* #29ABE2 Vibrant Blue */
-    --primary-foreground: 0 0% 100%; /* White */
+    --primary: 262 88% 66%; /* Electric Purple */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 33% 90%; /* Lighter gray than background */
-    --secondary-foreground: 210 10% 23%; /* Dark Gray for text */
+    --secondary: 222 84% 58%; /* Electric Blue */
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 33% 85%; /* Muted gray */
-    --muted-foreground: 210 10% 45%; /* Lighter dark gray for muted text */
+    --muted: 223 47% 11%;
+    --muted-foreground: 210 40% 62%;
 
-    --accent: 30 94% 61%; /* #F9A03F Yellow-Orange */
-    --accent-foreground: 0 0% 100%; /* White */
+    --accent: 262 88% 66%; /* Neon Purple for accents */
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%; /* Default Red */
-    --destructive-foreground: 0 0% 98%; /* Default Light Text */
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 210 20% 88%; /* Light gray border */
-    --input: 210 20% 92%; /* Slightly lighter gray for input background */
-    --ring: 199 77% 53%; /* Primary color for rings */
+    --border: 223 47% 11%;
+    --input: 223 47% 11%;
+    --ring: 262 88% 66%; /* Electric Purple for rings */
 
-    --chart-1: 199 77% 53%; /* Primary */
-    --chart-2: 30 94% 61%;  /* Accent */
-    --chart-3: 210 33% 70%; /* Muted Blue/Gray */
-    --chart-4: 150 50% 50%; /* A Green */
-    --chart-5: 280 50% 60%; /* A Purple */
+    --chart-1: 262 88% 66%;
+    --chart-2: 222 84% 58%;
+    --chart-3: 317 88% 66%; /* A pinkish neon */
+    --chart-4: 198 93% 60%; /* A cyan neon */
+    --chart-5: 280 50% 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     /* Sidebar specific theme variables */
-    --sidebar-background: 0 0% 100%; /* White */
-    --sidebar-foreground: 210 10% 23%; /* Dark text */
-    --sidebar-primary: 199 77% 53%; /* Main primary for active link background */
-    --sidebar-primary-foreground: 0 0% 100%; /* White text on active link */
-    --sidebar-accent: 210 33% 92%; /* Light gray for hover background */
-    --sidebar-accent-foreground: 210 10% 23%; /* Dark text on hover */
-    --sidebar-border: 210 20% 85%; /* Border for sidebar */
-    --sidebar-ring: 199 77% 53%; /* Primary color for focus rings within sidebar */
+    --sidebar-background: 224 71% 4%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 262 88% 66%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 223 47% 11%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 223 47% 11%;
+    --sidebar-ring: 262 88% 66%;
   }
 
   .dark {
-    --background: 210 10% 15%; /* Darker background */
-    --foreground: 210 33% 96%; /* Light Gray text */
+    --background: 224 71% 4%; /* Deep Dark Blue */
+    --foreground: 210 40% 98%; /* Almost White */
 
-    --card: 210 10% 20%; /* Darker card */
-    --card-foreground: 210 33% 96%; /* Light Gray text */
+    /* For Glassmorphism: semi-transparent */
+    --card: 246 41% 10% / 0.6; 
+    --card-foreground: 210 40% 98%;
 
-    --popover: 210 10% 10%; /* Dark popover */
-    --popover-foreground: 210 33% 96%; /* Light Gray text */
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 199 77% 53%; /* #29ABE2 Vibrant Blue */
-    --primary-foreground: 0 0% 100%; /* White */
+    --primary: 262 88% 66%; /* Electric Purple */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 10% 25%; /* Darker secondary */
-    --secondary-foreground: 210 33% 96%; /* Light Gray text */
+    --secondary: 222 84% 58%; /* Electric Blue */
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 10% 30%; /* Darker muted */
-    --muted-foreground: 210 33% 75%; /* Lighter gray text for muted */
+    --muted: 223 47% 11%;
+    --muted-foreground: 210 40% 62%;
 
-    --accent: 30 94% 61%; /* #F9A03F Yellow-Orange */
-    --accent-foreground: 0 0% 100%; /* White */
+    --accent: 262 88% 66%; /* Neon Purple for accents */
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 70% 50%; /* Darker Red */
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 210 10% 35%; /* Darker border */
-    --input: 210 10% 28%; /* Darker input background */
-    --ring: 199 77% 53%; /* Primary color for rings */
-
-    --chart-1: 199 77% 63%;
-    --chart-2: 30 94% 71%;
-    --chart-3: 210 33% 80%;
-    --chart-4: 150 50% 60%;
-    --chart-5: 280 50% 70%;
+    --border: 223 47% 11%;
+    --input: 223 47% 11%;
+    --ring: 262 88% 66%; /* Electric Purple for rings */
+    
+    --chart-1: 262 88% 66%;
+    --chart-2: 222 84% 58%;
+    --chart-3: 317 88% 66%;
+    --chart-4: 198 93% 60%;
+    --chart-5: 280 50% 60%;
 
     /* Dark Sidebar specific theme variables */
-    --sidebar-background: 210 10% 12%; /* Very dark blue/gray */
-    --sidebar-foreground: 210 33% 92%; /* Light gray text */
-    --sidebar-primary: 199 77% 53%; /* Main primary for active link background */
-    --sidebar-primary-foreground: 0 0% 100%; /* White text on active link */
-    --sidebar-accent: 210 10% 20%; /* Dark gray for hover background */
-    --sidebar-accent-foreground: 210 33% 92%; /* Light gray text on hover */
-    --sidebar-border: 210 10% 25%; /* Border for dark sidebar */
-    --sidebar-ring: 199 77% 53%; /* Primary color for focus rings */
+    --sidebar-background: 230 50% 7% / 0.8; /* Semi-transparent sidebar */
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 262 88% 66%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 223 47% 11%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 223 47% 15%;
+    --sidebar-ring: 262 88% 66%;
   }
 }
 
@@ -108,5 +109,18 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+     /* Add a subtle background image or gradient for the tech feel */
+    background-image: radial-gradient(circle at top left, hsl(262 88% 66% / 0.1), transparent 40%),
+                      radial-gradient(circle at bottom right, hsl(222 84% 58% / 0.1), transparent 40%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Neon glow effect for buttons on hover/focus */
+  .btn-glow:hover, .btn-glow:focus {
+    box-shadow: 0 0 5px hsl(var(--primary)),
+                0 0 10px hsl(var(--primary) / 0.8),
+                0 0 20px hsl(var(--primary) / 0.6);
   }
 }
