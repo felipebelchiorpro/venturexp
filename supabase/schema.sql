@@ -1,4 +1,3 @@
-
 -- Habilita a extensão pgcrypto se ainda não estiver habilitada
 create extension if not exists "pgcrypto" with schema "extensions";
 
@@ -117,7 +116,24 @@ create table if not exists public.profiles (
 
 comment on table public.profiles is 'Armazena dados públicos do perfil para cada usuário.';
 
--- Configura RLS (Row Level Security) para a tabela de perfis
+-- Cria a tabela de produtos (products)
+create table if not exists public.products (
+    id uuid default gen_random_uuid() primary key,
+    created_at timestamp with time zone not null default now(),
+    name text not null,
+    description text null,
+    price numeric not null default 0,
+    category text null,
+    sku text null,
+    stock_quantity integer null
+);
+
+comment on table public.products is 'Armazena informações sobre produtos e serviços pré-definidos.';
+
+
+-- POLÍTICAS DE SEGURANÇA (RLS) --
+
+-- Policies para a tabela `profiles`
 alter table public.profiles enable row level security;
 drop policy if exists "Public profiles are viewable by everyone." on public.profiles;
 create policy "Public profiles are viewable by everyone." on public.profiles for select using (true);
@@ -127,66 +143,21 @@ drop policy if exists "Users can update own profile." on public.profiles;
 create policy "Users can update own profile." on public.profiles for update using (auth.uid() = id);
 
 
-
--- Habilita a Segurança de Nível de Linha (RLS) para a tabela de clientes
-ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
-
--- Permite que usuários autenticados leiam todos os clientes
-DROP POLICY IF EXISTS "Authenticated users can view clients." ON public.clients;
-CREATE POLICY "Authenticated users can view clients."
-ON public.clients
-FOR SELECT
-USING (auth.role() = 'authenticated');
-
--- Permite que usuários autenticados insiram novos clientes
-DROP POLICY IF EXISTS "Authenticated users can insert clients." ON public.clients;
-CREATE POLICY "Authenticated users can insert clients."
-ON public.clients
-FOR INSERT
-WITH CHECK (auth.role() = 'authenticated');
-
--- Permite que usuários autenticados atualizem clientes
-DROP POLICY IF EXISTS "Authenticated users can update clients." ON public.clients;
-CREATE POLICY "Authenticated users can update clients."
-ON public.clients
-FOR UPDATE
-USING (auth.role() = 'authenticated');
-
--- Permite que usuários autenticados deletem clientes
-DROP POLICY IF EXISTS "Authenticated users can delete clients." ON public.clients;
-CREATE POLICY "Authenticated users can delete clients."
-ON public.clients
-FOR DELETE
-USING (auth.role() = 'authenticated');
+-- Policies para a tabela `clients`
+alter table public.clients enable row level security;
+drop policy if exists "Authenticated users can manage clients." on public.clients;
+create policy "Authenticated users can manage clients." on public.clients
+for all using (auth.role() = 'authenticated');
 
 
--- Habilita a Segurança de Nível de Linha (RLS) para a tabela de leads
-ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+-- Policies para a tabela `leads`
+alter table public.leads enable row level security;
+drop policy if exists "Authenticated users can manage leads." on public.leads;
+create policy "Authenticated users can manage leads." on public.leads
+for all using (auth.role() = 'authenticated');
 
--- Permite que usuários autenticados leiam todos os leads
-DROP POLICY IF EXISTS "Authenticated users can view leads." ON public.leads;
-CREATE POLICY "Authenticated users can view leads."
-ON public.leads
-FOR SELECT
-USING (auth.role() = 'authenticated');
-
--- Permite que usuários autenticados insiram novos leads
-DROP POLICY IF EXISTS "Authenticated users can insert leads." ON public.leads;
-CREATE POLICY "Authenticated users can insert leads."
-ON public.leads
-FOR INSERT
-WITH CHECK (auth.role() = 'authenticated');
-
--- Permite que usuários autenticados atualizem leads
-DROP POLICY IF EXISTS "Authenticated users can update leads." ON public.leads;
-CREATE POLICY "Authenticated users can update leads."
-ON public.leads
-FOR UPDATE
-USING (auth.role() = 'authenticated');
-
--- Permite que usuários autenticados deletem leads
-DROP POLICY IF EXISTS "Authenticated users can delete leads." ON public.leads;
-CREATE POLICY "Authenticated users can delete leads."
-ON public.leads
-FOR DELETE
-USING (auth.role() = 'authenticated');
+-- Policies para a tabela `products`
+alter table public.products enable row level security;
+drop policy if exists "Authenticated users can manage products." on public.products;
+create policy "Authenticated users can manage products." on public.products
+for all using (auth.role() = 'authenticated');

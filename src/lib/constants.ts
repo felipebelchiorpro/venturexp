@@ -1,6 +1,6 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck, ShoppingCart } from 'lucide-react';
 import type { NavItem } from '@/types';
 
 export const navItems: NavItem[] = [
@@ -10,6 +10,7 @@ export const navItems: NavItem[] = [
   { label: 'Funil de Vendas', href: '/sales-funnel', icon: GanttChartSquare },
   { label: 'Propostas', href: '/proposals', icon: FileText },
   { label: 'Leads', href: '/leads', icon: Users },
+  { label: 'Produtos', href: '/products', icon: ShoppingCart },
   { label: 'Gerenciar Equipe', href: '/team', icon: UserPlus },
   { label: 'Perfis de Acesso', href: '/access-profiles/new', icon: ShieldCheck },
   { label: 'Lembretes de Pag.', href: '/payment-reminders', icon: BellRing },

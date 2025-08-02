@@ -1,5 +1,6 @@
 
 import type { Database as DB } from './database.types';
+import type { Tables } from './database.types';
 
 export const USER_ROLES = ['Admin', 'Executive', 'Manager', 'Member', 'Analyst'] as const;
 export type UserRole = typeof USER_ROLES[number];
@@ -52,18 +53,7 @@ export interface NavItem {
   executiveOnly?: boolean;
 }
 
-export interface Proposal {
-  id: string;
-  clientName: string;
-  serviceDescription: string;
-  amount: number;
-  currency: string;
-  deadline: string; // ISO date string
-  status: ProposalStatusType;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
-  aiGeneratedDraft?: string;
-}
+export type Proposal = Tables<'proposals'>;
 
 export type Lead = DB['public']['Tables']['leads']['Row'];
 

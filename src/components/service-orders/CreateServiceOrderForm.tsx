@@ -2,7 +2,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserCircle, Phone, MapPin, Wrench, Package, CalendarDays, DollarSign, FileText, ListChecks, Save } from "lucide-react";
+import { UserCircle, Phone, MapPin, Wrench, Package, CalendarDays, DollarSign, FileText, ListChecks, Save, PlusCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from 'date-fns/locale';
@@ -27,17 +27,29 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { SERVICE_ORDER_STATUSES, type ServiceOrderStatusType, type ServiceOrder } from "@/types";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { Tables } from "@/types/database.types";
+
+type Product = Tables<'products'>;
+
+const productItemSchema = z.object({
+    productId: z.string().min(1, "Selecione um produto."),
+    quantity: z.coerce.number().min(1, "A quantidade deve ser pelo menos 1."),
+    unitPrice: z.coerce.number(), // Preço virá do produto selecionado
+    name: z.string() // Nome virá do produto selecionado
+});
 
 const formSchema = z.object({
   contactPhone: z.string().optional(),
   serviceAddress: z.string().optional(),
   serviceType: z.string().min(1, "O tipo de serviço é obrigatório."),
-  productsUsed: z.string().optional(),
+  productsUsed: z.array(productItemSchema).optional(),
   osCreationDate: z.date({
     required_error: "A data de abertura da OS é obrigatória.",
   }),
   executionDeadline: z.date().optional(),
-  serviceValue: z.string().optional().transform(val => val ? parseFloat(val.replace(',', '.')) : undefined).refine(val => val === undefined || val > 0, {message: "O valor deve ser positivo."} ),
+  serviceValue: z.string().optional().transform(val => val ? parseFloat(val.replace(',', '.')) : undefined).refine(val => val === undefined || val >= 0, {message: "O valor não pode ser negativo."} ),
   additionalNotes: z.string().optional(),
   initialStatus: z.enum(SERVICE_ORDER_STATUSES, {
     required_error: "O status inicial é obrigatório.",
@@ -55,6 +67,9 @@ interface CreateServiceOrderFormProps {
 export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: CreateServiceOrderFormProps) {
   const { toast } = useToast();
   const router = useRouter();
+  const supabase = createClient();
+  const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
+  const [totalValue, setTotalValue] = useState(0);
 
   const form = useForm<CreateServiceOrderFormValues>({
     resolver: zodResolver(formSchema),
@@ -62,7 +77,7 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
       contactPhone: clientPhone || "",
       serviceAddress: "",
       serviceType: "",
-      productsUsed: "",
+      productsUsed: [],
       osCreationDate: new Date(),
       executionDeadline: undefined,
       serviceValue: undefined,
@@ -71,22 +86,63 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "productsUsed"
+  });
+
+  const productsWatch = form.watch("productsUsed");
+  const manualServiceValue = form.watch("serviceValue");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+        const { data, error } = await supabase.from('products').select('*').order('name');
+        if (error) {
+            toast({ title: 'Erro ao buscar produtos', description: error.message, variant: 'destructive' });
+        } else {
+            setAvailableProducts(data);
+        }
+    };
+    fetchProducts();
+  }, [supabase, toast]);
+
+  useEffect(() => {
+    const calculateTotal = () => {
+        const productsTotal = productsWatch?.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0) ?? 0;
+        setTotalValue(productsTotal);
+    };
+    calculateTotal();
+  }, [productsWatch]);
+
+  const handleProductSelection = (index: number, productId: string) => {
+    const selectedProduct = availableProducts.find(p => p.id === productId);
+    if(selectedProduct) {
+        form.setValue(`productsUsed.${index}.unitPrice`, selectedProduct.price);
+        form.setValue(`productsUsed.${index}.name`, selectedProduct.name);
+    }
+  };
+
+
   function onSubmit(values: CreateServiceOrderFormValues) {
-    console.log("Dados da Nova Ordem de Serviço:", values);
+    const finalValue = manualServiceValue !== undefined ? manualServiceValue : totalValue;
+    const productsString = values.productsUsed?.map(p => `${p.quantity}x ${p.name}`).join(', ');
+
+    console.log("Dados da Nova Ordem de Serviço:", { ...values, serviceValue: finalValue, productsUsed: productsString });
     
-    const newServiceOrderData: ServiceOrder = {
-      id: `os-${Date.now()}`,
+    // Here you would typically save to the database. For now, we simulate.
+    const newServiceOrderData: Partial<ServiceOrder> = {
+      // id: `os-${Date.now()}`,
       clientId: clientId,
       orderNumber: `OS-${Math.floor(Math.random() * 10000)}`,
-      clientName: clientName,
-      contactPhone: values.contactPhone,
-      serviceAddress: values.serviceAddress,
+      // clientName: clientName,
+      // contactPhone: values.contactPhone,
+      // serviceAddress: values.serviceAddress,
       serviceType: values.serviceType,
-      productsUsed: values.productsUsed,
+      productsUsed: productsString,
       creationDate: values.osCreationDate.toISOString(),
       executionDeadline: values.executionDeadline?.toISOString(),
-      serviceValue: values.serviceValue,
-      currency: values.serviceValue ? "BRL" : undefined,
+      serviceValue: finalValue,
+      currency: finalValue > 0 ? "BRL" : undefined,
       additionalNotes: values.additionalNotes,
       status: values.initialStatus as ServiceOrderStatusType,
     };
@@ -109,41 +165,41 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <CardContent className="space-y-6 pt-6">
-            <FormField
-              control={form.control}
-              name="contactPhone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <Phone className="mr-2 h-5 w-5 text-primary" /> Contato
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Telefone ou WhatsApp" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="serviceAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <MapPin className="mr-2 h-5 w-5 text-primary" /> Endereço
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Local onde o serviço será realizado (ou endereço de entrega/retirada)"
-                      {...field}
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                control={form.control}
+                name="contactPhone"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel className="flex items-center">
+                        <Phone className="mr-2 h-5 w-5 text-primary" /> Contato
+                    </FormLabel>
+                    <FormControl>
+                        <Input placeholder="Telefone ou WhatsApp" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                    control={form.control}
+                    name="serviceAddress"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="flex items-center">
+                            <MapPin className="mr-2 h-5 w-5 text-primary" /> Endereço
+                        </FormLabel>
+                        <FormControl>
+                            <Input
+                            placeholder="Local onde o serviço será realizado"
+                            {...field}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
 
             <FormField
               control={form.control}
@@ -164,27 +220,49 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="productsUsed"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <Package className="mr-2 h-5 w-5 text-primary" /> Produtos/Peças Utilizadas
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Liste os produtos ou peças incluídas, com quantidades (ex: Cabo HDMI x2, Fonte 12V x1)"
-                      {...field}
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             
+            <div className="space-y-4 rounded-md border p-4">
+                <FormLabel className="flex items-center text-base"><Package className="mr-2 h-5 w-5 text-primary" /> Produtos/Peças Utilizadas</FormLabel>
+                {fields.map((field, index) => (
+                    <div key={field.id} className="flex items-end gap-2 p-2 rounded-md bg-muted/50">
+                        <FormField
+                            control={form.control}
+                            name={`productsUsed.${index}.productId`}
+                            render={({ field }) => (
+                                <FormItem className="flex-1">
+                                <FormLabel className="text-xs">Produto</FormLabel>
+                                <Select onValueChange={(value) => { field.onChange(value); handleProductSelection(index, value); }} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Selecione um item" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        {availableProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name={`productsUsed.${index}.quantity`}
+                            render={({ field }) => (
+                                <FormItem className="w-24">
+                                <FormLabel className="text-xs">Qtd.</FormLabel>
+                                <FormControl><Input type="number" {...field} /></FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+                ))}
+                 <Button type="button" variant="outline" size="sm" onClick={() => append({ productId: "", quantity: 1, unitPrice: 0, name: '' })}>
+                    <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Item
+                </Button>
+            </div>
+
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -199,31 +277,17 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
                         <FormControl>
                           <Button
                             variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal mt-1",
-                              !field.value && "text-muted-foreground"
-                            )}
+                            className={cn("w-full justify-start text-left font-normal mt-1", !field.value && "text-muted-foreground" )}
                           >
                             <CalendarDays className="mr-2 h-4 w-4" />
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: ptBR })
-                            ) : (
-                              <span>Escolha uma data</span>
-                            )}
+                            {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                          locale={ptBR}
-                        />
+                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={ptBR} />
                       </PopoverContent>
                     </Popover>
-                    <FormDescription className="mt-1">Data em que a OS está sendo criada.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -235,61 +299,52 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="flex items-center">
-                      <CalendarDays className="mr-2 h-5 w-5 text-primary" /> Prazo de Execução ou Entrega
+                      <CalendarDays className="mr-2 h-5 w-5 text-primary" /> Prazo de Execução
                     </FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal mt-1",
-                              !field.value && "text-muted-foreground"
-                            )}
+                            className={cn("w-full justify-start text-left font-normal mt-1", !field.value && "text-muted-foreground")}
                           >
                             <CalendarDays className="mr-2 h-4 w-4" />
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: ptBR })
-                            ) : (
-                              <span>Escolha uma data (opcional)</span>
-                            )}
+                            {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Escolha uma data (opcional)</span>}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                          initialFocus
-                          locale={ptBR}
-                        />
+                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} initialFocus locale={ptBR}/>
                       </PopoverContent>
                     </Popover>
-                    <FormDescription className="mt-1">Prazo previsto para conclusão.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="serviceValue"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <DollarSign className="mr-2 h-5 w-5 text-primary" /> Valor (R$)
-                  </FormLabel>
-                  <FormControl>
-                    <Input type="text" placeholder="Ex: 150,00 (ou deixe em branco)" {...field} />
-                  </FormControl>
-                   <FormDescription>Informe o valor total do serviço (ou deixe em aberto).</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                <FormField
+                    control={form.control}
+                    name="serviceValue"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="flex items-center">
+                            <DollarSign className="mr-2 h-5 w-5 text-primary" /> Valor do Serviço (Manual)
+                        </FormLabel>
+                        <FormControl>
+                            <Input type="text" placeholder="Deixe em branco para calcular" {...field} />
+                        </FormControl>
+                        <FormDescription>Preencha para substituir o cálculo automático.</FormDescription>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <div className="p-2 rounded-md bg-muted text-muted-foreground">
+                    <span className="text-sm">Valor Total Calculado:</span>
+                    <p className="text-lg font-bold text-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}</p>
+                </div>
+            </div>
 
             <FormField
               control={form.control}
@@ -300,11 +355,7 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
                     <FileText className="mr-2 h-5 w-5 text-primary" /> Observações Adicionais
                   </FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Ex: cliente solicitou urgência, equipamento já aberto, etc."
-                      {...field}
-                      rows={4}
-                    />
+                    <Textarea placeholder="Ex: cliente solicitou urgência, equipamento já aberto, etc." {...field} rows={4}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -321,9 +372,7 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
                   </FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o status inicial" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Selecione o status inicial" /></SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {SERVICE_ORDER_STATUSES.map(status => (
@@ -341,8 +390,8 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
                 <UserCircle className="mr-2 h-5 w-5 text-primary" /> 
                 <span className="text-sm font-medium">Cliente: {clientName}</span>
             </div>
-            <Button type="submit" className="ml-auto">
-              <Save className="mr-2 h-4 w-4" /> Gerar Ordem de Serviço
+            <Button type="submit" className="ml-auto" disabled={form.formState.isSubmitting}>
+              <Save className="mr-2 h-4 w-4" /> {form.formState.isSubmitting ? 'Salvando...' : 'Gerar Ordem de Serviço'}
             </Button>
           </CardFooter>
         </form>
