@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarHeader,
@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_ICON, APP_LOGO_URL, navItems } from "@/lib/constants";
 import { LogOut, Settings } from "lucide-react";
-import { useToast } from "@/hooks/use-toast"; 
 import Image from "next/image";
+import { createClient } from "@/lib/supabase/client";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const AppLogoIcon = APP_ICON;
-  const { toast } = useToast(); 
 
   // In a real app, role would come from an auth context.
   // For now, we assume a role that can see everything.
@@ -33,12 +33,11 @@ export function AppSidebar() {
     return true;
   });
 
-  const handleLogout = () => {
-    toast({
-      title: "Logout Realizado",
-      description: "Você foi desconectado. (Simulação)",
-    });
-    console.log("Logout simulado");
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
   };
 
 
@@ -51,7 +50,7 @@ export function AppSidebar() {
             src={APP_LOGO_URL} 
             alt="Venture XP Logo" 
             width={150} 
-            height={33} // Approx ratio for 180x40 -> 150x33.33
+            height={33}
             data-ai-hint="logo venture xp" 
             className="group-data-[collapsible=icon]:hidden h-auto"
           />

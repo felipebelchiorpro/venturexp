@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,12 +15,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { APP_LOGO_URL, APP_ICON } from "@/lib/constants";
+import { APP_LOGO_URL } from "@/lib/constants";
 import { LogOut, User, Settings, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes"; 
-import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { createClient } from "@/lib/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const ThemeToggle = () => {
   const { setTheme, theme } = useTheme ? useTheme() : { setTheme: () => {}, theme: 'light' };
@@ -49,50 +50,48 @@ const ThemeToggle = () => {
 };
 
 
-const UserNav = () => {
-  const { toast } = useToast();
+const UserNav = ({ user }: { user: SupabaseUser | null }) => {
   const router = useRouter();
 
-  const handleLogout = () => {
-    toast({
-      title: "Logout Realizado",
-      description: "Você foi desconectado. (Simulação)",
-    });
-    console.log("Logout simulado a partir do UserNav");
-    // router.push('/login'); 
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh(); 
   };
   
-  const handleProfileClick = () => {
-    toast({ title: "Perfil", description: "Navegando para a página de perfil (a ser implementada)." });
-    // router.push('/profile'); 
-  };
-
   const handleSettingsClick = () => {
     router.push('/settings');
   };
+
+  const getInitials = (email: string) => {
+    return email.charAt(0).toUpperCase();
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={"https://placehold.co/100x100.png"} alt={"Usuário"} data-ai-hint="user avatar" />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email || "Usuário"} data-ai-hint="user avatar" />
+            <AvatarFallback>{user ? getInitials(user.email!) : 'U'}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Usuário Logado</p>
+            <p className="text-sm font-medium leading-none">
+              {user?.user_metadata?.full_name || 'Usuário'}
+            </p>
             <p className="text-xs leading-none text-muted-foreground">
-              email@exemplo.com
+              {user?.email || 'email@exemplo.com'}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={handleProfileClick}>
+          <DropdownMenuItem onClick={() => router.push('/settings')}>
             <User className="mr-2 h-4 w-4" />
             <span>Perfil</span>
           </DropdownMenuItem>
@@ -112,6 +111,17 @@ const UserNav = () => {
 };
 
 export function AppHeader() {
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    fetchUser();
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
@@ -121,7 +131,7 @@ export function AppHeader() {
               src={APP_LOGO_URL} 
               alt="Venture XP Logo" 
               width={150} 
-              height={33}  // Approx ratio for 180x40 -> 150x33.33
+              height={33}
               data-ai-hint="logo venture xp" 
               className="h-auto" 
             />
@@ -132,7 +142,7 @@ export function AppHeader() {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
           <ThemeToggle />
-          <UserNav />
+          <UserNav user={user} />
         </div>
       </div>
     </header>

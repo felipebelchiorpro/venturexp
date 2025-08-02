@@ -17,12 +17,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { KeyRound } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { createClient } from "@/lib/supabase/client";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Endereço de e-mail inválido." }),
 });
 
 export function ForgotPasswordForm() {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -30,10 +33,25 @@ export function ForgotPasswordForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Mock password reset request
-    console.log("Solicitação de redefinição de senha para:", values.email);
-    alert("Se existir uma conta para este e-mail, um link de redefinição de senha foi enviado. (Este é um processo simulado)");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+    });
+
+    if (error) {
+      toast({
+        title: "Erro ao Enviar Email",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Link de Redefinição Enviado",
+      description: "Se existir uma conta para este e-mail, um link de redefinição de senha foi enviado.",
+    });
     form.reset();
   }
 
@@ -59,8 +77,8 @@ export function ForgotPasswordForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-              <KeyRound className="mr-2 h-4 w-4" /> Enviar Link de Redefinição
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={form.formState.isSubmitting}>
+             {form.formState.isSubmitting ? "Enviando..." : <><KeyRound className="mr-2 h-4 w-4" /> Enviar Link de Redefinição</>}
             </Button>
           </form>
         </Form>

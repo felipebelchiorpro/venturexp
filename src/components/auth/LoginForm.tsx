@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { LogIn } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Endereço de e-mail inválido." }),
@@ -26,6 +28,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,11 +37,21 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Mock login
-    console.log("Tentativa de login:", values);
-    // Simulate successful login
-    router.push("/dashboard"); 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword(values);
+
+    if (error) {
+      toast({
+        title: "Erro no Login",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // O middleware se encarregará do redirecionamento
+    router.refresh();
   }
 
   return (
@@ -81,8 +94,8 @@ export function LoginForm() {
                 Esqueceu sua senha?
               </Link>
             </div>
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-              <LogIn className="mr-2 h-4 w-4" /> Entrar
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? "Entrando..." : <><LogIn className="mr-2 h-4 w-4" /> Entrar</>}
             </Button>
           </form>
         </Form>

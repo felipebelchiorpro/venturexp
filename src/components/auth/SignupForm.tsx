@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { UserPlus } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "O nome deve ter pelo menos 2 caracteres." }),
@@ -27,6 +29,7 @@ const formSchema = z.object({
 
 export function SignupForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,11 +39,31 @@ export function SignupForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Mock signup
-    console.log("Tentativa de cadastro:", values);
-    // Simulate successful signup and redirect (e.g., to a verification pending page or login)
-    alert("Cadastro realizado com sucesso! Por favor, verifique seu e-mail para confirmação. (Esta é uma verificação simulada)");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: {
+        data: {
+          full_name: values.name,
+        },
+      },
+    });
+
+    if (error) {
+      toast({
+        title: "Erro no Cadastro",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    toast({
+      title: "Cadastro Realizado com Sucesso!",
+      description: "Por favor, verifique seu e-mail para confirmar sua conta.",
+    });
     router.push("/login");
   }
 
@@ -92,8 +115,8 @@ export function SignupForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-              <UserPlus className="mr-2 h-4 w-4" /> Cadastrar
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? "Cadastrando..." : <><UserPlus className="mr-2 h-4 w-4" /> Cadastrar</>}
             </Button>
           </form>
         </Form>

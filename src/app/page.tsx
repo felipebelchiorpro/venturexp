@@ -3,12 +3,24 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 export default function RootPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/login');
+    const checkUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        router.replace('/dashboard');
+      } else {
+        router.replace('/login');
+      }
+    };
+    
+    checkUser();
   }, [router]);
 
   return (
@@ -17,5 +29,3 @@ export default function RootPage() {
     </div>
   );
 }
-
-    
