@@ -37,7 +37,6 @@ Para rodar o projeto localmente, siga estes passos:
             *   **Project URL:** Este é o valor para `NEXT_PUBLIC_SUPABASE_URL`.
             *   **Project API keys:** Copie o valor do campo `anon` `public`. Esta é a sua `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
-
    *   **Abra o arquivo `.env`** que está na raiz do seu projeto.
    *   **Copie e cole** esses valores nos locais indicados dentro do arquivo:
      ```env
@@ -97,10 +96,13 @@ Para fazer o deploy desta aplicação no [Coolify](https://coolify.io/), siga es
 5.  **Variáveis de Ambiente (Environment Variables):**
     *   Vá para a aba "Environment Variables".
     *   Adicione as seguintes variáveis, uma por uma, com os valores do seu projeto Supabase e Gemini.
-    *   **É CRUCIAL que você marque a opção "Is Build Variable?"** para cada uma delas.
+    *   **É CRUCIAL que você marque a opção "Is Build Variable?"** para cada uma delas. Isso garante que as chaves estejam disponíveis durante o processo de build do Next.js.
         *   `NEXT_PUBLIC_SUPABASE_URL`: A URL do seu projeto Supabase.
         *   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: A chave `anon` do seu projeto Supabase.
         *   `GEMINI_API_KEY`: Sua chave da API do Google Gemini.
+        
+     
+
 
 ### 3. Configuração de URLs (CORS) no Supabase
 
