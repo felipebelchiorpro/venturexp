@@ -30,15 +30,19 @@ Para rodar o projeto localmente, siga estes passos:
    ```
 
 2. **Configure as Variáveis de Ambiente:**
+   *   **Encontre suas chaves no Supabase:**
+        1.  No painel do seu projeto Supabase, clique no ícone de engrenagem no menu esquerdo para ir para **Project Settings**.
+        2.  Na nova tela, clique em **API** no menu de configurações.
+        3.  Você verá uma seção chamada **Project URL**. O valor aqui é a sua `NEXT_PUBLIC_SUPABASE_URL`.
+        4.  Logo abaixo, na seção **Project API keys**, copie o valor do campo `anon` `public`. Esta é a sua `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
    *   **Abra o arquivo `.env`** que está na raiz do seu projeto.
-   *   **Navegue até o seu projeto no Supabase** e vá para **Project Settings** (ícone de engrenagem) > **API**.
-   *   Na seção **Project API keys**, você encontrará a `URL` e a chave `anon` (public).
-   *   **Copie e cole** esses valores nos locais indicados dentro do arquivo `.env`:
+   *   **Copie e cole** esses valores nos locais indicados dentro do arquivo:
      ```env
      # Cole aqui as variáveis de ambiente do seu projeto Supabase
      # Você pode encontrá-las em "Project Settings" > "API" no seu painel Supabase
-     NEXT_PUBLIC_SUPABASE_URL="COLE_SUA_URL_SUPABASE_AQUI"
-     NEXT_PUBLIC_SUPABASE_ANON_KEY="COLE_SUA_CHAVE_ANON_SUPABASE_AQUI"
+     NEXT_PUBLIC_SUPABASE_URL="COLE_A_URL_DO_PROJETO_AQUI"
+     NEXT_PUBLIC_SUPABASE_ANON_KEY="COLE_A_CHAVE_ANON_PUBLIC_AQUI"
 
      # Chave da API do Google Gemini (para funcionalidades de IA)
      # Crie em https://aistudio.google.com/app/apikey
