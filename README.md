@@ -33,8 +33,10 @@ Para rodar o projeto localmente, siga estes passos:
    *   **Encontre suas chaves no Supabase:**
         1.  No painel do seu projeto Supabase, clique no ícone de **engrenagem (⚙️) no menu esquerdo** para ir para **Project Settings**.
         2.  Na nova tela, clique em **API** no menu de configurações.
-        3.  Você verá uma seção chamada **Project URL**. O valor aqui é a sua `NEXT_PUBLIC_SUPABASE_URL`.
-        4.  Logo abaixo, na seção **Project API keys**, copie o valor do campo `anon` `public`. Esta é a sua `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+        3.  Você verá duas informações essenciais:
+            *   **Project URL:** Este é o valor para `NEXT_PUBLIC_SUPABASE_URL`.
+            *   **Project API keys:** Copie o valor do campo `anon` `public`. Esta é a sua `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+        
 
    *   **Abra o arquivo `.env`** que está na raiz do seu projeto.
    *   **Copie e cole** esses valores nos locais indicados dentro do arquivo:
@@ -52,6 +54,7 @@ Para rodar o projeto localmente, siga estes passos:
 3. **Configure o Banco de Dados com o Schema:**
    * Vá para o seu [Painel Supabase](https://app.supabase.com/).
    * No menu esquerdo, clique no ícone de banco de dados (🛢️) que é o **"SQL Editor"**.
+   
    * Abra o arquivo `supabase/schema.sql` do seu projeto local, copie todo o seu conteúdo.
    * Cole o conteúdo no editor SQL do Supabase e clique em **"RUN"**.
 
