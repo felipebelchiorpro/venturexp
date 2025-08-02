@@ -43,7 +43,7 @@ Para rodar o projeto localmente, siga estes passos:
      ```env
      # Cole aqui as variáveis de ambiente do seu projeto Supabase
      # Você pode encontrá-las em "Project Settings" > "API" no seu painel Supabase
-     NEXT_PUBLIC_SUPABASE_URL="COLE_A_URL_DO_PROJETO_AQUI"
+     NEXT_PUBLIC_SUPABASE_URL="https://moqwrgxbvsfzsxrpvias.supabase.co"
      NEXT_PUBLIC_SUPABASE_ANON_KEY="COLE_A_CHAVE_ANON_PUBLIC_AQUI"
 
      # Chave da API do Google Gemini (para funcionalidades de IA)
@@ -51,12 +51,16 @@ Para rodar o projeto localmente, siga estes passos:
      GEMINI_API_KEY="COLE_SUA_CHAVE_GEMINI_AQUI"
      ```
 
-3. **Configure o Banco de Dados com o Schema:**
+3. **Configure o Banco de Dados (Schema e Policies):**
    * Vá para o seu [Painel Supabase](https://app.supabase.com/).
-   * No menu esquerdo, clique no ícone de banco de dados (🛢️) que é o **"SQL Editor"**.
-   
-   * Abra o arquivo `supabase/schema.sql` do seu projeto local, copie todo o seu conteúdo.
-   * Cole o conteúdo no editor SQL do Supabase e clique em **"RUN"**.
+   * No menu esquerdo, clique no ícone de banco de dados (🛢️), o **"SQL Editor"**.
+   * Clique em **"+ New query"**.
+   * **Primeiro, rode o Schema:**
+     * Abra o arquivo `supabase/schema.sql` do seu projeto, copie todo o seu conteúdo.
+     * Cole o conteúdo no editor SQL do Supabase e clique em **"RUN"**.
+   * **Depois, rode as Policies (Políticas de Acesso):**
+     * Abra o arquivo `supabase/policies.sql`, copie todo o seu conteúdo.
+     * Cole no editor SQL (pode apagar o conteúdo anterior) e clique em **"RUN"**.
 
 4. **Rode o servidor de desenvolvimento:**
    ```bash
@@ -108,8 +112,8 @@ Para evitar o erro `TypeError: Failed to fetch` após o deploy, autorize o domí
 1.  **Vá para o painel do seu projeto no Supabase.**
 2.  No menu da esquerda, vá para **Authentication**.
 3.  Na nova tela, no menu lateral de "Authentication", clique em **URL Configuration**.
-4.  No campo **Site URL**, insira a URL principal da sua aplicação (Ex: `https://seusite.coolify.app`).
-5.  Na lista de **Redirect URLs**, adicione a mesma URL com `/**` no final para permitir redirecionamentos de qualquer rota (Ex: `https://seusite.coolify.app/**`).
+4.  No campo **Site URL**, insira a URL principal da sua aplicação (Ex: `https://venturesys.venturexp.pro`).
+5.  Na lista de **Redirect URLs**, adicione a mesma URL com `/**` no final para permitir redirecionamentos de qualquer rota (Ex: `https://venturesys.venturexp.pro/**`).
 6.  Clique em **Save**.
 
 ### 4. Salvar e Fazer o Deploy
