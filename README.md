@@ -75,7 +75,7 @@ Para fazer o deploy desta aplicação no [Coolify](https://coolify.io/), siga es
 
 - **Envie seu código para o GitHub:** Certifique-se de que seu projeto está em um repositório no GitHub.
 - **Tenha uma instância do Coolify rodando.**
-- **Tenha um projeto Supabase criado e configurado** (siga os passos 2, 3 e 5 da seção "Primeiros Passos").
+- **Tenha um projeto Supabase criado e configurado** (siga os passos 2 e 3 da seção "Primeiros Passos").
 
 ### 2. Configuração no Coolify
 
@@ -95,6 +95,7 @@ Para fazer o deploy desta aplicação no [Coolify](https://coolify.io/), siga es
 
 5.  **Variáveis de Ambiente (Environment Variables):**
     *   Vá para a aba "Environment Variables".
+    *   Clique no botão **"+ Add"** para adicionar uma nova variável.
     *   Adicione as seguintes variáveis, uma por uma, com os valores do seu projeto Supabase e Gemini.
     *   **É CRUCIAL que você marque a opção "Is Build Variable?"** para cada uma delas. Isso garante que as chaves estejam disponíveis durante o processo de build do Next.js.
         *   `NEXT_PUBLIC_SUPABASE_URL`: A URL do seu projeto Supabase.
