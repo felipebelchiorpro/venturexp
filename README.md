@@ -96,13 +96,17 @@ Para fazer o deploy desta aplicação no [Coolify](https://coolify.io/), siga es
 5.  **Variáveis de Ambiente (Environment Variables):**
     *   Vá para a aba "Environment Variables".
     *   Clique no botão **"+ Add"** para adicionar uma nova variável.
-    *   Adicione as seguintes variáveis, uma por uma, com os valores do seu projeto Supabase e Gemini.
+    *   Adicione as seguintes variáveis, uma por uma, preenchendo os campos "Name" e "Value" conforme a tabela abaixo.
     *   **É CRUCIAL que você marque a opção "Is Build Variable?"** para cada uma delas. Isso garante que as chaves estejam disponíveis durante o processo de build do Next.js.
-        *   `NEXT_PUBLIC_SUPABASE_URL`: A URL do seu projeto Supabase.
-        *   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: A chave `anon` do seu projeto Supabase.
-        *   `GEMINI_API_KEY`: Sua chave da API do Google Gemini.
-        
-     
+
+| Name (Nome)                      | Value (Valor)                                                                        | Marcar "Is Build Variable?" |
+| -------------------------------- | ------------------------------------------------------------------------------------ | --------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`       | A URL do seu projeto Supabase (ex: `https://xyz.supabase.co`)                            | ✅ Sim                      |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`  | A chave `anon` `public` do seu projeto Supabase.                                           | ✅ Sim                      |
+| `GEMINI_API_KEY`                 | Sua chave da API do Google Gemini.                                                       | ✅ Sim                      |
+
+   **Exemplo de preenchimento:**
+   
 
 
 ### 3. Configuração de URLs (CORS) no Supabase
