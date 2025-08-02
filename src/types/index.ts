@@ -65,19 +65,8 @@ export interface Proposal {
   aiGeneratedDraft?: string;
 }
 
-export interface Lead {
-  id: string;
-  name: string;
-  company?: string;
-  email: string;
-  phone?: string;
-  status: string; // Corresponds to pipeline stage
-  source?: string;
-  assignedTo?: string; // User ID or name
-  lastContacted: string; // ISO date string
-  createdAt: string; // ISO date string
-  notes?: string;
-}
+export type Lead = DB['public']['Tables']['leads']['Row'];
+
 
 export interface Task {
   id: string;
@@ -92,7 +81,7 @@ export interface Task {
 export interface KanbanItem {
   id: string;
   content: string; // Could be Lead name or short description
-  leadId?: string; // To link back to full lead details
+  company?: string | null;
 }
 
 export interface TeamMember {
@@ -193,5 +182,3 @@ export const PIPELINE_STAGES = [
   'Fechamento Ganho',
   'Fechamento Perdido',
 ];
-
-    

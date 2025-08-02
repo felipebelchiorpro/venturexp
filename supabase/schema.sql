@@ -1,4 +1,3 @@
--- supabase/schema.sql
 
 -- Habilita a extensão pgcrypto se ainda não estiver habilitada
 create extension if not exists "pgcrypto" with schema "extensions";
@@ -127,27 +126,67 @@ create policy "Users can insert their own profile." on public.profiles for inser
 drop policy if exists "Users can update own profile." on public.profiles;
 create policy "Users can update own profile." on public.profiles for update using (auth.uid() = id);
 
+
+
 -- Habilita a Segurança de Nível de Linha (RLS) para a tabela de clientes
-alter table public.clients enable row level security;
+ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
 
--- Permite que qualquer pessoa (anônima/pública) leia (SELECT) todos os clientes.
-drop policy if exists "Public clients are viewable by everyone" on public.clients;
-create policy "Public clients are viewable by everyone" on public.clients
-  for select using (true);
+-- Permite que usuários autenticados leiam todos os clientes
+DROP POLICY IF EXISTS "Authenticated users can view clients." ON public.clients;
+CREATE POLICY "Authenticated users can view clients."
+ON public.clients
+FOR SELECT
+USING (auth.role() = 'authenticated');
 
--- Permite que qualquer pessoa (anônima/pública) insira (INSERT) novos clientes.
-drop policy if exists "Public clients are insertable" on public.clients;
-create policy "Public clients are insertable" on public.clients
-  for insert with check (true);
+-- Permite que usuários autenticados insiram novos clientes
+DROP POLICY IF EXISTS "Authenticated users can insert clients." ON public.clients;
+CREATE POLICY "Authenticated users can insert clients."
+ON public.clients
+FOR INSERT
+WITH CHECK (auth.role() = 'authenticated');
 
--- Permite que qualquer pessoa (anônima/pública) atualize (UPDATE) qualquer cliente.
-drop policy if exists "Public clients are updatable" on public.clients;
-create policy "Public clients are updatable" on public.clients
-  for update using (true);
+-- Permite que usuários autenticados atualizem clientes
+DROP POLICY IF EXISTS "Authenticated users can update clients." ON public.clients;
+CREATE POLICY "Authenticated users can update clients."
+ON public.clients
+FOR UPDATE
+USING (auth.role() = 'authenticated');
 
--- Permite que qualquer pessoa (anônima/pública) exclua (DELETE) qualquer cliente.
-drop policy if exists "Public clients are deletable" on public.clients;
-create policy "Public clients are deletable" on public.clients
-  for delete using (true);
+-- Permite que usuários autenticados deletem clientes
+DROP POLICY IF EXISTS "Authenticated users can delete clients." ON public.clients;
+CREATE POLICY "Authenticated users can delete clients."
+ON public.clients
+FOR DELETE
+USING (auth.role() = 'authenticated');
 
-    
+
+-- Habilita a Segurança de Nível de Linha (RLS) para a tabela de leads
+ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+
+-- Permite que usuários autenticados leiam todos os leads
+DROP POLICY IF EXISTS "Authenticated users can view leads." ON public.leads;
+CREATE POLICY "Authenticated users can view leads."
+ON public.leads
+FOR SELECT
+USING (auth.role() = 'authenticated');
+
+-- Permite que usuários autenticados insiram novos leads
+DROP POLICY IF EXISTS "Authenticated users can insert leads." ON public.leads;
+CREATE POLICY "Authenticated users can insert leads."
+ON public.leads
+FOR INSERT
+WITH CHECK (auth.role() = 'authenticated');
+
+-- Permite que usuários autenticados atualizem leads
+DROP POLICY IF EXISTS "Authenticated users can update leads." ON public.leads;
+CREATE POLICY "Authenticated users can update leads."
+ON public.leads
+FOR UPDATE
+USING (auth.role() = 'authenticated');
+
+-- Permite que usuários autenticados deletem leads
+DROP POLICY IF EXISTS "Authenticated users can delete leads." ON public.leads;
+CREATE POLICY "Authenticated users can delete leads."
+ON public.leads
+FOR DELETE
+USING (auth.role() = 'authenticated');
