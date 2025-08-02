@@ -120,6 +120,9 @@ comment on table public.profiles is 'Armazena dados públicos do perfil para cad
 
 -- Configura RLS (Row Level Security) para a tabela de perfis
 alter table public.profiles enable row level security;
+drop policy if exists "Public profiles are viewable by everyone." on public.profiles;
+drop policy if exists "Users can insert their own profile." on public.profiles;
+drop policy if exists "Users can update own profile." on public.profiles;
 create policy "Public profiles are viewable by everyone." on public.profiles for select using (true);
 create policy "Users can insert their own profile." on public.profiles for insert with check (auth.uid() = id);
 create policy "Users can update own profile." on public.profiles for update using (auth.uid() = id);
@@ -128,28 +131,22 @@ create policy "Users can update own profile." on public.profiles for update usin
 
 -- Habilita a Segurança de Nível de Linha (RLS) para a tabela de clientes
 -- Isso garante que as políticas que definirmos abaixo sejam aplicadas.
-ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
+alter table public.clients enable row level security;
 
 -- Remove qualquer política antiga de "INSERT" para garantir um estado limpo.
 -- O 'IF EXISTS' evita erros se a política não existir.
-DROP POLICY IF EXISTS "Public clients are insertable" ON public.clients;
+drop policy if exists "Public clients are insertable" on public.clients;
 
 -- Cria uma nova política que permite a qualquer pessoa (usuário anônimo/público)
 -- inserir um novo registro na tabela de clientes.
--- A cláusula 'USING (true)' significa que esta política se aplica a todas as tentativas de inserção.
-CREATE POLICY "Public clients are insertable"
-ON public.clients
-FOR INSERT
-WITH CHECK (true);
+-- A cláusula 'WITH CHECK (true)' significa que esta política se aplica a todas as tentativas de inserção.
+create policy "Public clients are insertable" on public.clients for insert with check (true);
 
 
 -- Remove qualquer política antiga de "SELECT" para garantir um estado limpo.
-DROP POLICY IF EXISTS "Public clients are viewable by everyone" ON public.clients;
+drop policy if exists "Public clients are viewable by everyone" on public.clients;
 
 -- Cria uma nova política que permite a qualquer pessoa (usuário anônimo/público)
 -- visualizar (ler) todos os registros na tabela de clientes.
 -- A cláusula 'USING (true)' significa que esta política se aplica a todas as tentativas de leitura.
-CREATE POLICY "Public clients are viewable by everyone"
-ON public.clients
-FOR SELECT
-USING (true);
+create policy "Public clients are viewable by everyone" on public.clients for select using (true);
