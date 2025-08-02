@@ -4,24 +4,18 @@
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock, MapPin, FileType, Tag, Package, Edit3 } from "lucide-react";
+import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock, MapPin, FileType, Tag, Package, Edit3, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation"; 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { Client, Invoice, ServiceOrder, InvoiceStatusType, PaymentMethodType, ServiceOrderStatusType } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";
-import { CLIENT_TYPES, SERVICE_ORDER_STATUSES } from "@/types";
+import { createClient } from "@/lib/supabase/client";
 
 export const dynamic = 'force-dynamic';
-
-// Mock data for invoices and service orders - now initialized empty
-const mockInvoices: Invoice[] = [];
-const mockServiceOrders: ServiceOrder[] = [];
-
 
 export default function ClientDetailPage() {
   const params = useParams();
@@ -33,65 +27,65 @@ export default function ClientDetailPage() {
   const [loading, setLoading] = useState(true);
 
   const { toast } = useToast();
+  const supabase = createClient();
+
+  const fetchClientData = useCallback(async () => {
+    setLoading(true);
+
+    // Fetch client details
+    const { data: clientData, error: clientError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', clientId)
+      .single();
+
+    if (clientError || !clientData) {
+      toast({ title: "Erro", description: "Cliente não encontrado.", variant: "destructive" });
+      setLoading(false);
+      router.push('/clients');
+      return;
+    }
+    setClient(clientData);
+
+    // Fetch related invoices (replace with actual logic if invoices table exists)
+    // const { data: invoicesData, error: invoicesError } = await supabase.from('invoices').select('*').eq('client_id', clientId);
+    // setClientInvoices(invoicesData || []);
+    
+    // Fetch related service orders (replace with actual logic if service_orders table exists)
+    // const { data: serviceOrdersData, error: serviceOrdersError } = await supabase.from('service_orders').select('*').eq('client_id', clientId);
+    // setClientServiceOrders(serviceOrdersData || []);
+
+    setLoading(false);
+  }, [clientId, supabase, router, toast]);
 
   useEffect(() => {
-    // In a real app, this data would be fetched from an API
-    // For now, we create a placeholder client to avoid crashing
-    setTimeout(() => { // Simulating API call
-      const placeholderClient: Client = {
-        id: clientId,
-        name: `Cliente ${clientId.substring(0,4)}`,
-        email: 'cliente@exemplo.com',
-        company: 'Empresa Exemplo',
-        phone: '(11) 99999-8888',
-        status: 'Ativo',
-        responsable: 'Responsável Padrão',
-        segment: 'Tecnologia',
-        created_at: new Date().toISOString(),
-        registration_date: new Date().toISOString(),
-        address: 'Rua Exemplo, 123, Bairro, Cidade-UF',
-        document: '12.345.678/0001-99',
-        client_type: 'Pessoa Jurídica',
-        avatar_url: null,
-        frequent_services: null,
-        internal_notes: null,
-      };
-      setClient(placeholderClient);
-
-      // Filter from the global empty mocks, will result in empty lists
-      setClientInvoices(mockInvoices.filter(inv => inv.clientId === clientId));
-      setClientServiceOrders(mockServiceOrders.filter(os => os.clientId === clientId));
-      setLoading(false);
-    }, 500);
-  }, [clientId]);
+    fetchClientData();
+  }, [fetchClientData]);
   
   if (loading) {
     return (
-       <div className="space-y-6">
-        <PageHeader title="Carregando Cliente..." description="Aguarde enquanto carregamos os dados do cliente." />
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="animate-spin h-8 w-8 text-primary" />
+        <p className="ml-2">Carregando dados do cliente...</p>
       </div>
     )
   }
-
 
   if (!client) {
     return (
       <div className="space-y-6">
         <PageHeader title="Cliente Não Encontrado" description="O cliente que você está procurando não foi encontrado." />
+         <Button onClick={() => router.push('/clients')}>Voltar para a Lista</Button>
       </div>
     );
   }
   
   const handleAddInvoice = () => {
-    if (client) {
-      router.push(`/clients/${client.id}/invoices/new`);
-    }
+    router.push(`/clients/${client.id}/invoices/new`);
   }
 
   const handleAddServiceOrder = () => {
-     if (client) {
-      router.push(`/clients/${client.id}/service-orders/new`);
-    }
+     router.push(`/clients/${client.id}/service-orders/new`);
   }
 
   const handleViewInvoice = (invoiceNumber: string) => {
@@ -103,8 +97,7 @@ export default function ClientDetailPage() {
   }
   
   const handleEditClient = () => {
-     // Futuramente: router.push(`/clients/${client.id}/edit`);
-     toast({ title: "Editar Cliente", description: `Funcionalidade para editar ${client.name} será implementada. (Simulação)`});
+     router.push(`/clients/${client.id}/edit`);
   }
   
   const getInvoiceStatusBadgeVariant = (status: InvoiceStatusType) => {
@@ -128,7 +121,6 @@ export default function ClientDetailPage() {
       default: return 'outline';
     }
   };
-
 
   return (
     <div className="space-y-8">
@@ -322,3 +314,5 @@ export default function ClientDetailPage() {
     </div>
   );
 }
+
+    

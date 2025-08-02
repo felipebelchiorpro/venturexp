@@ -8,7 +8,7 @@ export const TEAM_MEMBER_STATUSES = ['Active', 'Pending Invitation', 'Inactive']
 export type TeamMemberStatus = typeof TEAM_MEMBER_STATUSES[number];
 
 export const CLIENT_STATUSES = ['Ativo', 'Inativo', 'Potencial'] as const;
-export type ClientStatus = typeof CLIENT_STATUSES[number];
+export type ClientStatus = (typeof CLIENT_STATUSES)[number];
 
 export const PROPOSAL_STATUSES = ['Rascunho', 'Enviada', 'Aceita', 'Recusada', 'Arquivada'] as const;
 export type ProposalStatusType = typeof PROPOSAL_STATUSES[number];
@@ -26,7 +26,7 @@ export const SERVICE_ORDER_STATUSES = ['Aberta', 'Em Andamento', 'Finalizada', '
 export type ServiceOrderStatusType = typeof SERVICE_ORDER_STATUSES[number];
 
 export const CLIENT_TYPES = ['Pessoa Física', 'Pessoa Jurídica'] as const;
-export type ClientType = typeof CLIENT_TYPES[number];
+export type ClientType = (typeof CLIENT_TYPES)[number];
 
 export const ACCESS_PERMISSION_MODULE_IDS = ['clients', 'serviceOrders', 'productsAndStock', 'financial', 'reportsAndDashboard', 'systemSettings', 'collaboratorManagement'] as const;
 export type AccessPermissionModuleIdType = typeof ACCESS_PERMISSION_MODULE_IDS[number];
@@ -104,26 +104,6 @@ export interface TeamMember {
   joinedDate: string; // ISO date string
   avatarUrl?: string;
 }
-
-// Removido tipo Client manual
-// export interface Client {
-//     id: string;
-//     created_at: string;
-//     name: string;
-//     email: string;
-//     phone?: string | null;
-//     address?: string | null;
-//     document?: string | null;
-//     client_type: ClientType;
-//     frequent_services?: string | null;
-//     internal_notes?: string | null;
-//     registration_date: string;
-//     status: ClientStatus;
-//     company?: string | null;
-//     responsable?: string | null;
-//     segment?: string | null;
-//     avatar_url?: string | null;
-// }
 
 // Novo tipo Client gerado a partir do schema do Supabase
 export type Client = DB['public']['Tables']['clients']['Row'];
@@ -213,3 +193,5 @@ export const PIPELINE_STAGES = [
   'Fechamento Ganho',
   'Fechamento Perdido',
 ];
+
+    

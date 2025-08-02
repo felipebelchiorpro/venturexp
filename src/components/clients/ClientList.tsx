@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from "@/lib/supabase/client";
 import { Skeleton } from '../ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 const getStatusBadgeVariant = (status: Client['status']): "default" | "secondary" | "destructive" | "outline" => {
   if (!status) return 'outline';
@@ -40,6 +41,7 @@ export function ClientList() {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchClients() {
@@ -58,7 +60,7 @@ export function ClientList() {
         });
         setClients([]);
       } else if (data) {
-        setClients(data as unknown as Client[]);
+        setClients(data);
       }
       setLoading(false);
     }
@@ -94,11 +96,7 @@ export function ClientList() {
   };
   
   const handleEditClient = (clientId: string) => {
-    toast({
-      title: "Editar Cliente",
-      description: `Função de editar será implementada.`,
-    });
-    // router.push(`/clients/${clientId}/edit`); // Exemplo de navegação futura
+    router.push(`/clients/${clientId}/edit`);
   }
 
 
@@ -197,3 +195,5 @@ export function ClientList() {
     </div>
   );
 }
+
+    

@@ -22,7 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarIcon, Save, User, Mail, Phone, MapPin, FileType, Tag, Package, Edit3, CheckSquare, AlertCircle, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from 'date-fns/locale';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -30,6 +30,7 @@ import { useRouter } from "next/navigation";
 import type { Client } from "@/types";
 import { CLIENT_STATUSES, CLIENT_TYPES } from "@/types";
 import { createClient } from "@/lib/supabase/client";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "🧾 O nome/razão social deve ter pelo menos 2 caracteres." }),
@@ -56,63 +57,106 @@ const formSchema = z.object({
 
 type ClientFormValues = z.infer<typeof formSchema>;
 
-export function ClientForm() {
+interface ClientFormProps {
+  client?: Client | null;
+}
+
+export function ClientForm({ client }: ClientFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const supabase = createClient();
-
-  const defaultValues: Partial<ClientFormValues> = {
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    document: "",
-    client_type: undefined,
-    frequent_services: "",
-    internal_notes: "",
-    registration_date: new Date(),
-    status: "Ativo",
-    company: "",
-    responsable: "",
-    segment: "",
-  };
-
+  const isEditMode = !!client;
 
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      document: "",
+      client_type: undefined,
+      frequent_services: "",
+      internal_notes: "",
+      registration_date: new Date(),
+      status: "Ativo",
+      company: "",
+      responsable: "",
+      segment: "",
+    },
   });
 
+  useEffect(() => {
+    if (isEditMode && client) {
+      form.reset({
+        ...client,
+        phone: client.phone ?? undefined,
+        address: client.address ?? undefined,
+        document: client.document ?? undefined,
+        frequent_services: client.frequent_services ?? undefined,
+        internal_notes: client.internal_notes ?? undefined,
+        company: client.company ?? undefined,
+        responsable: client.responsable ?? undefined,
+        segment: client.segment ?? undefined,
+        registration_date: client.registration_date ? parseISO(client.registration_date) : new Date(),
+      });
+    }
+  }, [isEditMode, client, form]);
+
   async function onSubmit(values: ClientFormValues) {
-    
     const clientData = {
       ...values,
-      registration_date: values.registration_date.toISOString(),
+      registration_date: values.registration_date.toISOString().split('T')[0], // format as YYYY-MM-DD for date type
       company: values.client_type === 'Pessoa Jurídica' ? values.name : values.company,
     };
-    
-    const { data, error } = await supabase
-      .from('clients')
-      .insert([clientData])
-      .select();
 
-    if (error) {
-      console.error("Erro ao cadastrar cliente:", error);
+    if (isEditMode && client) {
+      const { error } = await supabase
+        .from('clients')
+        .update(clientData)
+        .eq('id', client.id);
+
+      if (error) {
+        console.error("Erro ao atualizar cliente:", error);
+        toast({
+          title: "Erro ao atualizar cliente",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
-        title: "Erro ao cadastrar cliente",
-        description: error.message,
-        variant: "destructive",
+        title: "Cliente Atualizado!",
+        description: `O cliente "${values.name}" foi atualizado com sucesso.`,
       });
-      return;
-    }
+      router.push(`/clients/${client.id}`);
+      router.refresh();
 
-    toast({
-      title: "Cliente Cadastrado!",
-      description: `O cliente "${values.name}" foi cadastrado com sucesso.`,
-    });
-    
-    router.push("/clients");
-    router.refresh();
+    } else {
+      const { data, error } = await supabase
+        .from('clients')
+        .insert([clientData])
+        .select();
+
+      if (error) {
+        console.error("Erro ao cadastrar cliente:", error);
+        toast({
+          title: "Erro ao cadastrar cliente",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Cliente Cadastrado!",
+        description: `O cliente "${values.name}" foi cadastrado com sucesso.`,
+      });
+      
+      router.push("/clients");
+      router.refresh();
+    }
   }
 
   return (
@@ -120,10 +164,10 @@ export function ClientForm() {
       <CardHeader>
         <CardTitle className="text-xl font-semibold flex items-center">
             <User className="mr-2 h-5 w-5 text-primary" />
-            Cadastrar Novo Cliente
+            {isEditMode ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}
         </CardTitle>
         <CardDescription>
-          Preencha os dados abaixo para cadastrar um novo cliente.
+          {isEditMode ? 'Atualize os dados do cliente abaixo.' : 'Preencha os dados abaixo para cadastrar um novo cliente.'}
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -172,7 +216,7 @@ export function ClientForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center"><MapPin className="mr-2 h-4 w-4 text-primary" /> 📍 Endereço Completo</FormLabel>
-                  <FormControl><Textarea placeholder="Rua, número, bairro, cidade, estado e CEP" {...field} rows={3} /></FormControl>
+                  <FormControl><Textarea placeholder="Rua, número, bairro, cidade, estado e CEP" {...field} value={field.value ?? ''} rows={3} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -185,7 +229,7 @@ export function ClientForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center"><FileType className="mr-2 h-4 w-4 text-primary" /> 🆔 CPF ou CNPJ</FormLabel>
-                    <FormControl><Input placeholder="Documento para controle fiscal" {...field} /></FormControl>
+                    <FormControl><Input placeholder="Documento para controle fiscal" {...field} value={field.value ?? ''} /></FormControl>
                      <FormDescription>Usado para emissão de notas ou controle fiscal.</FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -200,7 +244,7 @@ export function ClientForm() {
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                         className="flex space-x-4 pt-2"
                       >
                         {CLIENT_TYPES.map(type => (
@@ -223,7 +267,7 @@ export function ClientForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center"><Package className="mr-2 h-4 w-4 text-primary" /> 📦 Produtos ou Serviços Contratados com Frequência</FormLabel>
-                  <FormControl><Textarea placeholder="Ex: manutenção de ar-condicionado, compra de suplementos, etc" {...field} rows={3} /></FormControl>
+                  <FormControl><Textarea placeholder="Ex: manutenção de ar-condicionado, compra de suplementos, etc" {...field} value={field.value ?? ''} rows={3} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -235,7 +279,7 @@ export function ClientForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center"><Edit3 className="mr-2 h-4 w-4 text-primary" /> 🗂️ Observações / Anotações internas</FormLabel>
-                  <FormControl><Textarea placeholder="Ex: cliente prefere contato por WhatsApp, tem desconto fidelidade, etc" {...field} rows={3} /></FormControl>
+                  <FormControl><Textarea placeholder="Ex: cliente prefere contato por WhatsApp, tem desconto fidelidade, etc" {...field} value={field.value ?? ''} rows={3} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -284,7 +328,7 @@ export function ClientForm() {
                         }
                          ✅ Status
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger></FormControl>
                       <SelectContent>
                         {CLIENT_STATUSES.map(status => (
@@ -299,8 +343,9 @@ export function ClientForm() {
             </div>
           </CardContent>
           <CardFooter className="border-t px-6 py-4">
-            <Button type="submit" className="w-full md:w-auto">
-              <Save className="mr-2 h-4 w-4" /> Cadastrar Cliente
+            <Button type="submit" className="w-full md:w-auto" disabled={form.formState.isSubmitting}>
+              <Save className="mr-2 h-4 w-4" /> 
+              {form.formState.isSubmitting ? 'Salvando...' : (isEditMode ? 'Salvar Alterações' : 'Cadastrar Cliente')}
             </Button>
           </CardFooter>
         </form>
@@ -308,3 +353,5 @@ export function ClientForm() {
     </Card>
   );
 }
+
+    
