@@ -36,7 +36,7 @@ Para rodar o projeto localmente, siga estes passos:
         3.  Você verá duas informações essenciais:
             *   **Project URL:** Este é o valor para `NEXT_PUBLIC_SUPABASE_URL`.
             *   **Project API keys:** Copie o valor do campo `anon` `public`. Esta é a sua `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-        
+
 
    *   **Abra o arquivo `.env`** que está na raiz do seu projeto.
    *   **Copie e cole** esses valores nos locais indicados dentro do arquivo:
@@ -55,12 +55,9 @@ Para rodar o projeto localmente, siga estes passos:
    * Vá para o seu [Painel Supabase](https://app.supabase.com/).
    * No menu esquerdo, clique no ícone de banco de dados (🛢️), o **"SQL Editor"**.
    * Clique em **"+ New query"**.
-   * **Primeiro, rode o Schema:**
+   * **Execute o Script do Schema:**
      * Abra o arquivo `supabase/schema.sql` do seu projeto, copie todo o seu conteúdo.
-     * Cole o conteúdo no editor SQL do Supabase e clique em **"RUN"**.
-   * **Depois, rode as Policies (Políticas de Acesso):**
-     * Abra o arquivo `supabase/policies.sql`, copie todo o seu conteúdo.
-     * Cole no editor SQL (pode apagar o conteúdo anterior) e clique em **"RUN"**.
+     * Cole o conteúdo no editor SQL do Supabase e clique em **"RUN"**. Isso criará todas as tabelas e políticas de segurança necessárias de uma só vez.
 
 4. **Rode o servidor de desenvolvimento:**
    ```bash
