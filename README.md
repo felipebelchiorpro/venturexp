@@ -70,6 +70,7 @@ Para fazer o deploy desta aplicação no [Coolify](https://coolify.io/), siga es
 
 - **Envie seu código para o GitHub:** Certifique-se de que seu projeto está em um repositório no GitHub.
 - **Tenha uma instância do Coolify rodando:** Você pode usar a versão em nuvem ou auto-hospedada.
+- **Tenha um projeto Supabase criado:** Siga os passos da seção "Pré-requisitos" acima.
 
 ### 2. Configuração no Coolify
 
@@ -100,11 +101,20 @@ Para fazer o deploy desta aplicação no [Coolify](https://coolify.io/), siga es
         *   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: A chave `anon` do seu projeto Supabase.
         *   `GEMINI_API_KEY`: Sua chave da API do Google Gemini.
 
+### 3. Configuração de URLs (CORS) no Supabase
+
+Para evitar o erro `TypeError: Failed to fetch` após o deploy, você precisa autorizar o domínio da sua aplicação no Supabase.
+
+1.  **Vá para o painel do seu projeto no Supabase.**
+2.  No menu da esquerda, vá para **Authentication**.
+3.  Na nova tela, no menu lateral de "Authentication", clique em **URL Configuration**.
+4.  No campo **Site URL**, insira a URL principal da sua aplicação (Ex: `https://seusite.coolify.app`).
+5.  Na lista de **Redirect URLs**, adicione a mesma URL com `/**` no final para permitir redirecionamentos de qualquer rota (Ex: `https://seusite.coolify.app/**`).
+6.  Clique em **Save**.
+
 ### 4. Salvar e Fazer o Deploy
 
-- Clique em **"Save"** para salvar suas configurações.
+- Clique em **"Save"** nas configurações do Coolify.
 - Clique em **"Deploy"** para iniciar o processo de build e deploy.
 
-O Coolify irá buscar seu código do GitHub, usar o Nixpacks para construir sua aplicação Next.js, injetar as variáveis de ambiente e iniciar sua aplicação. Você poderá acompanhar os logs de deploy diretamente na interface do Coolify.
-
-Após a conclusão, sua aplicação "Venture XP" estará online e conectada ao seu banco de dados!
+O Coolify irá buscar seu código do GitHub, usar o Nixpacks para construir sua aplicação Next.js injetando as variáveis de ambiente, e iniciar sua aplicação. Após a conclusão, sua aplicação "Venture XP" estará online e corretamente conectada ao seu banco de dados Supabase!
