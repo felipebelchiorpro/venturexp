@@ -9,14 +9,14 @@ Antes de rodar a aplicação, você precisa ter um projeto no [Supabase](https:/
 
 1.  **Acesse o Supabase:** Vá para [app.supabase.com](https://app.supabase.com) e faça login.
 2.  **Crie um Novo Projeto:**
-    *   Na página principal, clique no botão verde **"New project"**.
-    *   Escolha uma organização (ou crie uma nova, se for sua primeira vez).
+    *   No painel, clique no botão verde **"New project"**.
+    *   Escolha uma organização (ou crie uma nova).
     *   Preencha os detalhes do projeto:
-        *   **Project name:** Recomendamos usar `Venture XP` para consistência.
-        *   **Database Password:** Crie uma senha segura e guarde-a em um local seguro.
-        *   **Region:** Escolha a região de servidor mais próxima de você ou de seus usuários.
-        *   **Pricing Plan:** Selecione o plano `Free` (Grátis).
-    *   Clique em **"Create new project"** e aguarde alguns minutos para a configuração ser concluída.
+        *   **Project name:** Recomendamos usar `Venture XP`.
+        *   **Database Password:** Crie uma senha segura e guarde-a.
+        *   **Region:** Escolha a região mais próxima de você.
+        *   **Pricing Plan:** Selecione o plano `Free`.
+    *   Clique em **"Create new project"**.
 
 Com o projeto criado, você pode seguir para os "Primeiros Passos".
 
@@ -30,26 +30,26 @@ Para rodar o projeto localmente, siga estes passos:
    ```
 
 2. **Configure as Variáveis de Ambiente:**
-   *   Crie um arquivo chamado `.env` na raiz do projeto (se não existir).
-   *   Copie o conteúdo do exemplo abaixo para o seu arquivo `.env`.
-   *   Substitua os valores pelos dados do seu projeto Supabase e da sua chave da API do Gemini.
-   ```
-   # Cole aqui as variáveis de ambiente do seu projeto Supabase
-   # Você pode encontrá-las em "Project Settings" > "API" no seu painel Supabase
+   *   **Abra o arquivo `.env`** que está na raiz do seu projeto.
+   *   **Navegue até o seu projeto no Supabase** e vá para **Project Settings** (ícone de engrenagem) > **API**.
+   *   Na seção **Project API keys**, você encontrará a `URL` e a chave `anon` (public).
+   *   **Copie e cole** esses valores nos locais indicados dentro do arquivo `.env`:
+     ```env
+     # Cole aqui as variáveis de ambiente do seu projeto Supabase
+     # Você pode encontrá-las em "Project Settings" > "API" no seu painel Supabase
+     NEXT_PUBLIC_SUPABASE_URL="COLE_SUA_URL_SUPABASE_AQUI"
+     NEXT_PUBLIC_SUPABASE_ANON_KEY="COLE_SUA_CHAVE_ANON_SUPABASE_AQUI"
 
-   NEXT_PUBLIC_SUPABASE_URL="https://your-project-url.supabase.co"
-   NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
-
-   # Chave da API do Google Gemini (para funcionalidades de IA)
-   # Crie em https://aistudio.google.com/app/apikey
-   GEMINI_API_KEY="your-gemini-api-key"
-   ```
+     # Chave da API do Google Gemini (para funcionalidades de IA)
+     # Crie em https://aistudio.google.com/app/apikey
+     GEMINI_API_KEY="COLE_SUA_CHAVE_GEMINI_AQUI"
+     ```
 
 3. **Configure o Banco de Dados com o Schema:**
    * Vá para o seu [Painel Supabase](https://app.supabase.com/).
    * No menu esquerdo, clique no ícone de banco de dados para abrir o **"SQL Editor"**.
    * Abra o arquivo `supabase/schema.sql` do seu projeto local, copie todo o seu conteúdo.
-   * Cole o conteúdo no editor SQL do Supabase e clique em **"RUN"**. Isso criará todas as tabelas necessárias.
+   * Cole o conteúdo no editor SQL do Supabase e clique em **"RUN"**.
 
 4. **Rode o servidor de desenvolvimento:**
    ```bash
@@ -57,8 +57,6 @@ Para rodar o projeto localmente, siga estes passos:
    ```
 
 Abra [http://localhost:9002](http://localhost:9002) no seu navegador para ver o resultado.
-
-Você pode começar a editar a página principal em `src/app/page.tsx`. A página é atualizada automaticamente conforme você edita o arquivo.
 
 ---
 
@@ -69,41 +67,36 @@ Para fazer o deploy desta aplicação no [Coolify](https://coolify.io/), siga es
 ### 1. Preparação
 
 - **Envie seu código para o GitHub:** Certifique-se de que seu projeto está em um repositório no GitHub.
-- **Tenha uma instância do Coolify rodando:** Você pode usar a versão em nuvem ou auto-hospedada.
-- **Tenha um projeto Supabase criado:** Siga os passos da seção "Pré-requisitos" acima.
+- **Tenha uma instância do Coolify rodando.**
+- **Tenha um projeto Supabase criado e configurado** (siga os passos 2, 3 e 5 da seção "Primeiros Passos").
 
 ### 2. Configuração no Coolify
 
 1.  **Crie um Novo Recurso (New Resource):**
     *   No seu painel do Coolify, vá para o projeto desejado e clique em "New Resource".
-    *   Selecione "Application" como o tipo de recurso.
+    *   Selecione "Application".
 
 2.  **Selecione a Fonte (Source):**
-    *   Escolha "GitHub" como a fonte.
-    *   Selecione o repositório onde seu projeto está hospedado e a branch que deseja usar (ex: `main` ou `master`).
+    *   Escolha "GitHub", selecione o repositório e a branch correta.
 
 3.  **Configurações de Build:**
-    *   **Build Pack:** Selecione **"Nixpacks"**. O Coolify deve detectar automaticamente a configuração para um projeto Next.js.
-    *   **Install Command:** Deixe em branco (Nixpacks usará `npm ci` ou `npm install`).
-    *   **Build Command:** Deixe em branco (Nixpacks usará `npm run build`).
-    *   **Start Command:** Deixe em branco (Nixpacks usará `npm run start`).
+    *   **Build Pack:** Selecione **"Nixpacks"**. Deixe os outros campos de build (`Install Command`, etc.) em branco para usar os padrões.
 
 4.  **Configurações de Rede (Networking):**
-    *   **Port:** O Coolify detectará a porta `3000`. Configure o valor para **`3000`**.
-    *   Você pode configurar um domínio personalizado na aba "FQDN(s)".
+    *   **Port:** Configure o valor para **`3000`**.
+    *   Configure um domínio personalizado na aba "FQDN(s)".
 
 5.  **Variáveis de Ambiente (Environment Variables):**
-    *   Esta é a parte mais importante para conectar ao Supabase e Gemini.
     *   Vá para a aba "Environment Variables".
-    *   Clique em "Add a new variable".
-    *   Adicione as seguintes variáveis, uma por uma, com os seus valores secretos. **É CRUCIAL que você marque a opção "Is Build Variable?"** para que elas fiquem disponíveis durante o processo de build do Next.js.
+    *   Adicione as seguintes variáveis, uma por uma, com os valores do seu projeto Supabase e Gemini.
+    *   **É CRUCIAL que você marque a opção "Is Build Variable?"** para cada uma delas.
         *   `NEXT_PUBLIC_SUPABASE_URL`: A URL do seu projeto Supabase.
         *   `NEXT_PUBLIC_SUPABASE_ANON_KEY`: A chave `anon` do seu projeto Supabase.
         *   `GEMINI_API_KEY`: Sua chave da API do Google Gemini.
 
 ### 3. Configuração de URLs (CORS) no Supabase
 
-Para evitar o erro `TypeError: Failed to fetch` após o deploy, você precisa autorizar o domínio da sua aplicação no Supabase.
+Para evitar o erro `TypeError: Failed to fetch` após o deploy, autorize o domínio da sua aplicação no Supabase.
 
 1.  **Vá para o painel do seu projeto no Supabase.**
 2.  No menu da esquerda, vá para **Authentication**.
@@ -115,6 +108,6 @@ Para evitar o erro `TypeError: Failed to fetch` após o deploy, você precisa au
 ### 4. Salvar e Fazer o Deploy
 
 - Clique em **"Save"** nas configurações do Coolify.
-- Clique em **"Deploy"** para iniciar o processo de build e deploy.
+- Vá para a aba **"Deployments"** e clique em **"Redeploy"** para iniciar o processo.
 
-O Coolify irá buscar seu código do GitHub, usar o Nixpacks para construir sua aplicação Next.js injetando as variáveis de ambiente, e iniciar sua aplicação. Após a conclusão, sua aplicação "Venture XP" estará online e corretamente conectada ao seu banco de dados Supabase!
+Sua aplicação estará online e conectada corretamente ao seu novo banco de dados Supabase!
