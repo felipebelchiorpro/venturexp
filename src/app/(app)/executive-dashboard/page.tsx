@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -40,10 +39,10 @@ export default function ExecutiveDashboardPage() {
         const monthlyBilling = 0;
         
         const fetchedKpis: Record<string, KpiData> = {
-          proposalsSent: { title: "Total de Propostas Enviadas", value: String(proposalsSent ?? 0), iconName: "FileText" as IconName, trend: "neutral" as const },
-          billingMonthly: { title: "Faturamento Mensal (Simulado)", value: `R$${monthlyBilling.toFixed(2)}`, iconName: "DollarSign" as IconName, change: "+0% vs mês anterior", trend: "neutral" as const },
-          totalLeads: { title: "Total de Leads no Funil", value: String(totalLeads ?? 0), iconName: "Users" as IconName, trend: "neutral" as const },
-          totalClients: { title: "Total de Clientes", value: String(totalClients ?? 0), iconName: "Award" as IconName, description: "Clientes na base de dados" },
+          proposalsSent: { title: "Total de Propostas Enviadas", value: String(proposalsSent ?? 0), iconName: "FileText", trend: "neutral" },
+          billingMonthly: { title: "Faturamento Mensal (Simulado)", value: `R$${monthlyBilling.toFixed(2)}`, iconName: "DollarSign", change: "+0% vs mês anterior", trend: "neutral" },
+          totalLeads: { title: "Total de Leads no Funil", value: String(totalLeads ?? 0), iconName: "Users", trend: "neutral" },
+          totalClients: { title: "Total de Clientes", value: String(totalClients ?? 0), iconName: "Award", description: "Clientes na base de dados" },
         };
         setKpiData(fetchedKpis);
 
@@ -61,18 +60,6 @@ export default function ExecutiveDashboardPage() {
     fetchExecutiveData();
   }, [supabase, toast]);
 
-  const LoadingKpiCard = () => (
-    <Card className="shadow-lg">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-         <Skeleton className="h-5 w-24" />
-         <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-8 w-1/2 mb-1" />
-        <Skeleton className="h-4 w-1/4" />
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="space-y-8">
@@ -81,29 +68,33 @@ export default function ExecutiveDashboardPage() {
         description="Visão geral consolidada da operação da agência."
       />
 
-      {/* Section: High-Level KPIs */}
       <section>
         <h2 className="text-xl font-semibold text-foreground mb-4">Visão Geral da Operação</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {loading ? (
-            <>
-              <LoadingKpiCard />
-              <LoadingKpiCard />
-              <LoadingKpiCard />
-              <LoadingKpiCard />
-            </>
+            Array.from({ length: 4 }).map((_, index) => (
+              <Card className="shadow-lg" key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="h-5 w-24" />
+                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-1/2 mb-1" />
+                  <Skeleton className="h-4 w-1/4" />
+                </CardContent>
+              </Card>
+            ))
           ) : (
             <>
-              <KpiCard {...kpiData.billingMonthly} />
-              <KpiCard {...kpiData.proposalsSent} />
-              <KpiCard {...kpiData.totalLeads} />
-              <KpiCard {...kpiData.totalClients} />
+              {kpiData.billingMonthly && <KpiCard {...kpiData.billingMonthly} />}
+              {kpiData.proposalsSent && <KpiCard {...kpiData.proposalsSent} />}
+              {kpiData.totalLeads && <KpiCard {...kpiData.totalLeads} />}
+              {kpiData.totalClients && <KpiCard {...kpiData.totalClients} />}
             </>
           )}
         </div>
       </section>
 
-      {/* Section: Billing Overview */}
       <section>
         <h2 className="text-xl font-semibold text-foreground mb-4">Análise Financeira</h2>
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
@@ -132,7 +123,6 @@ export default function ExecutiveDashboardPage() {
         </div>
       </section>
 
-      {/* Section: Sales Funnel */}
       <section>
         <h2 className="text-xl font-semibold text-foreground mb-4">Análise de Vendas</h2>
         <div className="grid gap-4 md:grid-cols-2">
@@ -141,7 +131,7 @@ export default function ExecutiveDashboardPage() {
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
                 <GanttChartSquare className="h-5 w-5 mr-2 text-muted-foreground" />
                 Leads por Etapa do Funil
-                </CardTitle>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ExecutivePlaceholderContent message="Gráfico de leads em cada etapa do funil será exibido aqui." icon={<BarChart3 size={32}/>} />
@@ -162,7 +152,6 @@ export default function ExecutiveDashboardPage() {
         </div>
       </section>
       
-      {/* Section: Team Performance & Productivity */}
       <section>
         <h2 className="text-xl font-semibold text-foreground mb-4">Performance e Produtividade da Equipe</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -172,7 +161,7 @@ export default function ExecutiveDashboardPage() {
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
                 <Activity className="h-5 w-5 mr-2 text-muted-foreground" />
                 Resumo de Produtividade
-                </CardTitle>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ExecutivePlaceholderContent message="Resumo geral da produtividade da equipe será exibido aqui." icon={<Users size={32}/>} />
@@ -183,7 +172,7 @@ export default function ExecutiveDashboardPage() {
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
                 <AlertTriangle className="h-5 w-5 mr-2 text-muted-foreground" />
                 Pontos de Atenção
-                </CardTitle>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ExecutivePlaceholderContent message="Projetos com atraso, gargalos ou clientes com baixa satisfação." icon={<AlertTriangle size={32}/>} />
