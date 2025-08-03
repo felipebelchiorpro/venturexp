@@ -5,24 +5,88 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale'; 
 import { PageHeader } from "@/components/PageHeader";
-import { KpiCard } from "@/components/dashboard/KpiCard";
+import { KpiCard, IconName } from "@/components/dashboard/KpiCard";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, BarChartHorizontalBig, LineChart, TrendingUp, Activity, CalendarClock } from "lucide-react";
+import { PlusCircle, BarChartHorizontalBig, LineChart, TrendingUp, Activity, CalendarClock, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExecutivePlaceholderContent } from '@/components/dashboard/ExecutivePlaceholderContent';
 import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@/lib/supabase/client';
 
 export const dynamic = 'force-dynamic';
 
-const KPI_DATA: { title: string; value: string; change: string; trend: "up" | "down" | "neutral"; iconName: string; }[] = [];
+interface KpiData {
+  title: string;
+  value: string;
+  change?: string;
+  trend?: "up" | "down" | "neutral";
+  iconName: IconName;
+}
 
 export default function DashboardPage() {
   const [currentDateTime, setCurrentDateTime] = useState<string | null>(null);
+  const [kpiData, setKpiData] = useState<KpiData[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const supabase = createClient();
 
   useEffect(() => {
-    setCurrentDateTime(format(new Date(), "PPP, p", { locale: ptBR })); 
-  }, []);
+    setCurrentDateTime(format(new Date(), "PPP, p", { locale: ptBR }));
+
+    async function fetchDashboardData() {
+      setLoading(true);
+      try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        // Fetch new clients in the last 30 days
+        const { count: newClientsCount } = await supabase
+          .from('clients')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', thirtyDaysAgo.toISOString());
+
+        // Fetch active leads (not 'Fechamento Ganho' or 'Fechamento Perdido')
+        const { count: activeLeadsCount } = await supabase
+          .from('leads')
+          .select('*', { count: 'exact', head: true })
+          .not('status', 'in', '("Fechamento Ganho", "Fechamento Perdido")');
+
+        // Fetch service orders in progress
+        const { count: ongoingOsCount } = await supabase
+          .from('service_orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Em andamento');
+
+        // Fetch pending proposals
+        const { count: pendingProposalsCount } = await supabase
+          .from('proposals')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Enviada');
+
+        const fetchedKpis: KpiData[] = [
+          { title: "Novos Clientes (Últimos 30d)", value: String(newClientsCount ?? 0), trend: "up", iconName: "Users" },
+          { title: "Leads Ativos no Funil", value: String(activeLeadsCount ?? 0), trend: "neutral", iconName: "TrendingUp" },
+          { title: "O.S. em Andamento", value: String(ongoingOsCount ?? 0), trend: "neutral", iconName: "ClipboardList" },
+          { title: "Propostas Pendentes", value: String(pendingProposalsCount ?? 0), trend: "neutral", iconName: "FileText" },
+        ];
+
+        setKpiData(fetchedKpis);
+
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Não foi possível buscar os dados para o dashboard.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchDashboardData();
+
+  }, [supabase, toast]);
 
   const handleAddWidget = () => {
     toast({
@@ -47,17 +111,31 @@ export default function DashboardPage() {
         }
       />
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {KPI_DATA.map((kpi) => (
-          <KpiCard
-            key={kpi.title}
-            title={kpi.title}
-            value={kpi.value}
-            change={kpi.change}
-            trend={kpi.trend as "up" | "down" | "neutral"}
-            iconName={kpi.iconName as any}
-          />
-        ))}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 w-1/2 bg-muted rounded animate-pulse mb-1" />
+                <div className="h-4 w-1/4 bg-muted rounded animate-pulse" />
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          kpiData.map((kpi) => (
+            <KpiCard
+              key={kpi.title}
+              title={kpi.title}
+              value={kpi.value}
+              change={kpi.change}
+              trend={kpi.trend as "up" | "down" | "neutral"}
+              iconName={kpi.iconName as any}
+            />
+          ))
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -97,3 +175,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

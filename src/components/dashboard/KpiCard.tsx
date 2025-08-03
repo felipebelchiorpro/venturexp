@@ -61,7 +61,7 @@ const iconMap: Record<IconName, LucideIcon> = {
 };
 
 export function KpiCard({ title, value, change, trend, iconName, description }: KpiCardProps) {
-  const IconComponent = iconMap[iconName];
+  const IconComponent = iconName ? iconMap[iconName] : null;
   const TrendIcon = trend === "up" ? ArrowUpRight : trend === "down" ? ArrowDownRight : Minus;
   
   return (
@@ -95,3 +95,5 @@ export function KpiCard({ title, value, change, trend, iconName, description }: 
     </Card>
   );
 }
+
+    
