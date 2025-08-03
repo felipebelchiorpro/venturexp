@@ -5,9 +5,12 @@ import { PageHeader } from "@/components/PageHeader";
 import { CreateServiceOrderForm } from "@/components/service-orders/CreateServiceOrderForm";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { Client } from "@/types";
+import type { Tables } from "@/types/database.types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+
+type Client = Tables<'clients'>;
 
 export const dynamic = 'force-dynamic';
 
@@ -17,23 +20,40 @@ export default function NewServiceOrderPage() {
   const clientId = params.clientId as string;
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
-    // In a real app, you would fetch the client from an API
-    // const foundClient = MOCK_CLIENTS.find(c => c.id === clientId);
-    // For now, we simulate a loading state and show a generic name/phone.
-    // Replace this logic with your actual data fetching.
-     setTimeout(() => { // Simulating API call
-      // setClient(foundClient || null);
-      setClient({ id: clientId, name: `Cliente ${clientId.substring(0,4)}`, phone: '(XX) XXXXX-XXXX' } as Client);
+    async function fetchClient() {
+      if (!clientId) {
+        setLoading(false);
+        return;
+      }
+      
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, phone')
+        .eq('id', clientId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching client for OS:", error);
+        setClient(null);
+      } else {
+        setClient(data);
+      }
       setLoading(false);
-    }, 500);
-  }, [clientId]);
+    }
+
+    fetchClient();
+  }, [clientId, supabase]);
 
   if (loading) {
      return (
        <div className="space-y-6">
         <PageHeader title="Carregando Cliente..." description="Aguarde enquanto carregamos os dados do cliente." />
+         <div className="flex justify-center items-center h-32">
+          <Loader2 className="animate-spin h-8 w-8 text-primary" />
+        </div>
       </div>
     )
   }
@@ -42,6 +62,10 @@ export default function NewServiceOrderPage() {
     return (
       <div className="space-y-6">
         <PageHeader title="Cliente Não Encontrado" description="Não foi possível carregar o formulário de ordem de serviço." />
+         <Button variant="outline" onClick={() => router.back()}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar
+          </Button>
       </div>
     );
   }
@@ -58,7 +82,7 @@ export default function NewServiceOrderPage() {
           </Button>
         }
       />
-      <CreateServiceOrderForm clientName={client.name} clientId={clientId} clientPhone={client.phone} />
+      <CreateServiceOrderForm clientName={client.name} clientId={client.id} clientPhone={client.phone} />
     </div>
   );
 }
