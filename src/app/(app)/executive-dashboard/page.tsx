@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -20,6 +21,13 @@ interface KpiData {
   trend?: "up" | "down" | "neutral";
   description?: string;
 }
+
+const kpiPlaceholders: { key: string; title: string }[] = [
+    { key: 'billingMonthly', title: 'Faturamento Mensal (Simulado)' },
+    { key: 'proposalsSent', title: 'Total de Propostas Enviadas' },
+    { key: 'totalLeads', title: 'Total de Leads no Funil' },
+    { key: 'totalClients', title: 'Total de Clientes' },
+];
 
 export default function ExecutiveDashboardPage() {
   const [kpiData, setKpiData] = useState<Record<string, KpiData>>({});
@@ -60,7 +68,6 @@ export default function ExecutiveDashboardPage() {
     fetchExecutiveData();
   }, [supabase, toast]);
 
-
   return (
     <div className="space-y-8">
       <PageHeader
@@ -72,10 +79,10 @@ export default function ExecutiveDashboardPage() {
         <h2 className="text-xl font-semibold text-foreground mb-4">Visão Geral da Operação</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {loading ? (
-            Array.from({ length: 4 }).map((_, index) => (
-              <Card className="shadow-lg" key={index}>
+            kpiPlaceholders.map(({ key, title }) => (
+              <Card className="shadow-lg" key={key}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <Skeleton className="h-5 w-24" />
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                 </CardHeader>
                 <CardContent>
@@ -85,12 +92,9 @@ export default function ExecutiveDashboardPage() {
               </Card>
             ))
           ) : (
-            <>
-              {kpiData.billingMonthly && <KpiCard {...kpiData.billingMonthly} />}
-              {kpiData.proposalsSent && <KpiCard {...kpiData.proposalsSent} />}
-              {kpiData.totalLeads && <KpiCard {...kpiData.totalLeads} />}
-              {kpiData.totalClients && <KpiCard {...kpiData.totalClients} />}
-            </>
+            Object.values(kpiData).map((data) => (
+              data ? <KpiCard key={data.title} {...data} /> : null
+            ))
           )}
         </div>
       </section>
