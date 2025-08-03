@@ -26,12 +26,13 @@ import { ptBR } from 'date-fns/locale';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { SERVICE_ORDER_STATUSES, type ServiceOrderStatusType, type ServiceOrder } from "@/types";
+import { SERVICE_ORDER_STATUSES } from "@/types";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Tables } from "@/types/database.types";
+import type { Tables, TablesInsert } from '@/types/database.types';
 
 type Product = Tables<'products'>;
+type ServiceOrderInsert = TablesInsert<'service_orders'>;
 
 const productItemSchema = z.object({
     productId: z.string().min(1, "Selecione um produto."),
@@ -61,7 +62,7 @@ type CreateServiceOrderFormValues = z.infer<typeof formSchema>;
 interface CreateServiceOrderFormProps {
   clientName: string;
   clientId: string;
-  clientPhone?: string;
+  clientPhone?: string | null;
 }
 
 export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: CreateServiceOrderFormProps) {
@@ -123,37 +124,37 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
   };
 
 
-  function onSubmit(values: CreateServiceOrderFormValues) {
+  async function onSubmit(values: CreateServiceOrderFormValues) {
     const finalValue = manualServiceValue !== undefined ? manualServiceValue : totalValue;
     const productsString = values.productsUsed?.map(p => `${p.quantity}x ${p.name}`).join(', ');
 
-    console.log("Dados da Nova Ordem de Serviço:", { ...values, serviceValue: finalValue, productsUsed: productsString });
-    
-    // Here you would typically save to the database. For now, we simulate.
-    const newServiceOrderData: Partial<ServiceOrder> = {
-      // id: `os-${Date.now()}`,
-      clientId: clientId,
-      orderNumber: `OS-${Math.floor(Math.random() * 10000)}`,
-      // clientName: clientName,
-      // contactPhone: values.contactPhone,
-      // serviceAddress: values.serviceAddress,
-      serviceType: values.serviceType,
-      productsUsed: productsString,
-      creationDate: values.osCreationDate.toISOString(),
-      executionDeadline: values.executionDeadline?.toISOString(),
-      serviceValue: finalValue,
-      currency: finalValue > 0 ? "BRL" : undefined,
-      additionalNotes: values.additionalNotes,
-      status: values.initialStatus as ServiceOrderStatusType,
+    const newServiceOrderData: ServiceOrderInsert = {
+      client_id: clientId,
+      order_number: `OS-${Math.floor(1000 + Math.random() * 9000)}`,
+      service_type: values.serviceType,
+      products_used: productsString,
+      created_at: values.osCreationDate.toISOString(),
+      execution_deadline: values.executionDeadline?.toISOString(),
+      service_value: finalValue,
+      status: values.initialStatus,
+      // 'additionalNotes' and other fields from the form are not in the 'service_orders' table schema.
+      // Need to add them to the table if they are required. For now, they are omitted.
     };
-    console.log("Simulando criação de OS com dados completos: ", newServiceOrderData);
+
+    const { error } = await supabase.from('service_orders').insert(newServiceOrderData);
+
+    if (error) {
+        toast({ title: "Erro ao Criar Ordem de Serviço", description: error.message, variant: 'destructive' });
+        return;
+    }
 
     toast({
       title: "Ordem de Serviço Criada!",
-      description: `A Ordem de Serviço para ${clientName} (${values.initialStatus}) foi gerada com sucesso. (Simulação)`,
+      description: `A Ordem de Serviço para ${clientName} (${values.initialStatus}) foi gerada com sucesso.`,
     });
     form.reset();
     router.push(`/clients/${clientId}`);
+    router.refresh(); // To update client details page
   }
 
   return (

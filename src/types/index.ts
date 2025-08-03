@@ -85,50 +85,14 @@ export interface TeamMember {
 }
 
 // Novo tipo Client gerado a partir do schema do Supabase
-export type Client = DB['public']['Tables']['clients']['Row'];
+export type Client = Tables<'clients'>;
 
+export type Invoice = Tables<'invoices'>
 
-export interface Invoice {
-  id: string;
-  clientId: string;
-  invoiceNumber: string;
-  amount: number;
-  currency: string;
-  issueDate: string; // ISO date string
-  dueDate: string; // ISO date string
-  status: InvoiceStatusType;
-  items: InvoiceItem[];
-  paymentMethod?: PaymentMethodType | string; // string for flexibility if other methods are added manually
-  paymentCondition?: PaymentConditionType;
-  installments?: string;
-  notes?: string;
-}
+export type InvoiceItem = Tables<'invoice_items'>;
 
-export interface InvoiceItem {
-  id: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-}
+export type ServiceOrder = Tables<'service_orders'>;
 
-export interface ServiceOrder {
-  id: string;
-  clientId: string;
-  orderNumber: string;
-  clientName?: string; // Denormalized for easier display
-  contactPhone?: string;
-  serviceAddress?: string;
-  serviceType: string;
-  productsUsed?: string;
-  creationDate: string; // ISO date string
-  executionDeadline?: string; // ISO date string
-  serviceValue?: number;
-  currency?: string;
-  additionalNotes?: string;
-  status: ServiceOrderStatusType;
-  assignedTo?: string;
-}
 
 export interface AccessProfile {
   id: string;

@@ -1,12 +1,13 @@
 
 import type { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, GanttChartSquare, BellRing, Briefcase, UserPlus, Building, Contact, ShieldCheck, ShoppingCart, Wrench } from 'lucide-react';
 import type { NavItem } from '@/types';
 
 export const navItems: NavItem[] = [
   { label: 'Painel Principal', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Painel Executivo', href: '/executive-dashboard', icon: Building, executiveOnly: true },
   { label: 'Clientes', href: '/clients', icon: Contact },
+  { label: 'Ordens de Serviço', href: '/service-orders', icon: Wrench },
   { label: 'Funil de Vendas', href: '/sales-funnel', icon: GanttChartSquare },
   { label: 'Propostas', href: '/proposals', icon: FileText },
   { label: 'Leads', href: '/leads', icon: Users },

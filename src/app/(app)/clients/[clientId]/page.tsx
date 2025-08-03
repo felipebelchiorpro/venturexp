@@ -8,12 +8,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mail, Phone, Building, Info, DollarSign, Briefcase, PlusCircle, FileText, History, Eye, Edit, Users, CalendarClock, MapPin, FileType, Tag, Package, Edit3, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation"; 
 import { useEffect, useState, useCallback } from "react";
-import type { Client, Invoice, ServiceOrder, InvoiceStatusType, PaymentMethodType, ServiceOrderStatusType } from "@/types";
+import type { InvoiceStatusType, ServiceOrderStatusType } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
+import type { Tables } from "@/types/database.types";
+
+type Client = Tables<'clients'>;
+type Invoice = Tables<'invoices'>;
+type ServiceOrder = Tables<'service_orders'>;
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +37,6 @@ export default function ClientDetailPage() {
   const fetchClientData = useCallback(async () => {
     setLoading(true);
 
-    // Fetch client details
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
       .select('*')
@@ -47,13 +51,11 @@ export default function ClientDetailPage() {
     }
     setClient(clientData);
 
-    // Fetch related invoices (replace with actual logic if invoices table exists)
-    // const { data: invoicesData, error: invoicesError } = await supabase.from('invoices').select('*').eq('client_id', clientId);
-    // setClientInvoices(invoicesData || []);
+    const { data: invoicesData, error: invoicesError } = await supabase.from('invoices').select('*').eq('client_id', clientId);
+    if(invoicesData) setClientInvoices(invoicesData);
     
-    // Fetch related service orders (replace with actual logic if service_orders table exists)
-    // const { data: serviceOrdersData, error: serviceOrdersError } = await supabase.from('service_orders').select('*').eq('client_id', clientId);
-    // setClientServiceOrders(serviceOrdersData || []);
+    const { data: serviceOrdersData, error: serviceOrdersError } = await supabase.from('service_orders').select('*').eq('client_id', clientId);
+    if(serviceOrdersData) setClientServiceOrders(serviceOrdersData);
 
     setLoading(false);
   }, [clientId, supabase, router, toast]);
@@ -100,7 +102,7 @@ export default function ClientDetailPage() {
      router.push(`/clients/${client.id}/edit`);
   }
   
-  const getInvoiceStatusBadgeVariant = (status: InvoiceStatusType) => {
+  const getInvoiceStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'Paga': return 'default'; 
       case 'Pendente': return 'secondary'; 
@@ -110,7 +112,7 @@ export default function ClientDetailPage() {
     }
   };
 
-  const getServiceOrderStatusBadgeVariant = (status: ServiceOrderStatusType) => {
+  const getServiceOrderStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'Finalizada': return 'default'; 
       case 'Em Andamento': return 'secondary'; 
@@ -239,9 +241,9 @@ export default function ClientDetailPage() {
                     {clientInvoices.map(invoice => (
                     <li key={invoice.id} className="flex justify-between items-center p-3 border rounded-md hover:bg-muted/50 transition-colors">
                         <div>
-                            <span className="font-medium text-base">Fatura {invoice.invoiceNumber}</span>
-                            <p className="text-sm text-muted-foreground">{invoice.currency} {invoice.amount.toFixed(2)} - Venc. {format(parseISO(invoice.dueDate), "dd/MM/yy", { locale: ptBR })}</p>
-                            {invoice.paymentMethod && <p className="text-xs text-muted-foreground">Método: {invoice.paymentMethod} {invoice.paymentCondition ? `(${invoice.paymentCondition}${invoice.installments ? ` - ${invoice.installments}`: ''})` : ''}</p>}
+                            <span className="font-medium text-base">Fatura {invoice.invoice_number}</span>
+                            <p className="text-sm text-muted-foreground">R$ {invoice.amount.toFixed(2)} - Venc. {format(parseISO(invoice.due_date), "dd/MM/yy", { locale: ptBR })}</p>
+                            {invoice.payment_method && <p className="text-xs text-muted-foreground">Método: {invoice.payment_method}</p>}
                         </div>
                         <div className="flex items-center space-x-2">
                             <Badge 
@@ -249,7 +251,7 @@ export default function ClientDetailPage() {
                                 className={`text-xs ${invoice.status === 'Paga' ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}>
                                 {invoice.status}
                             </Badge>
-                            <Button variant="ghost" size="sm" onClick={() => handleViewInvoice(invoice.invoiceNumber)} aria-label="Visualizar Fatura">
+                            <Button variant="ghost" size="sm" onClick={() => handleViewInvoice(invoice.invoice_number)} aria-label="Visualizar Fatura">
                                 <Eye className="h-4 w-4"/>
                             </Button>
                         </div>
@@ -278,15 +280,15 @@ export default function ClientDetailPage() {
                     {clientServiceOrders.map(os => (
                     <li key={os.id} className="flex justify-between items-center p-3 border rounded-md hover:bg-muted/50 transition-colors">
                         <div>
-                            <span className="font-medium text-base">OS {os.orderNumber}</span>
-                            <p className="text-sm text-muted-foreground">{os.serviceType}</p> 
+                            <span className="font-medium text-base">OS {os.order_number}</span>
+                            <p className="text-sm text-muted-foreground">{os.service_type}</p> 
                         </div>
                          <div className="flex items-center space-x-2">
                             <Badge variant={getServiceOrderStatusBadgeVariant(os.status)} 
                                    className={`text-xs ${os.status === 'Finalizada' ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}>
                                 {os.status}
                             </Badge>
-                            <Button variant="ghost" size="sm" onClick={() => handleViewServiceOrder(os.orderNumber)} aria-label="Visualizar Ordem de Serviço">
+                            <Button variant="ghost" size="sm" onClick={() => handleViewServiceOrder(os.order_number)} aria-label="Visualizar Ordem de Serviço">
                                 <Eye className="h-4 w-4"/>
                             </Button>
                         </div>
@@ -314,5 +316,3 @@ export default function ClientDetailPage() {
     </div>
   );
 }
-
-    
