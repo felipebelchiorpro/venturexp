@@ -9,6 +9,7 @@ import { BarChart3, DollarSign, FileText, Users, CreditCard, Award, TrendingUp, 
 import { ExecutivePlaceholderContent } from '@/components/dashboard/ExecutivePlaceholderContent';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,24 +61,18 @@ export default function ExecutiveDashboardPage() {
     fetchExecutiveData();
   }, [supabase, toast]);
 
-
-  const renderKpiCard = (key: string) => {
-    if (loading) {
-      return (
-        <Card className="shadow-lg">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-             <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
-          </CardHeader>
-          <CardContent>
-            <div className="h-8 w-1/2 bg-muted rounded animate-pulse mb-1" />
-            <div className="h-4 w-1/4 bg-muted rounded animate-pulse" />
-          </CardContent>
-        </Card>
-      );
-    }
-    if (!kpiData[key]) return null;
-    return <KpiCard {...kpiData[key]} />;
-  };
+  const LoadingKpiCard = () => (
+    <Card className="shadow-lg">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+         <Skeleton className="h-5 w-24" />
+         <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-8 w-1/2 mb-1" />
+        <Skeleton className="h-4 w-1/4" />
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-8">
@@ -90,10 +85,21 @@ export default function ExecutiveDashboardPage() {
       <section>
         <h2 className="text-xl font-semibold text-foreground mb-4">Visão Geral da Operação</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {renderKpiCard("billingMonthly")}
-          {renderKpiCard("proposalsSent")}
-          {renderKpiCard("totalLeads")}
-          {renderKpiCard("totalClients")}
+          {loading ? (
+            <>
+              <LoadingKpiCard />
+              <LoadingKpiCard />
+              <LoadingKpiCard />
+              <LoadingKpiCard />
+            </>
+          ) : (
+            <>
+              <KpiCard {...kpiData.billingMonthly} />
+              <KpiCard {...kpiData.proposalsSent} />
+              <KpiCard {...kpiData.totalLeads} />
+              <KpiCard {...kpiData.totalClients} />
+            </>
+          )}
         </div>
       </section>
 
