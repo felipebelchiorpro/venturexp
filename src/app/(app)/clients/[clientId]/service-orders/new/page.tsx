@@ -31,7 +31,7 @@ export default function NewServiceOrderPage() {
       
       const { data, error } = await supabase
         .from('clients')
-        .select('id, name, phone')
+        .select('*') // Seleciona todos os campos do cliente
         .eq('id', clientId)
         .single();
       
@@ -82,7 +82,9 @@ export default function NewServiceOrderPage() {
           </Button>
         }
       />
-      <CreateServiceOrderForm clientName={client.name} clientId={client.id} clientPhone={client.phone} />
+      <CreateServiceOrderForm client={client} />
     </div>
   );
 }
+
+    

@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2, Eye, FileDown } from "lucide-react";
-import type { ServiceOrderStatusType } from "@/types";
+import type { ServiceOrderStatusType, ServiceOrderPriorityType } from "@/types";
 import { SERVICE_ORDER_STATUSES } from '@/types';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -39,15 +39,25 @@ type ServiceOrderWithClient = Tables<'service_orders'> & {
 
 const getStatusBadgeVariant = (status: ServiceOrderStatusType) => {
     switch (status) {
-      case 'Finalizada': return 'default'; 
-      case 'Em Andamento': return 'secondary'; 
-      case 'Aberta': return 'outline'; 
+      case 'Concluída': return 'default';
+      case 'Em andamento': return 'secondary';
+      case 'Aguardando': return 'outline';
       case 'Aguardando Peças': return 'secondary';
       case 'Aguardando Aprovação': return 'secondary';
-      case 'Cancelada': return 'destructive'; 
+      case 'Cancelada': return 'destructive';
       default: return 'outline';
     }
 };
+
+const getPriorityBadgeVariant = (priority: ServiceOrderPriorityType) => {
+    switch (priority) {
+      case 'Urgente': return 'destructive';
+      case 'Alta': return 'secondary';
+      case 'Média': return 'default';
+      case 'Baixa': return 'outline';
+      default: return 'outline';
+    }
+}
 
 export function ServiceOrderList() {
   const [serviceOrders, setServiceOrders] = useState<ServiceOrderWithClient[]>([]);
@@ -187,7 +197,7 @@ export function ServiceOrderList() {
     doc.text("4.1 VALOR E FORMA DE PAGAMENTO:", margin, y);
     y += 5;
     doc.setFont('helvetica', 'normal');
-    addParagraph(`O valor total dos serviços contratados é de ${formatCurrency(order.service_value)}. O pagamento será efetuado da seguinte forma 100% após a finalização do projeto.`);
+    addParagraph(`O valor total dos serviços contratados é de ${formatCurrency(order.total_value)}. O pagamento será efetuado da seguinte forma 100% após a finalização do projeto.`);
     
     doc.setFont('helvetica', 'bold');
     doc.text("4.2 DESPESAS ADICIONAIS", margin, y);
@@ -286,6 +296,7 @@ export function ServiceOrderList() {
               <TableHead>Cliente</TableHead>
               <TableHead>Serviço</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Prioridade</TableHead>
               <TableHead>Data de Criação</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead className="text-right">Ações</TableHead>
@@ -299,6 +310,7 @@ export function ServiceOrderList() {
                   <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-40" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-28" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                   <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
@@ -306,7 +318,7 @@ export function ServiceOrderList() {
               ))
             ) : filteredServiceOrders.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                   Nenhuma ordem de serviço encontrada.
                 </TableCell>
               </TableRow>
@@ -319,13 +331,21 @@ export function ServiceOrderList() {
                 <TableCell>
                   <Badge 
                     variant={getStatusBadgeVariant(order.status as ServiceOrderStatusType)}
-                    className={order.status === 'Finalizada' ? 'bg-green-500 text-white hover:bg-green-600' : ''}
+                    className={order.status === 'Concluída' ? 'bg-green-500 text-white hover:bg-green-600' : ''}
                   >
                     {order.status}
                   </Badge>
                 </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={getPriorityBadgeVariant(order.priority as ServiceOrderPriorityType)}
+                    className={order.priority === 'Urgente' ? 'bg-red-600 text-white hover:bg-red-700' : ''}
+                   >
+                     {order.priority}
+                  </Badge>
+                </TableCell>
                 <TableCell>{format(parseISO(order.created_at), "PPP", { locale: ptBR })}</TableCell>
-                <TableCell>{formatCurrency(order.service_value)}</TableCell>
+                <TableCell>{formatCurrency(order.total_value)}</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -359,3 +379,5 @@ export function ServiceOrderList() {
     </div>
   );
 }
+
+    

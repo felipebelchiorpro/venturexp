@@ -19,81 +19,105 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserCircle, Phone, MapPin, Wrench, Package, CalendarDays, DollarSign, FileText, ListChecks, Save, PlusCircle, Trash2 } from "lucide-react";
+import { User, Phone, Mail, MapPin, Wrench, Package, CalendarDays, DollarSign, FileText, ListChecks, Save, PlusCircle, Trash2, Shield, Settings, Info, Tag, CreditCard, CheckCircle, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from 'date-fns/locale';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { SERVICE_ORDER_STATUSES } from "@/types";
+import { SERVICE_ORDER_STATUSES, SERVICE_ORDER_PRIORITIES, PAYMENT_METHODS, PAYMENT_STATUSES, type ProductPiece } from "@/types";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Tables, TablesInsert } from '@/types/database.types';
+import type { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
 
 type Product = Tables<'products'>;
+type Client = Tables<'clients'>;
+type ServiceOrder = Tables<'service_orders'>;
 type ServiceOrderInsert = TablesInsert<'service_orders'>;
+type ServiceOrderUpdate = TablesUpdate<'service_orders'>;
 
-const productItemSchema = z.object({
+const productUsedSchema = z.object({
     productId: z.string().min(1, "Selecione um produto."),
     quantity: z.coerce.number().min(1, "A quantidade deve ser pelo menos 1."),
-    unitPrice: z.coerce.number(), // Preço virá do produto selecionado
-    name: z.string() // Nome virá do produto selecionado
+    unitPrice: z.coerce.number(),
+    name: z.string()
 });
 
 const formSchema = z.object({
-  contactPhone: z.string().optional(),
-  serviceAddress: z.string().optional(),
-  serviceType: z.string().min(1, "O tipo de serviço é obrigatório."),
-  productsUsed: z.array(productItemSchema).optional(),
-  osCreationDate: z.date({
-    required_error: "A data de abertura da OS é obrigatória.",
-  }),
-  executionDeadline: z.date().optional(),
-  serviceValue: z.string().optional().transform(val => val ? parseFloat(val.replace(',', '.')) : undefined).refine(val => val === undefined || val >= 0, {message: "O valor não pode ser negativo."} ),
-  additionalNotes: z.string().optional(),
-  initialStatus: z.enum(SERVICE_ORDER_STATUSES, {
-    required_error: "O status inicial é obrigatório.",
-  }),
+  // Informações Gerais
+  status: z.enum(SERVICE_ORDER_STATUSES),
+  priority: z.enum(SERVICE_ORDER_PRIORITIES),
+  service_type: z.string().min(3, "O tipo de serviço é obrigatório."),
+  created_at: z.date(),
+  execution_deadline: z.date().optional(),
+  description: z.string().optional(),
+  
+  // Dados Técnicos
+  equipment: z.string().optional(),
+  defect_reported: z.string().optional(),
+  diagnostic_technical: z.string().optional(),
+  solution_applied: z.string().optional(),
+
+  // Orçamento e Pagamento
+  labor_value: z.coerce.number().min(0).default(0),
+  products_used: z.array(productUsedSchema).optional(),
+  payment_method: z.enum(PAYMENT_METHODS).optional(),
+  payment_status: z.enum(PAYMENT_STATUSES).optional(),
+
+  // Acompanhamento
+  technician_id: z.string().optional(), // Deveria ser um UUID de um usuário/técnico
+  additional_notes: z.string().optional(),
 });
 
 type CreateServiceOrderFormValues = z.infer<typeof formSchema>;
 
 interface CreateServiceOrderFormProps {
-  clientName: string;
-  clientId: string;
-  clientPhone?: string | null;
+  client: Client;
+  serviceOrder?: ServiceOrder;
+  onSuccess?: () => void;
 }
 
-export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: CreateServiceOrderFormProps) {
+export function CreateServiceOrderForm({ client, serviceOrder, onSuccess }: CreateServiceOrderFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const supabase = createClient();
   const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
   const [totalValue, setTotalValue] = useState(0);
+  const isEditMode = !!serviceOrder;
 
   const form = useForm<CreateServiceOrderFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      contactPhone: clientPhone || "",
-      serviceAddress: "",
-      serviceType: "",
-      productsUsed: [],
-      osCreationDate: new Date(),
-      executionDeadline: undefined,
-      serviceValue: undefined,
-      additionalNotes: "",
-      initialStatus: "Aberta",
+      status: serviceOrder?.status as any || "Aguardando",
+      priority: serviceOrder?.priority as any || "Média",
+      service_type: serviceOrder?.service_type || "",
+      created_at: serviceOrder?.created_at ? parseISO(serviceOrder.created_at) : new Date(),
+      execution_deadline: serviceOrder?.execution_deadline ? parseISO(serviceOrder.execution_deadline) : undefined,
+      description: serviceOrder?.description || "", // Campo não existe na tabela ainda
+      
+      equipment: serviceOrder?.equipment || "",
+      defect_reported: serviceOrder?.defect_reported || "",
+      diagnostic_technical: serviceOrder?.diagnostic_technical || "",
+      solution_applied: serviceOrder?.solution_applied || "",
+
+      labor_value: serviceOrder?.labor_value || 0,
+      products_used: (serviceOrder?.products_used as ProductPiece[] | null)?.map(p => ({...p, productId: p.productId || '' })) || [],
+      payment_method: serviceOrder?.payment_method as any || undefined,
+      payment_status: serviceOrder?.payment_status as any || undefined,
+      
+      technician_id: serviceOrder?.technician_id || undefined,
+      additional_notes: serviceOrder?.additional_notes || "",
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "productsUsed"
+    name: "products_used"
   });
 
-  const productsWatch = form.watch("productsUsed");
-  const manualServiceValue = form.watch("serviceValue");
+  const productsWatch = form.watch("products_used");
+  const laborValueWatch = form.watch("labor_value");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -110,293 +134,280 @@ export function CreateServiceOrderForm({ clientName, clientId, clientPhone }: Cr
   useEffect(() => {
     const calculateTotal = () => {
         const productsTotal = productsWatch?.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0) ?? 0;
-        setTotalValue(productsTotal);
+        const laborTotal = laborValueWatch || 0;
+        setTotalValue(productsTotal + laborTotal);
     };
     calculateTotal();
-  }, [productsWatch]);
+  }, [productsWatch, laborValueWatch]);
 
   const handleProductSelection = (index: number, productId: string) => {
     const selectedProduct = availableProducts.find(p => p.id === productId);
     if(selectedProduct) {
-        form.setValue(`productsUsed.${index}.unitPrice`, selectedProduct.price);
-        form.setValue(`productsUsed.${index}.name`, selectedProduct.name);
+        form.setValue(`products_used.${index}.unitPrice`, selectedProduct.price);
+        form.setValue(`products_used.${index}.name`, selectedProduct.name);
     }
   };
 
 
   async function onSubmit(values: CreateServiceOrderFormValues) {
-    const finalValue = manualServiceValue !== undefined ? manualServiceValue : totalValue;
-    const productsString = values.productsUsed?.map(p => `${p.quantity}x ${p.name}`).join(', ');
+    const finalValue = totalValue;
 
-    const newServiceOrderData: ServiceOrderInsert = {
-      client_id: clientId,
-      order_number: `OS-${Math.floor(1000 + Math.random() * 9000)}`,
-      service_type: values.serviceType,
-      products_used: productsString,
-      created_at: values.osCreationDate.toISOString(),
-      execution_deadline: values.executionDeadline?.toISOString(),
-      service_value: finalValue,
-      status: values.initialStatus,
-      // 'additionalNotes' and other fields from the form are not in the 'service_orders' table schema.
-      // Need to add them to the table if they are required. For now, they are omitted.
+    const dataToSave: Omit<ServiceOrder, 'id' | 'updated_at' | 'order_number'> = {
+        client_id: client.id,
+        created_at: values.created_at.toISOString(),
+        execution_deadline: values.execution_deadline?.toISOString() || null,
+        status: values.status,
+        priority: values.priority,
+        service_type: values.service_type,
+        equipment: values.equipment || null,
+        defect_reported: values.defect_reported || null,
+        diagnostic_technical: values.diagnostic_technical || null,
+        solution_applied: values.solution_applied || null,
+        labor_value: values.labor_value,
+        products_used: values.products_used as Json,
+        total_value: finalValue,
+        payment_method: values.payment_method || null,
+        payment_status: values.payment_status || null,
+        technician_id: values.technician_id || null,
+        additional_notes: values.additional_notes || null,
     };
+    
+    if (isEditMode && serviceOrder) {
+        const { error } = await supabase
+            .from('service_orders')
+            .update(dataToSave)
+            .eq('id', serviceOrder.id);
 
-    const { error } = await supabase.from('service_orders').insert(newServiceOrderData);
+        if (error) {
+            toast({ title: "Erro ao Atualizar O.S.", description: error.message, variant: 'destructive' });
+            return;
+        }
+        toast({ title: "Ordem de Serviço Atualizada!", description: `A O.S. para ${client.name} foi atualizada com sucesso.`});
 
-    if (error) {
-        toast({ title: "Erro ao Criar Ordem de Serviço", description: error.message, variant: 'destructive' });
-        return;
+    } else {
+        const newServiceOrderData: ServiceOrderInsert = {
+            ...dataToSave,
+            order_number: `OS-${Math.floor(1000 + Math.random() * 9000)}`,
+        };
+
+        const { error } = await supabase.from('service_orders').insert(newServiceOrderData);
+        if (error) {
+            toast({ title: "Erro ao Criar Ordem de Serviço", description: error.message, variant: 'destructive' });
+            return;
+        }
+        toast({ title: "Ordem de Serviço Criada!", description: `A O.S. para ${client.name} foi gerada com sucesso.`});
     }
 
-    toast({
-      title: "Ordem de Serviço Criada!",
-      description: `A Ordem de Serviço para ${clientName} (${values.initialStatus}) foi gerada com sucesso.`,
-    });
-    form.reset();
-    router.push(`/clients/${clientId}`);
-    router.refresh(); // To update client details page
+    if(onSuccess) {
+        onSuccess();
+    } else {
+        router.push(`/clients/${client.id}`);
+        router.refresh();
+    }
+  }
+
+  const formatCurrency = (value: number | null | undefined) => {
+    if (value === null || value === undefined || isNaN(value)) {
+        return 'R$ 0,00';
+    }
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   }
 
   return (
-    <Card className="w-full max-w-3xl mx-auto shadow-xl rounded-lg">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">Gerar Nova Ordem de Serviço</CardTitle>
-        <CardDescription>Por favor, preencha os dados abaixo para gerar a OS:</CardDescription>
-      </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <CardContent className="space-y-6 pt-6">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                control={form.control}
-                name="contactPhone"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel className="flex items-center">
-                        <Phone className="mr-2 h-5 w-5 text-primary" /> Contato
-                    </FormLabel>
-                    <FormControl>
-                        <Input placeholder="Telefone ou WhatsApp" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                    control={form.control}
-                    name="serviceAddress"
-                    render={({ field }) => (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        
+        {/* Card de Informações Gerais */}
+        <Card>
+            <CardHeader><CardTitle className="flex items-center"><Info className="mr-2 h-5 w-5 text-primary" />Informações Gerais</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <FormField control={form.control} name="status" render={({ field }) => (
                         <FormItem>
-                        <FormLabel className="flex items-center">
-                            <MapPin className="mr-2 h-5 w-5 text-primary" /> Endereço
-                        </FormLabel>
-                        <FormControl>
-                            <Input
-                            placeholder="Local onde o serviço será realizado"
-                            {...field}
-                            />
-                        </FormControl>
-                        <FormMessage />
+                            <FormLabel>Status da OS</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger></FormControl>
+                                <SelectContent>{SERVICE_ORDER_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                            </Select>
                         </FormItem>
-                    )}
-                />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="serviceType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <Wrench className="mr-2 h-5 w-5 text-primary" /> Tipo de Serviço
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descreva o serviço solicitado (ex: manutenção, instalação, troca de peça)"
-                      {...field}
-                      rows={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="space-y-4 rounded-md border p-4">
-                <FormLabel className="flex items-center text-base"><Package className="mr-2 h-5 w-5 text-primary" /> Produtos/Peças Utilizadas</FormLabel>
-                {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-end gap-2 p-2 rounded-md bg-muted/50">
-                        <FormField
-                            control={form.control}
-                            name={`productsUsed.${index}.productId`}
-                            render={({ field }) => (
-                                <FormItem className="flex-1">
-                                <FormLabel className="text-xs">Produto</FormLabel>
-                                <Select onValueChange={(value) => { field.onChange(value); handleProductSelection(index, value); }} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Selecione um item" /></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        {availableProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name={`productsUsed.${index}.quantity`}
-                            render={({ field }) => (
-                                <FormItem className="w-24">
-                                <FormLabel className="text-xs">Qtd.</FormLabel>
-                                <FormControl><Input type="number" {...field} /></FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </div>
-                ))}
-                 <Button type="button" variant="outline" size="sm" onClick={() => append({ productId: "", quantity: 1, unitPrice: 0, name: '' })}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Item
-                </Button>
-            </div>
-
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="osCreationDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="flex items-center">
-                      <CalendarDays className="mr-2 h-5 w-5 text-primary" /> Data de Abertura da OS
-                    </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn("w-full justify-start text-left font-normal mt-1", !field.value && "text-muted-foreground" )}
-                          >
-                            <CalendarDays className="mr-2 h-4 w-4" />
-                            {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={ptBR} />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="executionDeadline"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="flex items-center">
-                      <CalendarDays className="mr-2 h-5 w-5 text-primary" /> Prazo de Execução
-                    </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn("w-full justify-start text-left font-normal mt-1", !field.value && "text-muted-foreground")}
-                          >
-                            <CalendarDays className="mr-2 h-4 w-4" />
-                            {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Escolha uma data (opcional)</span>}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} initialFocus locale={ptBR}/>
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                <FormField
-                    control={form.control}
-                    name="serviceValue"
-                    render={({ field }) => (
+                    )}/>
+                    <FormField control={form.control} name="priority" render={({ field }) => (
                         <FormItem>
-                        <FormLabel className="flex items-center">
-                            <DollarSign className="mr-2 h-5 w-5 text-primary" /> Valor do Serviço (Manual)
-                        </FormLabel>
-                        <FormControl>
-                            <Input type="text" placeholder="Deixe em branco para calcular" {...field} />
-                        </FormControl>
-                        <FormDescription>Preencha para substituir o cálculo automático.</FormDescription>
-                        <FormMessage />
+                            <FormLabel>Prioridade</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Selecione a prioridade" /></SelectTrigger></FormControl>
+                                <SelectContent>{SERVICE_ORDER_PRIORITIES.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                            </Select>
                         </FormItem>
-                    )}
-                />
-                 <div className="p-2 rounded-md bg-muted text-muted-foreground">
-                    <span className="text-sm">Valor Total Calculado:</span>
-                    <p className="text-lg font-bold text-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}</p>
+                    )}/>
+                     <FormField control={form.control} name="created_at" render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                            <FormLabel>Data de Abertura</FormLabel>
+                            <Popover>
+                                <PopoverTrigger asChild><FormControl>
+                                    <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                    {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>} <CalendarDays className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                </FormControl></PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} /></PopoverContent>
+                            </Popover>
+                        </FormItem>
+                    )}/>
                 </div>
-            </div>
+                 <FormField control={form.control} name="service_type" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Tipo de Serviço</FormLabel>
+                        <FormControl><Input placeholder="Ex: Manutenção Preventiva, Instalação de Software" {...field} /></FormControl>
+                    </FormItem>
+                )}/>
+                <FormField control={form.control} name="description" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Descrição Detalhada do Serviço</FormLabel>
+                        <FormControl><Textarea placeholder="Descreva o escopo completo do serviço a ser realizado." {...field} rows={3} /></FormControl>
+                    </FormItem>
+                )}/>
+            </CardContent>
+        </Card>
+        
+        {/* Card do Cliente */}
+        <Card>
+            <CardHeader><CardTitle className="flex items-center"><User className="mr-2 h-5 w-5 text-primary" />Dados do Cliente</CardTitle></CardHeader>
+            <CardContent className="space-y-2">
+                <p><strong>Nome:</strong> {client.name}</p>
+                <p><strong>CPF/CNPJ:</strong> {client.document || 'Não informado'}</p>
+                <p><strong>Telefone:</strong> {client.phone || 'Não informado'}</p>
+                <p><strong>Email:</strong> {client.email}</p>
+                <p><strong>Endereço:</strong> {client.address || 'Não informado'}</p>
+            </CardContent>
+        </Card>
 
-            <FormField
-              control={form.control}
-              name="additionalNotes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <FileText className="mr-2 h-5 w-5 text-primary" /> Observações Adicionais
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Ex: cliente solicitou urgência, equipamento já aberto, etc." {...field} rows={4}/>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        {/* Card de Dados Técnicos */}
+        <Card>
+            <CardHeader><CardTitle className="flex items-center"><Settings className="mr-2 h-5 w-5 text-primary" />Dados Técnicos</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+                <FormField control={form.control} name="equipment" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Equipamento / Produto (Marca/Modelo)</FormLabel>
+                        <FormControl><Input placeholder="Ex: Notebook Dell Vostro, Ar Condicionado LG" {...field} /></FormControl>
+                    </FormItem>
+                )}/>
+                 <FormField control={form.control} name="defect_reported" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Defeito Relatado</FormLabel>
+                        <FormControl><Textarea placeholder="Descrição do problema informado pelo cliente." {...field} rows={3} /></FormControl>
+                    </FormItem>
+                )}/>
+                 <FormField control={form.control} name="diagnostic_technical" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Diagnóstico Técnico</FormLabel>
+                        <FormControl><Textarea placeholder="Análise técnica do problema encontrado." {...field} rows={3} /></FormControl>
+                    </FormItem>
+                )}/>
+                 <FormField control={form.control} name="solution_applied" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Solução Aplicada</FormLabel>
+                        <FormControl><Textarea placeholder="Descrição dos procedimentos realizados para resolver o problema." {...field} rows={3} /></FormControl>
+                    </FormItem>
+                )}/>
+            </CardContent>
+        </Card>
 
-            <FormField
-              control={form.control}
-              name="initialStatus"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    <ListChecks className="mr-2 h-5 w-5 text-primary" /> Status Inicial
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger><SelectValue placeholder="Selecione o status inicial" /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {SERVICE_ORDER_STATUSES.map(status => (
-                        <SelectItem key={status} value={status}>{status}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardFooter className="border-t px-6 py-4">
-            <div className="flex w-full items-center">
-                <UserCircle className="mr-2 h-5 w-5 text-primary" /> 
-                <span className="text-sm font-medium">Cliente: {clientName}</span>
-            </div>
-            <Button type="submit" className="ml-auto" disabled={form.formState.isSubmitting}>
-              <Save className="mr-2 h-4 w-4" /> {form.formState.isSubmitting ? 'Salvando...' : 'Gerar Ordem de Serviço'}
+        {/* Card de Orçamento e Pagamento */}
+        <Card>
+            <CardHeader><CardTitle className="flex items-center"><DollarSign className="mr-2 h-5 w-5 text-primary" />Orçamento e Pagamento</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+                 <div className="space-y-2">
+                    <FormLabel>Peças Utilizadas</FormLabel>
+                    {fields.map((field, index) => (
+                        <div key={field.id} className="flex items-end gap-2 p-2 rounded-md border bg-muted/50">
+                            <FormField control={form.control} name={`products_used.${index}.productId`} render={({ field }) => (
+                                <FormItem className="flex-1">
+                                    <Select onValueChange={(value) => { field.onChange(value); handleProductSelection(index, value); }} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Selecione um item" /></SelectTrigger></FormControl>
+                                        <SelectContent>{availableProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name} ({formatCurrency(p.price)})</SelectItem>)}</SelectContent>
+                                    </Select>
+                                </FormItem>
+                            )}/>
+                            <FormField control={form.control} name={`products_used.${index}.quantity`} render={({ field }) => (
+                                <FormItem className="w-24"><FormControl><Input type="number" placeholder="Qtd." {...field} /></FormControl></FormItem>
+                            )}/>
+                            <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
+                        </div>
+                    ))}
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ productId: "", name: "", quantity: 1, unitPrice: 0 })}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Peça/Produto
+                    </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="labor_value" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Valor da Mão de Obra (R$)</FormLabel>
+                            <FormControl><Input type="number" step="0.01" placeholder="0.00" {...field} /></FormControl>
+                        </FormItem>
+                    )}/>
+                    <div className="p-3 rounded-md bg-muted text-muted-foreground flex flex-col justify-center">
+                        <span className="text-sm font-semibold">Valor Total da OS:</span>
+                        <p className="text-2xl font-bold text-foreground">{formatCurrency(totalValue)}</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="payment_method" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Forma de Pagamento</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                                <SelectContent>{PAYMENT_METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </FormItem>
+                    )}/>
+                    <FormField control={form.control} name="payment_status" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Situação do Pagamento</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                                <SelectContent>{PAYMENT_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </FormItem>
+                    )}/>
+                </div>
+            </CardContent>
+        </Card>
+
+        {/* Card de Anexos e Acompanhamento */}
+        <Card>
+            <CardHeader><CardTitle className="flex items-center"><ListChecks className="mr-2 h-5 w-5 text-primary" />Acompanhamento e Anexos</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+                <FormField control={form.control} name="additional_notes" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Observações Adicionais</FormLabel>
+                        <FormControl><Textarea placeholder="Qualquer informação extra relevante para esta OS." {...field} rows={4} /></FormControl>
+                    </FormItem>
+                )}/>
+                <div>
+                    <FormLabel>Anexos</FormLabel>
+                    <div className="mt-2 flex items-center justify-center w-full p-4 border-2 border-dashed rounded-md">
+                        <Button type="button" variant="outline"><ImageIcon className="mr-2 h-4 w-4" /> Enviar Arquivos (Placeholder)</Button>
+                    </div>
+                </div>
+                <div>
+                     <FormLabel>Histórico de Alterações</FormLabel>
+                     <p className="text-sm text-muted-foreground mt-2">O histórico de alterações de status será exibido aqui.</p>
+                </div>
+            </CardContent>
+        </Card>
+        
+        <div className="flex flex-wrap gap-2 justify-end pt-4">
+            <Button type="button" variant="destructive" onClick={() => router.back()}>Cancelar</Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              <Save className="mr-2 h-4 w-4" /> {form.formState.isSubmitting ? 'Salvando...' : 'Salvar Ordem de Serviço'}
             </Button>
-          </CardFooter>
-        </form>
-      </Form>
-    </Card>
+            <Button type="button" variant="secondary" onClick={() => {toast({title: "Impressão de OS", description: "Funcionalidade de impressão será implementada."})}}>Imprimir PDF</Button>
+            <Button type="button" onClick={() => {toast({title: "Finalizar OS", description: "A OS será marcada como finalizada."})}} className="bg-green-600 hover:bg-green-700">
+                <CheckCircle className="mr-2 h-4 w-4"/>
+                Finalizar OS
+            </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
+
+    

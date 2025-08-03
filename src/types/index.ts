@@ -17,14 +17,20 @@ export type ProposalStatusType = typeof PROPOSAL_STATUSES[number];
 export const INVOICE_STATUSES = ['Pendente', 'Paga', 'Atrasada', 'Cancelada'] as const;
 export type InvoiceStatusType = typeof INVOICE_STATUSES[number];
 
-export const PAYMENT_METHODS = ['Cartão de Crédito', 'PIX', 'Dinheiro'] as const;
+export const PAYMENT_METHODS = ['Cartão de Crédito', 'PIX', 'Dinheiro', 'Boleto'] as const;
 export type PaymentMethodType = typeof PAYMENT_METHODS[number];
 
 export const PAYMENT_CONDITIONS = ['À vista', 'Parcelado'] as const;
 export type PaymentConditionType = typeof PAYMENT_CONDITIONS[number];
 
-export const SERVICE_ORDER_STATUSES = ['Aberta', 'Em Andamento', 'Finalizada', 'Aguardando Peças', 'Aguardando Aprovação', 'Cancelada'] as const;
+export const SERVICE_ORDER_STATUSES = ['Aguardando', 'Em andamento', 'Concluída', 'Cancelada', 'Aguardando Peças', 'Aguardando Aprovação'] as const;
 export type ServiceOrderStatusType = typeof SERVICE_ORDER_STATUSES[number];
+
+export const SERVICE_ORDER_PRIORITIES = ['Baixa', 'Média', 'Alta', 'Urgente'] as const;
+export type ServiceOrderPriorityType = typeof SERVICE_ORDER_PRIORITIES[number];
+
+export const PAYMENT_STATUSES = ['Pendente', 'Pago', 'Parcelado', 'Parcialmente Pago'] as const;
+export type PaymentStatusType = typeof PAYMENT_STATUSES[number];
 
 export const CLIENT_TYPES = ['Pessoa Física', 'Pessoa Jurídica'] as const;
 export type ClientType = (typeof CLIENT_TYPES)[number];
@@ -136,3 +142,12 @@ export const PIPELINE_STAGES = [
   'Fechamento Ganho',
   'Fechamento Perdido',
 ];
+
+export type ProductPiece = {
+    productId: string;
+    name: string;
+    quantity: number;
+    unitPrice: number;
+};
+
+    
