@@ -1,163 +1,192 @@
--- Habilita a extensão pgcrypto se ainda não estiver habilitada
-create extension if not exists "pgcrypto" with schema "extensions";
+-- Apaga tabelas antigas se existirem para uma nova configuração limpa
+drop table if exists "public"."invoice_items";
+drop table if exists "public"."invoices";
+drop table if exists "public"."service_orders";
+drop table if exists "public"."proposals";
+drop table if exists "public"."products";
+drop table if exists "public"."leads";
+drop table if exists "public"."clients";
+drop table if exists "public"."profiles";
 
--- Cria a tabela de clientes (clients)
-create table if not exists public.clients (
-    id uuid default gen_random_uuid() primary key,
-    created_at timestamp with time zone not null default now(),
-    name text not null,
-    email text not null,
-    phone text null,
-    address text null,
-    document text null,
-    client_type text not null,
-    frequent_services text null,
-    internal_notes text null,
-    registration_date date not null,
-    status text not null,
-    company text null,
-    responsable text null,
-    segment text null,
-    avatar_url text null
+-- Tabela de Clientes
+CREATE TABLE public.clients (
+    id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    name text NOT NULL,
+    email text NOT NULL,
+    phone text,
+    address text,
+    document text,
+    client_type text NOT NULL,
+    frequent_services text,
+    internal_notes text,
+    registration_date date NOT NULL,
+    status text NOT NULL,
+    company text,
+    responsable text,
+    segment text,
+    avatar_url text
 );
+COMMENT ON TABLE public.clients IS 'Tabela para armazenar informações dos clientes.';
 
-comment on table public.clients is 'Armazena informações sobre os clientes da empresa.';
-
--- Cria a tabela de propostas (proposals)
-create table if not exists public.proposals (
-    id uuid default gen_random_uuid() primary key,
-    client_id uuid null references public.clients(id) on delete set null,
-    client_name text not null,
-    service_description text not null,
-    amount numeric not null,
-    currency text not null default 'BRL',
-    deadline date not null,
-    status text not null,
-    created_at timestamp with time zone not null default now(),
-    updated_at timestamp with time zone not null default now(),
-    ai_generated_draft text null,
-    assigned_to uuid null -- references auth.users(id) on delete set null (adicionar quando auth estiver configurado)
+-- Tabela de Leads
+CREATE TABLE public.leads (
+    id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    name text NOT NULL,
+    company text,
+    email text,
+    phone text,
+    status text NOT NULL,
+    source text,
+    notes text,
+    assigned_to uuid,
+    last_contacted_at timestamp with time zone
 );
+COMMENT ON TABLE public.leads IS 'Armazena leads de vendas e seu progresso no funil.';
 
-comment on table public.proposals is 'Armazena as propostas comerciais enviadas aos clientes.';
-
--- Cria a tabela de faturas (invoices)
-create table if not exists public.invoices (
-    id uuid default gen_random_uuid() primary key,
-    client_id uuid not null references public.clients(id) on delete cascade,
-    proposal_id uuid null references public.proposals(id) on delete set null,
-    invoice_number text not null,
-    amount numeric not null,
-    status text not null,
-    due_date date not null,
-    paid_date date null,
-    payment_method text null,
-    created_at timestamp with time zone not null default now()
+-- Tabela de Produtos/Serviços
+CREATE TABLE public.products (
+    id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    name text NOT NULL,
+    description text,
+    price numeric NOT NULL,
+    category text,
+    sku text,
+    stock_quantity integer,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
 );
+COMMENT ON TABLE public.products IS 'Catálogo de produtos e serviços oferecidos.';
 
-comment on table public.invoices is 'Registra as faturas emitidas para os clientes.';
-
--- Cria a tabela de itens da fatura (invoice_items)
-create table if not exists public.invoice_items (
-    id uuid default gen_random_uuid() primary key,
-    invoice_id uuid not null references public.invoices(id) on delete cascade,
-    description text not null,
-    quantity numeric not null,
-    unit_price numeric not null,
-    total numeric not null
+-- Tabela de Propostas
+CREATE TABLE public.proposals (
+    id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    client_name text NOT NULL,
+    service_description text NOT NULL,
+    amount numeric NOT NULL,
+    currency text DEFAULT 'BRL'::text NOT NULL,
+    deadline date NOT NULL,
+    status text NOT NULL,
+    ai_generated_draft text,
+    client_id uuid,
+    assigned_to uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
+COMMENT ON TABLE public.proposals IS 'Armazena propostas comerciais enviadas aos clientes.';
 
-comment on table public.invoice_items is 'Detalha os itens individuais de cada fatura.';
-
--- Cria a tabela de leads
-create table if not exists public.leads (
-    id uuid default gen_random_uuid() primary key,
-    name text not null,
-    email text null,
-    phone text null,
-    company text null,
-    status text not null,
-    source text null,
-    assigned_to uuid null, -- references auth.users(id) on delete set null (adicionar quando auth estiver configurado)
-    last_contacted_at timestamp with time zone null,
-    notes text null,
-    created_at timestamp with time zone not null default now()
+-- Tabela de Ordens de Serviço
+CREATE TABLE public.service_orders (
+    id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    order_number text NOT NULL,
+    client_id uuid NOT NULL,
+    service_type text NOT NULL,
+    status text NOT NULL,
+    products_used text,
+    service_value numeric,
+    execution_deadline date,
+    assigned_to uuid,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
+COMMENT ON TABLE public.service_orders IS 'Gerencia as ordens de serviço para os clientes.';
 
-comment on table public.leads is 'Gerencia os leads e prospects do funil de vendas.';
-
--- Cria a tabela de ordens de serviço (service_orders)
-create table if not exists public.service_orders (
-    id uuid default gen_random_uuid() primary key,
-    order_number text not null,
-    client_id uuid not null references public.clients(id) on delete cascade,
-    service_type text not null,
-    status text not null,
-    products_used text null,
-    service_value numeric null,
-    execution_deadline timestamp with time zone null,
-    assigned_to uuid null, -- references auth.users(id) on delete set null (adicionar quando auth estiver configurado)
-    created_at timestamp with time zone not null default now(),
-    updated_at timestamp with time zone not null default now()
+-- Tabela de Faturas
+CREATE TABLE public.invoices (
+    id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    invoice_number text NOT NULL,
+    client_id uuid NOT NULL,
+    proposal_id uuid,
+    amount numeric NOT NULL,
+    status text NOT NULL,
+    due_date date NOT NULL,
+    paid_date date,
+    payment_method text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
 );
+COMMENT ON TABLE public.invoices IS 'Armazena informações de faturamento.';
 
-comment on table public.service_orders is 'Controla as ordens de serviço para os clientes.';
-
--- Cria a tabela de perfis de usuário (profiles) - para complementar auth.users
-create table if not exists public.profiles (
-  id uuid primary key references auth.users on delete cascade not null,
-  updated_at timestamp with time zone,
-  username text,
-  full_name text,
-  avatar_url text,
-  website text,
-  constraint username_length check (char_length(username) >= 3)
+-- Tabela de Itens da Fatura
+CREATE TABLE public.invoice_items (
+    id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    invoice_id uuid NOT NULL,
+    description text NOT NULL,
+    quantity integer NOT NULL,
+    unit_price numeric NOT NULL,
+    total numeric NOT NULL
 );
+COMMENT ON TABLE public.invoice_items IS 'Detalha os itens dentro de cada fatura.';
 
-comment on table public.profiles is 'Armazena dados públicos do perfil para cada usuário.';
-
--- Cria a tabela de produtos (products)
-create table if not exists public.products (
-    id uuid default gen_random_uuid() primary key,
-    created_at timestamp with time zone not null default now(),
-    name text not null,
-    description text null,
-    price numeric not null default 0,
-    category text null,
-    sku text null,
-    stock_quantity integer null
+-- Tabela de Perfis de Usuário
+CREATE TABLE public.profiles (
+    id uuid NOT NULL PRIMARY KEY,
+    updated_at timestamp with time zone,
+    username text,
+    full_name text,
+    avatar_url text,
+    website text,
+    CONSTRAINT username_length CHECK ((char_length(username) >= 3))
 );
+COMMENT ON TABLE public.profiles IS 'Armazena dados de perfil para usuários autenticados.';
 
-comment on table public.products is 'Armazena informações sobre produtos e serviços pré-definidos.';
+-- Adicionando Foreign Keys
+ALTER TABLE public.leads ADD CONSTRAINT leads_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.proposals ADD CONSTRAINT proposals_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE SET NULL;
+ALTER TABLE public.proposals ADD CONSTRAINT proposals_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.service_orders ADD CONSTRAINT service_orders_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;
+ALTER TABLE public.service_orders ADD CONSTRAINT service_orders_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.invoices ADD CONSTRAINT invoices_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;
+ALTER TABLE public.invoices ADD CONSTRAINT invoices_proposal_id_fkey FOREIGN KEY (proposal_id) REFERENCES public.proposals(id) ON DELETE SET NULL;
+ALTER TABLE public.invoice_items ADD CONSTRAINT invoice_items_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id) ON DELETE CASCADE;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
 
+-- Habilitando Row Level Security (RLS) para todas as tabelas
+ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.proposals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.service_orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.invoice_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- POLÍTICAS DE SEGURANÇA (RLS) --
+-- Políticas de Acesso
+-- Permitir que usuários logados leiam/escrevam em seus próprios dados ou em todos os dados.
+-- (Esta é uma política simples. Uma aplicação multi-tenant real precisaria de uma coluna 'organization_id')
 
--- Policies para a tabela `profiles`
-alter table public.profiles enable row level security;
-drop policy if exists "Public profiles are viewable by everyone." on public.profiles;
-create policy "Public profiles are viewable by everyone." on public.profiles for select using (true);
-drop policy if exists "Users can insert their own profile." on public.profiles;
-create policy "Users can insert their own profile." on public.profiles for insert with check (auth.uid() = id);
-drop policy if exists "Users can update own profile." on public.profiles;
-create policy "Users can update own profile." on public.profiles for update using (auth.uid() = id);
+CREATE POLICY "Allow all access for authenticated users" ON public.clients FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow all access for authenticated users" ON public.leads FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow all access for authenticated users" ON public.products FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow all access for authenticated users" ON public.proposals FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow all access for authenticated users" ON public.service_orders FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow all access for authenticated users" ON public.invoices FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow all access for authenticated users" ON public.invoice_items FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow logged-in users to view and edit their own profile" ON public.profiles FOR ALL USING (auth.uid() = id);
 
+-- Função para lidar com a atualização da coluna `updated_at`
+create or replace function public.handle_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql security definer;
 
--- Policies para a tabela `clients`
-alter table public.clients enable row level security;
-drop policy if exists "Authenticated users can manage clients." on public.clients;
-create policy "Authenticated users can manage clients." on public.clients
-for all using (auth.role() = 'authenticated');
+-- Triggers para `updated_at`
+create trigger on_proposals_updated
+  before update on public.proposals
+  for each row execute procedure public.handle_updated_at();
 
+create trigger on_service_orders_updated
+  before update on public.service_orders
+  for each row execute procedure public.handle_updated_at();
 
--- Policies para a tabela `leads`
-alter table public.leads enable row level security;
-drop policy if exists "Authenticated users can manage leads." on public.leads;
-create policy "Authenticated users can manage leads." on public.leads
-for all using (auth.role() = 'authenticated');
+create trigger on_profiles_updated
+  before update on public.profiles
+  for each row execute procedure public.handle_updated_at();
 
--- Policies para a tabela `products`
-alter table public.products enable row level security;
-drop policy if exists "Authenticated users can manage products." on public.products;
-create policy "Authenticated users can manage products." on public.products
-for all using (auth.role() = 'authenticated');
+-- Seed de dados iniciais (opcional, mas recomendado)
+-- Você pode adicionar alguns produtos aqui para começar
+-- INSERT INTO public.products (name, price, category, description) VALUES
+-- ('Instalação de Câmera de Segurança', 350.00, 'Segurança', 'Instalação completa de uma unidade de câmera de segurança.'),
+-- ('Manutenção de Ar Condicionado', 150.00, 'Manutenção', 'Limpeza e verificação de sistema de ar condicionado split.');
