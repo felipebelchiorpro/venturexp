@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, FileDown } from "lucide-react";
 import type { ServiceOrderStatusType } from "@/types";
 import { SERVICE_ORDER_STATUSES } from '@/types';
 import { format, parseISO } from 'date-fns';
@@ -113,6 +113,13 @@ export function ServiceOrderList() {
         description: `Ação em O.S. ${orderNumber}. (Funcionalidade futura)`,
     });
   };
+  
+  const handleGeneratePDF = (orderNumber: string) => {
+    toast({
+        title: "Gerando PDF...",
+        description: `O PDF para a O.S. ${orderNumber} está sendo preparado. (Simulação)`,
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -200,6 +207,9 @@ export function ServiceOrderList() {
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleAction('Editar O.S.', order.order_number)}>
                         <Edit className="mr-2 h-4 w-4" /> Editar O.S.
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleGeneratePDF(order.order_number)}>
+                        <FileDown className="mr-2 h-4 w-4" /> Gerar PDF
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => handleDelete(order.id, order.order_number)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
