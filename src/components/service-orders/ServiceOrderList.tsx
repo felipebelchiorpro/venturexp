@@ -143,6 +143,13 @@ export function ServiceOrderList() {
     const margin = 15;
     let y = 20;
 
+    // Logo da empresa em Base64
+    const logoBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAFeAQMAAADIAttUAAAABlBMVEUAAAAzMzPI8eYgAAAAAXRSTlMAQObYZgAAAIpJREFUeNrtwTEBAAAAwqD1T20ND6AAAAAAAAAAAAA4MgoAAAAAAAAAAAAAAAAAAAAAAAAAAOCPCgAAAAAAAAAAAAAAAI4qAAAAAAAAAAAAAgAAAAAAAAAAgA4KAAAAAAAAAAAAAAAAAAAAoJMKAAAAAAAAAAAAgAoAAAAAAAAAAAAAAACgkwIAAAAAAAAAAJwVAAAAAAAAAAAAAABgqAICAAAAAAAAAAAAAICAFAAAAAAAAAAAAACgVQUAAAAAAAAAAADgnAIAAAAAAAAAADhTQAEA03oC5gI0AMhpdgAAAABJRU5ErkJggg==';
+
+    doc.addImage(logoBase64, 'PNG', margin, 5, 50, 15);
+    y += 15;
+
+
     const addSectionTitle = (title: string) => {
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
@@ -170,7 +177,7 @@ export function ServiceOrderList() {
     addParagraph([
         "1.1 CONTRATANTE:",
         `Nome: ${client?.name || 'Não informado'}`,
-        `CPF: ${client?.document || 'Não informado'}`,
+        `CPF/CNPJ: ${client?.document || 'Não informado'}`,
         `Telefone: ${client?.phone || 'Não informado'}`,
     ]);
 
@@ -241,7 +248,7 @@ export function ServiceOrderList() {
 
     // Data e Assinaturas
     y += 10;
-    doc.text("Caconde-SP 17/07/2025", margin, y);
+    doc.text(`Caconde-SP ${format(new Date(), "dd/MM/yyyy")}`, margin, y);
     y += 20;
     
     const centerOfPage = pageWidth / 2;
@@ -379,5 +386,3 @@ export function ServiceOrderList() {
     </div>
   );
 }
-
-    
