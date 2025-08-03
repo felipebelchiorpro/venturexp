@@ -25,9 +25,16 @@ import { createClient } from "@/lib/supabase/client";
 import { Skeleton } from '../ui/skeleton';
 import { useRouter } from 'next/navigation';
 import type { Tables } from '@/types/database.types';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import type { UserOptions } from 'jspdf-autotable';
+
+interface jsPDFWithAutoTable extends jsPDF {
+    autoTable: (options: UserOptions) => jsPDF;
+}
 
 type ServiceOrderWithClient = Tables<'service_orders'> & {
-  clients: Pick<Tables<'clients'>, 'name'> | null;
+  clients: Pick<Tables<'clients'>, 'name' | 'email' | 'phone' | 'document' | 'address'> | null;
 };
 
 const getStatusBadgeVariant = (status: ServiceOrderStatusType) => {
@@ -58,7 +65,11 @@ export function ServiceOrderList() {
       .select(`
         *,
         clients (
-          name
+          name,
+          email,
+          phone,
+          document,
+          address
         )
       `)
       .order('created_at', { ascending: false });
@@ -114,12 +125,92 @@ export function ServiceOrderList() {
     });
   };
   
-  const handleGeneratePDF = (orderNumber: string) => {
-    toast({
-        title: "Gerando PDF...",
-        description: `O PDF para a O.S. ${orderNumber} está sendo preparado. (Simulação)`,
+  const generatePDF = (order: ServiceOrderWithClient) => {
+    const doc = new jsPDF() as jsPDFWithAutoTable;
+    const client = order.clients;
+
+    // Cabeçalho
+    doc.setFontSize(20);
+    doc.text("Ordem de Serviço", 14, 22);
+    doc.setFontSize(12);
+    doc.text(`Número: ${order.order_number}`, 14, 30);
+    
+    doc.setFontSize(10);
+    doc.text("VentureSys - Soluções em Tecnologia", 195, 22, { align: 'right'});
+    doc.text("Rua das Inovações, 123 - Techville", 195, 28, { align: 'right'});
+    doc.text("contato@venturesys.pro", 195, 34, { align: 'right'});
+    
+
+    // Dados do Cliente
+    doc.setFontSize(14);
+    doc.text("Dados do Cliente", 14, 45);
+    doc.setFontSize(10);
+    doc.text(`Nome: ${client?.name || 'Não informado'}`, 14, 52);
+    doc.text(`Email: ${client?.email || 'Não informado'}`, 14, 58);
+    doc.text(`Telefone: ${client?.phone || 'Não informado'}`, 14, 64);
+    doc.text(`CPF/CNPJ: ${client?.document || 'Não informado'}`, 100, 64);
+    doc.text(`Endereço: ${client?.address || 'Não informado'}`, 14, 70);
+
+    // Detalhes da Ordem de Serviço
+    doc.setFontSize(14);
+    doc.text("Detalhes do Serviço", 14, 85);
+    doc.autoTable({
+        startY: 90,
+        head: [['Data de Criação', 'Prazo de Execução', 'Status', 'Valor Total']],
+        body: [[
+            format(parseISO(order.created_at), "dd/MM/yyyy", { locale: ptBR }),
+            order.execution_deadline ? format(parseISO(order.execution_deadline), "dd/MM/yyyy", { locale: ptBR }) : 'N/A',
+            order.status,
+            formatCurrency(order.service_value)
+        ]],
+        theme: 'striped',
+        headStyles: { fillColor: [41, 128, 185] }
     });
+
+    let finalY = doc.autoTable.previous.finalY;
+
+    // Descrição do serviço
+    doc.setFontSize(12);
+    doc.text("Descrição do Serviço Solicitado:", 14, finalY + 10);
+    doc.setFontSize(10);
+    const serviceDescriptionLines = doc.splitTextToSize(order.service_type, 180);
+    doc.text(serviceDescriptionLines, 14, finalY + 16);
+    finalY += 16 + (serviceDescriptionLines.length * 5);
+
+    // Produtos/Peças
+    if (order.products_used) {
+        doc.setFontSize(12);
+        doc.text("Produtos/Peças Utilizadas:", 14, finalY + 10);
+        doc.setFontSize(10);
+        const productsLines = doc.splitTextToSize(order.products_used, 180);
+        doc.text(productsLines, 14, finalY + 16);
+        finalY += 16 + (productsLines.length * 5);
+    }
+
+    // Cláusulas
+    doc.setFontSize(12);
+    doc.text("Termos e Condições", 14, finalY + 15);
+    doc.setFontSize(8);
+    const clauses = [
+        "1. A garantia para os serviços prestados é de 90 dias a contar da data de finalização desta O.S.",
+        "2. Peças e componentes trocados possuem garantia de acordo com o fabricante.",
+        "3. O pagamento deverá ser efetuado na conclusão do serviço, conforme condições acordadas.",
+        "4. A não retirada do equipamento após 90 dias da comunicação de finalização implicará em cobrança de taxa de armazenagem.",
+        "5. O cliente autoriza a execução dos serviços descritos acima e está ciente dos valores e condições."
+    ];
+    doc.text(clauses, 14, finalY + 21, { charSpace: 0.1 });
+    
+    // Assinatura
+    const signatureY = doc.internal.pageSize.height - 40;
+    doc.line(40, signatureY, 170, signatureY);
+    doc.setFontSize(10);
+    doc.text("Assinatura do Cliente", 105, signatureY + 5, { align: 'center'});
+    doc.text(`( ${client?.name || ''} )`, 105, signatureY + 10, { align: 'center'});
+
+    doc.save(`OS-${order.order_number}-${client?.name || 'cliente'}.pdf`);
+    toast({ title: "PDF Gerado!", description: "O download do arquivo deve iniciar em breve." });
   };
+
 
   return (
     <div className="space-y-4">
@@ -208,7 +299,7 @@ export function ServiceOrderList() {
                       <DropdownMenuItem onClick={() => handleAction('Editar O.S.', order.order_number)}>
                         <Edit className="mr-2 h-4 w-4" /> Editar O.S.
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleGeneratePDF(order.order_number)}>
+                      <DropdownMenuItem onClick={() => generatePDF(order)}>
                         <FileDown className="mr-2 h-4 w-4" /> Gerar PDF
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -226,3 +317,4 @@ export function ServiceOrderList() {
     </div>
   );
 }
+
