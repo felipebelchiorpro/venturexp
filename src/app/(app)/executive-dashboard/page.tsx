@@ -22,36 +22,37 @@ interface KpiData {
   description?: string;
 }
 
-const kpiPlaceholders: { key: string; title: string }[] = [
-    { key: 'billingMonthly', title: 'Faturamento Mensal (Simulado)' },
-    { key: 'proposalsSent', title: 'Total de Propostas Enviadas' },
-    { key: 'totalLeads', title: 'Total de Leads no Funil' },
-    { key: 'totalClients', title: 'Total de Clientes' },
-];
-
 export default function ExecutiveDashboardPage() {
-  const [kpiData, setKpiData] = useState<Record<string, KpiData>>({});
+  const [kpiData, setKpiData] = useState<KpiData[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const { toast } = useToast();
-  
+
   useEffect(() => {
     async function fetchExecutiveData() {
       setLoading(true);
       try {
-        const { count: proposalsSent } = await supabase.from('proposals').select('*', { count: 'exact', head: true });
-        const { count: totalLeads } = await supabase.from('leads').select('*', { count: 'exact', head: true });
-        const { count: totalClients } = await supabase.from('clients').select('*', { count: 'exact', head: true });
+        // Fetch all counts in parallel for efficiency
+        const [
+          { count: proposalsSent },
+          { count: totalLeads },
+          { count: totalClients }
+        ] = await Promise.all([
+          supabase.from('proposals').select('*', { count: 'exact', head: true }),
+          supabase.from('leads').select('*', { count: 'exact', head: true }),
+          supabase.from('clients').select('*', { count: 'exact', head: true })
+        ]);
 
         // Placeholder for billing data, as it requires more complex logic
         const monthlyBilling = 0;
         
-        const fetchedKpis: Record<string, KpiData> = {
-          proposalsSent: { title: "Total de Propostas Enviadas", value: String(proposalsSent ?? 0), iconName: "FileText", trend: "neutral" },
-          billingMonthly: { title: "Faturamento Mensal (Simulado)", value: `R$${monthlyBilling.toFixed(2)}`, iconName: "DollarSign", change: "+0% vs mês anterior", trend: "neutral" },
-          totalLeads: { title: "Total de Leads no Funil", value: String(totalLeads ?? 0), iconName: "Users", trend: "neutral" },
-          totalClients: { title: "Total de Clientes", value: String(totalClients ?? 0), iconName: "Award", description: "Clientes na base de dados" },
-        };
+        const fetchedKpis: KpiData[] = [
+          { title: "Faturamento Mensal (Simulado)", value: `R$${monthlyBilling.toFixed(2)}`, iconName: "DollarSign", change: "+0% vs mês anterior", trend: "neutral" },
+          { title: "Total de Propostas Enviadas", value: String(proposalsSent ?? 0), iconName: "FileText", trend: "neutral" },
+          { title: "Total de Leads no Funil", value: String(totalLeads ?? 0), iconName: "Users", trend: "neutral" },
+          { title: "Total de Clientes", value: String(totalClients ?? 0), iconName: "Award", description: "Clientes na base de dados" },
+        ];
+        
         setKpiData(fetchedKpis);
 
       } catch (error) {
@@ -79,10 +80,10 @@ export default function ExecutiveDashboardPage() {
         <h2 className="text-xl font-semibold text-foreground mb-4">Visão Geral da Operação</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {loading ? (
-            kpiPlaceholders.map(({ key, title }) => (
-              <Card className="shadow-lg" key={key}>
+            Array.from({ length: 4 }).map((_, index) => (
+              <Card className="shadow-lg" key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+                  <Skeleton className="h-5 w-3/4" />
                   <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                 </CardHeader>
                 <CardContent>
@@ -92,8 +93,8 @@ export default function ExecutiveDashboardPage() {
               </Card>
             ))
           ) : (
-            Object.values(kpiData).map((data) => (
-              data ? <KpiCard key={data.title} {...data} /> : null
+            kpiData.map((data) => (
+              <KpiCard key={data.title} {...data} />
             ))
           )}
         </div>
