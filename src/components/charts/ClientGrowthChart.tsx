@@ -1,28 +1,21 @@
 "use client"
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { useMemo } from "react"
+import { format, subMonths, startOfMonth } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import type { Tables } from "@/types/database.types"
 
-const chartData = [
-  { month: "Jan", clients: 186 },
-  { month: "Fev", clients: 205 },
-  { month: "Mar", clients: 237 },
-  { month: "Abr", clients: 203 },
-  { month: "Mai", clients: 259 },
-  { month: "Jun", clients: 280 },
-]
+type Client = Tables<'clients'>;
+
+interface ClientGrowthChartProps {
+  data: Client[];
+}
 
 const chartConfig = {
   clients: {
@@ -31,7 +24,44 @@ const chartConfig = {
   },
 }
 
-export function ClientGrowthChart() {
+export function ClientGrowthChart({ data }: ClientGrowthChartProps) {
+  const chartData = useMemo(() => {
+    const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5));
+    
+    const monthlyData = Array.from({ length: 6 }).map((_, i) => {
+        const monthDate = startOfMonth(subMonths(new Date(), 5 - i));
+        return {
+            month: format(monthDate, "MMM/yy", { locale: ptBR }),
+            clients: 0
+        };
+    });
+
+    if (data) {
+        let cumulativeClients = 0;
+        const clientsBeforePeriod = data.filter(c => new Date(c.created_at) < sixMonthsAgo).length;
+        cumulativeClients = clientsBeforePeriod;
+
+        monthlyData.forEach((month, index) => {
+             const monthDate = startOfMonth(subMonths(new Date(), 5 - index));
+             const endOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+
+             const newClientsInMonth = data.filter(client => {
+                const clientDate = new Date(client.created_at);
+                return clientDate >= monthDate && clientDate <= endOfMonth;
+             }).length;
+             
+             cumulativeClients += newClientsInMonth;
+             month.clients = cumulativeClients;
+        });
+    }
+
+    return monthlyData;
+  }, [data])
+
+  if (!data || data.length === 0) {
+    return <div className="flex items-center justify-center h-[250px] text-muted-foreground">Sem dados de clientes para exibir.</div>
+  }
+
   return (
       <ChartContainer config={chartConfig} className="h-[250px] w-full">
         <AreaChart
@@ -48,13 +78,13 @@ export function ClientGrowthChart() {
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
           />
           <YAxis
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            domain={[150, 300]}
+            domain={['dataMin - 10', 'dataMax + 10']}
+            allowDataOverflow
           />
           <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
           <defs>
