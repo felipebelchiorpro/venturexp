@@ -75,21 +75,32 @@ CREATE TABLE public.proposals (
 );
 COMMENT ON TABLE public.proposals IS 'Armazena propostas comerciais enviadas aos clientes.';
 
--- Tabela de Ordens de Serviço
+-- Tabela de Ordens de Serviço (ATUALIZADA)
 CREATE TABLE public.service_orders (
     id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
     order_number text NOT NULL,
     client_id uuid NOT NULL,
-    service_type text NOT NULL,
     status text NOT NULL,
-    products_used text,
-    service_value numeric,
-    execution_deadline date,
-    assigned_to uuid,
+    priority text NOT NULL,
+    service_type text NOT NULL,
+    description text,
+    equipment text,
+    defect_reported text,
+    diagnostic_technical text,
+    solution_applied text,
+    labor_value numeric,
+    products_used jsonb,
+    total_value numeric,
+    payment_method text,
+    payment_status text,
+    technician_id uuid,
+    additional_notes text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    execution_deadline date,
     updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 COMMENT ON TABLE public.service_orders IS 'Gerencia as ordens de serviço para os clientes.';
+
 
 -- Tabela de Faturas
 CREATE TABLE public.invoices (
@@ -134,7 +145,7 @@ ALTER TABLE public.leads ADD CONSTRAINT leads_assigned_to_fkey FOREIGN KEY (assi
 ALTER TABLE public.proposals ADD CONSTRAINT proposals_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE SET NULL;
 ALTER TABLE public.proposals ADD CONSTRAINT proposals_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES auth.users(id) ON DELETE SET NULL;
 ALTER TABLE public.service_orders ADD CONSTRAINT service_orders_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;
-ALTER TABLE public.service_orders ADD CONSTRAINT service_orders_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.service_orders ADD CONSTRAINT service_orders_technician_id_fkey FOREIGN KEY (technician_id) REFERENCES auth.users(id) ON DELETE SET NULL;
 ALTER TABLE public.invoices ADD CONSTRAINT invoices_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;
 ALTER TABLE public.invoices ADD CONSTRAINT invoices_proposal_id_fkey FOREIGN KEY (proposal_id) REFERENCES public.proposals(id) ON DELETE SET NULL;
 ALTER TABLE public.invoice_items ADD CONSTRAINT invoice_items_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id) ON DELETE CASCADE;
@@ -150,10 +161,18 @@ ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.invoice_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Políticas de Acesso
--- Permitir que usuários logados leiam/escrevam em seus próprios dados ou em todos os dados.
--- (Esta é uma política simples. Uma aplicação multi-tenant real precisaria de uma coluna 'organization_id')
+-- Apagando políticas antigas antes de criar novas
+DROP POLICY IF EXISTS "Allow all access for authenticated users" ON public.clients;
+DROP POLICY IF EXISTS "Allow all access for authenticated users" ON public.leads;
+DROP POLICY IF EXISTS "Allow all access for authenticated users" ON public.products;
+DROP POLICY IF EXISTS "Allow all access for authenticated users" ON public.proposals;
+DROP POLICY IF EXISTS "Allow all access for authenticated users" ON public.service_orders;
+DROP POLICY IF EXISTS "Allow all access for authenticated users" ON public.invoices;
+DROP POLICY IF EXISTS "Allow all access for authenticated users" ON public.invoice_items;
+DROP POLICY IF EXISTS "Allow logged-in users to view and edit their own profile" ON public.profiles;
 
+
+-- Políticas de Acesso
 CREATE POLICY "Allow all access for authenticated users" ON public.clients FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow all access for authenticated users" ON public.leads FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Allow all access for authenticated users" ON public.products FOR ALL USING (auth.role() = 'authenticated');
@@ -184,9 +203,8 @@ create trigger on_service_orders_updated
 create trigger on_profiles_updated
   before update on public.profiles
   for each row execute procedure public.handle_updated_at();
-
+  
 -- Seed de dados iniciais (opcional, mas recomendado)
--- Você pode adicionar alguns produtos aqui para começar
 -- INSERT INTO public.products (name, price, category, description) VALUES
 -- ('Instalação de Câmera de Segurança', 350.00, 'Segurança', 'Instalação completa de uma unidade de câmera de segurança.'),
 -- ('Manutenção de Ar Condicionado', 150.00, 'Manutenção', 'Limpeza e verificação de sistema de ar condicionado split.');
