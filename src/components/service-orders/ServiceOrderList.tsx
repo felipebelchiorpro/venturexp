@@ -249,7 +249,7 @@ export function ServiceOrderList() {
 
     // Data e Assinaturas
     y += 10;
-    doc.text(`Caconde-SP, ${format(new Date(), "PPP", { locale: ptBR })}`, margin, y);
+    doc.text(`Caconde-SP, ${format(new Date(), "dd/MM/yyyy")}`, margin, y);
     y += 20;
     
     const centerOfPage = pageWidth / 2;
@@ -387,3 +387,4 @@ export function ServiceOrderList() {
     </div>
   );
 }
+
