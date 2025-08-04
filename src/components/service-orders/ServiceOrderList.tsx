@@ -162,7 +162,7 @@ export function ServiceOrderList() {
 
     const addParagraph = (text: string | string[], options: { isList?: boolean } = {}) => {
         const lines = Array.isArray(text) ? text : doc.splitTextToSize(text, pageWidth - margin * 2);
-        lines.forEach((line: string, index: number) => {
+        lines.forEach((line: string) => {
             if (y > pageHeight - 20) { // Check for page break
                 doc.addPage();
                 y = 20;
@@ -387,4 +387,3 @@ export function ServiceOrderList() {
     </div>
   );
 }
-
