@@ -19,17 +19,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Phone, Mail, MapPin, Wrench, Package, CalendarDays, DollarSign, FileText, ListChecks, Save, PlusCircle, Trash2, Shield, Settings, Info, Tag, CreditCard, CheckCircle, Image as ImageIcon } from "lucide-react";
+import { User, Phone, Mail, MapPin, Wrench, Package, CalendarDays, DollarSign, FileText, ListChecks, Save, PlusCircle, Trash2, Shield, Settings, Info, Tag, CreditCard, CheckCircle, Image as ImageIcon, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
 import { ptBR } from 'date-fns/locale';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { SERVICE_ORDER_STATUSES, SERVICE_ORDER_PRIORITIES, PAYMENT_METHODS, PAYMENT_STATUSES, type ProductPiece } from "@/types";
+import { SERVICE_ORDER_STATUSES, SERVICE_ORDER_PRIORITIES, PAYMENT_METHODS, PAYMENT_STATUSES } from "@/types";
+import type { ProductPiece } from "@/types";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Tables, TablesInsert, TablesUpdate } from '@/types/database.types';
+import type { Tables, TablesInsert, TablesUpdate, Json } from '@/types/database.types';
 
 type Product = Tables<'products'>;
 type Client = Tables<'clients'>;
@@ -51,7 +52,6 @@ const formSchema = z.object({
   service_type: z.string().min(3, "O tipo de serviço é obrigatório."),
   created_at: z.date(),
   execution_deadline: z.date().optional(),
-  description: z.string().optional(),
   
   // Dados Técnicos
   equipment: z.string().optional(),
@@ -74,7 +74,7 @@ type CreateServiceOrderFormValues = z.infer<typeof formSchema>;
 
 interface CreateServiceOrderFormProps {
   client: Client;
-  serviceOrder?: ServiceOrder;
+  serviceOrder?: ServiceOrder | null;
   onSuccess?: () => void;
 }
 
@@ -89,25 +89,21 @@ export function CreateServiceOrderForm({ client, serviceOrder, onSuccess }: Crea
   const form = useForm<CreateServiceOrderFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      status: serviceOrder?.status as any || "Aguardando",
-      priority: serviceOrder?.priority as any || "Média",
-      service_type: serviceOrder?.service_type || "",
-      created_at: serviceOrder?.created_at ? parseISO(serviceOrder.created_at) : new Date(),
-      execution_deadline: serviceOrder?.execution_deadline ? parseISO(serviceOrder.execution_deadline) : undefined,
-      description: serviceOrder?.description || "", // Campo não existe na tabela ainda
-      
-      equipment: serviceOrder?.equipment || "",
-      defect_reported: serviceOrder?.defect_reported || "",
-      diagnostic_technical: serviceOrder?.diagnostic_technical || "",
-      solution_applied: serviceOrder?.solution_applied || "",
-
-      labor_value: serviceOrder?.labor_value || 0,
-      products_used: (serviceOrder?.products_used as ProductPiece[] | null)?.map(p => ({...p, productId: p.productId || '' })) || [],
-      payment_method: serviceOrder?.payment_method as any || undefined,
-      payment_status: serviceOrder?.payment_status as any || undefined,
-      
-      technician_id: serviceOrder?.technician_id || undefined,
-      additional_notes: serviceOrder?.additional_notes || "",
+      status: "Aguardando",
+      priority: "Média",
+      service_type: "",
+      created_at: new Date(),
+      execution_deadline: undefined,
+      equipment: "",
+      defect_reported: "",
+      diagnostic_technical: "",
+      solution_applied: "",
+      labor_value: 0,
+      products_used: [],
+      payment_method: undefined,
+      payment_status: undefined,
+      technician_id: undefined,
+      additional_notes: "",
     },
   });
 
@@ -118,6 +114,28 @@ export function CreateServiceOrderForm({ client, serviceOrder, onSuccess }: Crea
 
   const productsWatch = form.watch("products_used");
   const laborValueWatch = form.watch("labor_value");
+
+  useEffect(() => {
+    if (isEditMode && serviceOrder) {
+      form.reset({
+        status: serviceOrder.status as any,
+        priority: serviceOrder.priority as any,
+        service_type: serviceOrder.service_type,
+        created_at: parseISO(serviceOrder.created_at),
+        execution_deadline: serviceOrder.execution_deadline ? parseISO(serviceOrder.execution_deadline) : undefined,
+        equipment: serviceOrder.equipment ?? "",
+        defect_reported: serviceOrder.defect_reported ?? "",
+        diagnostic_technical: serviceOrder.diagnostic_technical ?? "",
+        solution_applied: serviceOrder.solution_applied ?? "",
+        labor_value: serviceOrder.labor_value ?? 0,
+        products_used: (serviceOrder.products_used as ProductPiece[] | null)?.map(p => ({ ...p, productId: p.productId || '' })) || [],
+        payment_method: (serviceOrder.payment_method as any) || undefined,
+        payment_status: (serviceOrder.payment_status as any) || undefined,
+        technician_id: serviceOrder.technician_id ?? undefined,
+        additional_notes: serviceOrder.additional_notes ?? "",
+      });
+    }
+  }, [isEditMode, serviceOrder, form]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -152,7 +170,7 @@ export function CreateServiceOrderForm({ client, serviceOrder, onSuccess }: Crea
   async function onSubmit(values: CreateServiceOrderFormValues) {
     const finalValue = totalValue;
 
-    const dataToSave: Omit<ServiceOrder, 'id' | 'updated_at' | 'order_number'> = {
+    const dataToSave = {
         client_id: client.id,
         created_at: values.created_at.toISOString(),
         execution_deadline: values.execution_deadline?.toISOString() || null,
@@ -175,7 +193,7 @@ export function CreateServiceOrderForm({ client, serviceOrder, onSuccess }: Crea
     if (isEditMode && serviceOrder) {
         const { error } = await supabase
             .from('service_orders')
-            .update(dataToSave)
+            .update(dataToSave as ServiceOrderUpdate)
             .eq('id', serviceOrder.id);
 
         if (error) {
@@ -254,18 +272,27 @@ export function CreateServiceOrderForm({ client, serviceOrder, onSuccess }: Crea
                         </FormItem>
                     )}/>
                 </div>
-                 <FormField control={form.control} name="service_type" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Tipo de Serviço</FormLabel>
-                        <FormControl><Input placeholder="Ex: Manutenção Preventiva, Instalação de Software" {...field} /></FormControl>
-                    </FormItem>
-                )}/>
-                <FormField control={form.control} name="description" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Descrição Detalhada do Serviço</FormLabel>
-                        <FormControl><Textarea placeholder="Descreva o escopo completo do serviço a ser realizado." {...field} rows={3} /></FormControl>
-                    </FormItem>
-                )}/>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="service_type" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Tipo de Serviço</FormLabel>
+                            <FormControl><Input placeholder="Ex: Manutenção Preventiva, Instalação de Software" {...field} /></FormControl>
+                        </FormItem>
+                    )}/>
+                    <FormField control={form.control} name="execution_deadline" render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                            <FormLabel>Previsão de Entrega</FormLabel>
+                            <Popover>
+                                <PopoverTrigger asChild><FormControl>
+                                    <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                    {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>} <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                </FormControl></PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} /></PopoverContent>
+                            </Popover>
+                        </FormItem>
+                    )}/>
+                 </div>
             </CardContent>
         </Card>
         
@@ -397,17 +424,10 @@ export function CreateServiceOrderForm({ client, serviceOrder, onSuccess }: Crea
         <div className="flex flex-wrap gap-2 justify-end pt-4">
             <Button type="button" variant="destructive" onClick={() => router.back()}>Cancelar</Button>
             <Button type="submit" disabled={form.formState.isSubmitting}>
-              <Save className="mr-2 h-4 w-4" /> {form.formState.isSubmitting ? 'Salvando...' : 'Salvar Ordem de Serviço'}
-            </Button>
-            <Button type="button" variant="secondary" onClick={() => {toast({title: "Impressão de OS", description: "Funcionalidade de impressão será implementada."})}}>Imprimir PDF</Button>
-            <Button type="button" onClick={() => {toast({title: "Finalizar OS", description: "A OS será marcada como finalizada."})}} className="bg-green-600 hover:bg-green-700">
-                <CheckCircle className="mr-2 h-4 w-4"/>
-                Finalizar OS
+              <Save className="mr-2 h-4 w-4" /> {form.formState.isSubmitting ? 'Salvando...' : (isEditMode ? 'Atualizar Ordem de Serviço' : 'Salvar Ordem de Serviço')}
             </Button>
         </div>
       </form>
     </Form>
   );
 }
-
-    

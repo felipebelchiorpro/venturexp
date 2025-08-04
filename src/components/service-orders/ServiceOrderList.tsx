@@ -128,12 +128,13 @@ export function ServiceOrderList() {
     }
   };
   
-  const handleAction = (action: string, orderNumber: string) => {
-    toast({
-        title: action,
-        description: `Ação em O.S. ${orderNumber}. (Funcionalidade futura)`,
-    });
+  const handleEdit = (orderId: string) => {
+    router.push(`/service-orders/${orderId}/edit`);
   };
+
+  const handleViewDetails = (clientId: string) => {
+      router.push(`/clients/${clientId}`);
+  }
   
   const generatePDF = (order: ServiceOrderWithClient) => {
     const doc = new jsPDF() as jsPDFWithAutoTable;
@@ -248,7 +249,7 @@ export function ServiceOrderList() {
 
     // Data e Assinaturas
     y += 10;
-    doc.text(`Caconde-SP ${format(new Date(), "dd/MM/yyyy")}`, margin, y);
+    doc.text(`Caconde-SP, ${format(new Date(), "PPP", { locale: ptBR })}`, margin, y);
     y += 20;
     
     const centerOfPage = pageWidth / 2;
@@ -362,14 +363,14 @@ export function ServiceOrderList() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                       <DropdownMenuItem onClick={() => handleAction('Ver Detalhes', order.order_number)}>
-                        <Eye className="mr-2 h-4 w-4" /> Ver Detalhes
+                       <DropdownMenuItem onClick={() => handleViewDetails(order.client_id)}>
+                        <Eye className="mr-2 h-4 w-4" /> Ver Detalhes do Cliente
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleAction('Editar O.S.', order.order_number)}>
+                      <DropdownMenuItem onClick={() => handleEdit(order.id)}>
                         <Edit className="mr-2 h-4 w-4" /> Editar O.S.
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => generatePDF(order)}>
-                        <FileDown className="mr-2 h-4 w-4" /> Gerar PDF
+                        <FileDown className="mr-2 h-4 w-4" /> Gerar Contrato
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => handleDelete(order.id, order.order_number)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
