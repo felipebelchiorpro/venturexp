@@ -28,6 +28,7 @@ import type { Tables } from '@/types/database.types';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import type { UserOptions } from 'jspdf-autotable';
+import { APP_LOGO_URL } from '@/lib/constants';
 
 interface jsPDFWithAutoTable extends jsPDF {
     autoTable: (options: UserOptions) => jsPDF;
@@ -144,12 +145,11 @@ export function ServiceOrderList() {
     const margin = 15;
     let y = 20;
 
-    // Logo da empresa em Base64
-    const logoBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAFeAQMAAADIAttUAAAABlBMVEUAAAAzMzPI8eYgAAAAAXRSTlMAQObYZgAAAIpJREFUeNrtwTEBAAAAwqD1T20ND6AAAAAAAAAAAAA4MgoAAAAAAAAAAAAAAAAAAAAAAAAAAOCPCgAAAAAAAAAAAAAAAI4qAAAAAAAAAAAAAgAAAAAAAAAAgA4KAAAAAAAAAAAAAAAAAAAAoJMKAAAAAAAAAAAAgAoAAAAAAAAAAAAAAACgkwIAAAAAAAAAAJwVAAAAAAAAAAAAAABgqAICAAAAAAAAAAAAAICAFAAAAAAAAAAAAACgVQUAAAAAAAAAAADgnAIAAAAAAAAAADhTQAEA03oC5gI0AMhpdgAAAABJRU5ErkJggg==';
-
-    doc.addImage(logoBase64, 'PNG', margin, 5, 50, 15);
+    // Cabeçalho
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`CONTRATO DE PRESTAÇÃO DE SERVIÇOS - OS Nº ${order.order_number}`, pageWidth / 2, y, { align: 'center' });
     y += 15;
-
 
     const addSectionTitle = (title: string) => {
         doc.setFontSize(12);
@@ -160,112 +160,75 @@ export function ServiceOrderList() {
         doc.setFontSize(10);
     };
 
-    const addParagraph = (text: string | string[], options: { isList?: boolean } = {}) => {
+    const addParagraph = (text: string | string[]) => {
         const lines = Array.isArray(text) ? text : doc.splitTextToSize(text, pageWidth - margin * 2);
         lines.forEach((line: string) => {
-            if (y > pageHeight - 20) { // Check for page break
+            if (y > pageHeight - 20) {
                 doc.addPage();
                 y = 20;
             }
-            doc.text((options.isList ? `   •  ${line}` : line), margin, y);
+            doc.text(line, margin, y);
             y += 5;
         });
-        y += 5; // Extra space after paragraph
+        y += 5;
     };
     
-    // Contratante
-    addSectionTitle("1. PARTES");
+    // 1. PARTES
+    addSectionTitle("1. DAS PARTES");
+    doc.setFont('helvetica', 'bold');
+    doc.text("CONTRATANTE:", margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
     addParagraph([
-        "1.1 CONTRATANTE:",
-        `Nome: ${client?.name || 'Não informado'}`,
-        `CPF/CNPJ: ${client?.document || 'Não informado'}`,
-        `Telefone: ${client?.phone || 'Não informado'}`,
+      `Nome/Razão Social: ${client?.name || 'Não informado'}`,
+      `CPF/CNPJ: ${client?.document || 'Não informado'}`,
+      `Endereço: ${client?.address || 'Não informado'}`,
+      `E-mail: ${client?.email || 'Não informado'}`,
+      `Telefone: ${client?.phone || 'Não informado'}`,
     ]);
 
-    // Contratado
+    doc.setFont('helvetica', 'bold');
+    doc.text("CONTRATADA:", margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
     addParagraph([
-        "1.2 CONTRATADO:",
-        "Nome: Grupo Belchior",
-        "CNPJ: 46.105.907/0001-16",
-        "Telefone: (19) 97154-4146",
-        "E-mail: atendimento@grupobelchior.com",
+        "Nome/Razão Social: Venture XP", // Substituir pelo nome da sua empresa
+        "CNPJ: 00.000.000/0001-00", // Substituir pelo seu CNPJ
+        "Endereço: Rua Exemplo, 123, Cidade, Estado", // Substituir pelo seu endereço
+        "E-mail: contato@venturexp.pro", // Substituir pelo seu e-mail
     ]);
 
-    // Objetivo
-    addSectionTitle("2. OBJETIVO");
-    addParagraph("O presente contrato tem por objeto a prestação de serviços pelo Grupo Belchior em favor do Contratante, conforme as condições estabelecidas neste instrumento.");
-
-    // Descrição dos Serviços
-    addSectionTitle("3. DESCRIÇÃO DOS SERVIÇOS");
-    addParagraph(`Os serviços a serem prestados pelo Grupo Belchior (Agencia Venture) compreendem "${order.service_type || 'Serviço não especificado'}" conforme especificado no Anexo A, que faz parte integrante deste contrato".`);
+    // 2. OBJETO
+    addSectionTitle("2. DO OBJETO");
+    addParagraph(`O presente contrato tem por objeto a prestação dos seguintes serviços pela CONTRATADA em favor da CONTRATANTE: "${order.service_type || 'Serviço não especificado'}", conforme detalhado na Ordem de Serviço (O.S.) de número ${order.order_number}.`);
     
-    // Condições Financeiras
-    addSectionTitle("4. CONDIÇÕES FINANCEIRAS");
-    doc.setFont('helvetica', 'bold');
-    doc.text("4.1 VALOR E FORMA DE PAGAMENTO:", margin, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    addParagraph(`O valor total dos serviços contratados é de ${formatCurrency(order.total_value)}. O pagamento será efetuado da seguinte forma 100% após a finalização do projeto.`);
+    // 3. VALOR E PAGAMENTO
+    addSectionTitle("3. DO VALOR E DA FORMA DE PAGAMENTO");
+    addParagraph(`Pelos serviços prestados, a CONTRATANTE pagará à CONTRATADA o valor total de ${formatCurrency(order.total_value)}. O pagamento deverá ser efetuado via ${order.payment_method || 'a combinar'}.`);
+
+    // 4. PRAZOS
+    addSectionTitle("4. DOS PRAZOS");
+    addParagraph(`A CONTRATADA se compromete a iniciar a execução dos serviços na data de ${format(parseISO(order.created_at), "PPP", { locale: ptBR })}. A previsão de conclusão é ${order.execution_deadline ? `até ${format(parseISO(order.execution_deadline), "PPP", { locale: ptBR })}` : 'a ser definida'}.`);
+
+    // 5. DISPOSIÇÕES GERAIS
+    addSectionTitle("5. DISPOSIÇÕES GERAIS");
+    addParagraph("Quaisquer alterações no escopo dos serviços deverão ser formalizadas por meio de um aditivo contratual ou uma nova Ordem de Serviço, com os devidos ajustes de valor e prazo. As partes elegem o foro da Comarca de Caconde/SP para dirimir quaisquer controvérsias oriundas deste contrato.");
     
-    doc.setFont('helvetica', 'bold');
-    doc.text("4.2 DESPESAS ADICIONAIS", margin, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    addParagraph("Despesas adicionais, tais como deslocamento, hospedagem e alimentação (se aplicável), serão de responsabilidade do Contratante e serão detalhadas no orçamento.");
-
-    // Prazo e Entrega
-    addSectionTitle("5. PRAZO E ENTREGA");
-    addParagraph("O prazo de entrega dos arquivo será de 1 após a realização do serviço. Qualquer alteração no prazo será comunicada e acordada entre as partes.");
-
-    // Direitos Autorais
-    addSectionTitle("6. DIREITOS AUTORAIS");
-    addParagraph("Os direitos autorais dos arquivos são exclusivos da Contratada. O Contratante terá direito ao uso das imagens para fins pessoais, sociais e comerciais, após o envio.");
-
-    // Cancelamento e Alterações
-    addSectionTitle("7. CANCELAMENTO E ALTERAÇÕES");
-    addParagraph("Em caso de cancelamento ou alteração da data do evento por parte do Contratante, será aplicada uma taxa de [percentual] sobre o valor total, a título de ressarcimento pelos serviços e compromissos assumidos.(se aplicável)");
-    
-    // Responsabilidades
-    addSectionTitle("8. RESPONSABILIDADES DAS PARTES");
-    doc.setFont('helvetica', 'bold');
-    doc.text("8.1 DO CONTRATANTE:", margin, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    addParagraph("O Contratante compromete-se a colaborar com a Contratada, fornecendo informações e condições necessárias para a adequada prestação dos serviços.");
-    
-    doc.setFont('helvetica', 'bold');
-    doc.text("8.2 DA CONTRATADA:", margin, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    addParagraph("O Grupo Belchior compromete-se a realizar os serviços de forma profissional e diligente, utilizando equipamentos adequados e técnicas apropriadas.");
-
-    // Disposições Gerais
-    addSectionTitle("9. DISPOSIÇÕES GERAIS");
-    doc.setFont('helvetica', 'bold');
-    doc.text("9.1 PUBLICIDADE:", margin, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    addParagraph("A Contratada poderá utilizar as imagens produzidas para fins de divulgação em seus canais de comunicação, salvo acordo em contrário.");
-
     // Data e Assinaturas
-    y += 10;
-    doc.text(`Caconde-SP, ${format(new Date(), "dd/MM/yyyy")}`, margin, y);
     y += 20;
-    
-    const centerOfPage = pageWidth / 2;
-    const signatureLineY = y;
-    const signatureLineLength = 80;
-    
-    doc.line(centerOfPage - signatureLineLength / 2, signatureLineY, centerOfPage + signatureLineLength / 2, signatureLineY);
-    doc.text(`${client?.name || ' '}`, centerOfPage, signatureLineY + 5, { align: 'center'});
-    doc.text(`${client?.document || ' '}`, centerOfPage, signatureLineY + 10, { align: 'center'});
-    doc.text("Titular Responsável", centerOfPage, signatureLineY + 15, { align: 'center'});
-
+    doc.text(`Gerado em: ${format(new Date(), "PPP", { locale: ptBR })}`, margin, y);
     y += 25;
     
-    doc.line(centerOfPage - signatureLineLength / 2, y, centerOfPage + signatureLineLength / 2, y);
-    doc.text("Felipe Augusto Belchior", centerOfPage, y + 5, { align: 'center'});
-    doc.text("CEO Grupo Belchior", centerOfPage, y + 10, { align: 'center'});
+    const centerOfPage = pageWidth / 2;
+    const signatureLineLength = 70;
+
+    doc.line(margin, y, margin + signatureLineLength, y);
+    doc.text("CONTRATANTE", margin, y + 5);
+    doc.text(`${client?.name || '(Assinatura)'}`, margin, y + 10);
+    
+    doc.line(pageWidth - margin - signatureLineLength, y, pageWidth - margin, y);
+    doc.text("CONTRATADA", pageWidth - margin - signatureLineLength, y + 5);
+    doc.text("Venture XP", pageWidth - margin - signatureLineLength, y + 10);
 
     doc.save(`Contrato-OS-${order.order_number}-${client?.name || 'cliente'}.pdf`);
     toast({ title: "Contrato em PDF Gerado!", description: "O download do arquivo deve iniciar em breve." });
