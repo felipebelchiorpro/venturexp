@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -140,15 +139,34 @@ export function ServiceOrderList() {
   const generatePDF = (order: ServiceOrderWithClient) => {
     const doc = new jsPDF() as jsPDFWithAutoTable;
     const client = order.clients;
-    const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.width;
     const margin = 15;
     let y = 20;
 
-    // Cabeçalho
+    // Função para adicionar a logo
+    const addLogo = () => {
+        try {
+            // A logo de placeholder pode não funcionar com o `addImage` do jsPDF.
+            // Para um teste real, substitua APP_LOGO_URL por uma URL de imagem acessível publicamente com CORS habilitado.
+            // doc.addImage(APP_LOGO_URL, 'PNG', margin, y, 40, 10);
+            // y += 20;
+            // Usando texto como substituto temporário para a logo:
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text("Venture XP (Sua Logo Aqui)", margin, y);
+            y += 15;
+        } catch (e) {
+            console.error("Erro ao adicionar a logo no PDF:", e);
+            // Continua sem a logo se houver erro
+        }
+    };
+    
+    addLogo();
+
+    // Cabeçalho do Contrato
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text(`CONTRATO DE PRESTAÇÃO DE SERVIÇOS - OS Nº ${order.order_number}`, pageWidth / 2, y, { align: 'center' });
+    doc.text(`Contrato de Prestação de Serviços - O.S. Nº ${order.order_number}`, pageWidth / 2, y, { align: 'center' });
     y += 15;
 
     const addSectionTitle = (title: string) => {
@@ -162,73 +180,46 @@ export function ServiceOrderList() {
 
     const addParagraph = (text: string | string[]) => {
         const lines = Array.isArray(text) ? text : doc.splitTextToSize(text, pageWidth - margin * 2);
-        lines.forEach((line: string) => {
-            if (y > pageHeight - 20) {
-                doc.addPage();
-                y = 20;
-            }
-            doc.text(line, margin, y);
-            y += 5;
-        });
-        y += 5;
+        doc.text(lines, margin, y);
+        y += (lines.length * 5) + 5; // Ajusta o espaçamento
     };
-    
-    // 1. PARTES
+
+    // 1. DAS PARTES
     addSectionTitle("1. DAS PARTES");
-    doc.setFont('helvetica', 'bold');
-    doc.text("CONTRATANTE:", margin, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
     addParagraph([
-      `Nome/Razão Social: ${client?.name || 'Não informado'}`,
-      `CPF/CNPJ: ${client?.document || 'Não informado'}`,
-      `Endereço: ${client?.address || 'Não informado'}`,
-      `E-mail: ${client?.email || 'Não informado'}`,
-      `Telefone: ${client?.phone || 'Não informado'}`,
+      `CONTRATANTE: ${client?.name || 'Não informado'}, CPF/CNPJ: ${client?.document || 'Não informado'}, com endereço em ${client?.address || 'Não informado'}.`,
+      `CONTRATADA: Venture XP, CNPJ 00.000.000/0001-00, com endereço em Rua Exemplo, 123, Cidade, Estado.`
     ]);
 
-    doc.setFont('helvetica', 'bold');
-    doc.text("CONTRATADA:", margin, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    addParagraph([
-        "Nome/Razão Social: Venture XP", // Substituir pelo nome da sua empresa
-        "CNPJ: 00.000.000/0001-00", // Substituir pelo seu CNPJ
-        "Endereço: Rua Exemplo, 123, Cidade, Estado", // Substituir pelo seu endereço
-        "E-mail: contato@venturexp.pro", // Substituir pelo seu e-mail
-    ]);
+    // 2. DO OBJETO
+    addSectionTitle("2. DO OBJETO DO CONTRATO");
+    addParagraph(`O presente contrato tem como objeto a prestação de serviço de "${order.service_type || 'Serviço não especificado'}", conforme detalhado na Ordem de Serviço (O.S.) de número ${order.order_number}. O serviço inclui as seguintes atividades: ${order.solution_applied || order.defect_reported || 'Conforme descrito na O.S.'}.`);
 
-    // 2. OBJETO
-    addSectionTitle("2. DO OBJETO");
-    addParagraph(`O presente contrato tem por objeto a prestação dos seguintes serviços pela CONTRATADA em favor da CONTRATANTE: "${order.service_type || 'Serviço não especificado'}", conforme detalhado na Ordem de Serviço (O.S.) de número ${order.order_number}.`);
-    
-    // 3. VALOR E PAGAMENTO
+    // 3. DO VALOR E DA FORMA DE PAGAMENTO
     addSectionTitle("3. DO VALOR E DA FORMA DE PAGAMENTO");
-    addParagraph(`Pelos serviços prestados, a CONTRATANTE pagará à CONTRATADA o valor total de ${formatCurrency(order.total_value)}. O pagamento deverá ser efetuado via ${order.payment_method || 'a combinar'}.`);
+    addParagraph(`Pelos serviços prestados, a CONTRATANTE pagará à CONTRATADA o valor total de ${formatCurrency(order.total_value)}, a ser pago via ${order.payment_method || 'a combinar'}.`);
 
-    // 4. PRAZOS
+    // 4. DOS PRAZOS
     addSectionTitle("4. DOS PRAZOS");
-    addParagraph(`A CONTRATADA se compromete a iniciar a execução dos serviços na data de ${format(parseISO(order.created_at), "PPP", { locale: ptBR })}. A previsão de conclusão é ${order.execution_deadline ? `até ${format(parseISO(order.execution_deadline), "PPP", { locale: ptBR })}` : 'a ser definida'}.`);
+    addParagraph(`A CONTRATADA se compromete a executar os serviços a partir de ${format(parseISO(order.created_at), "PPP", { locale: ptBR })}. A previsão de conclusão é ${order.execution_deadline ? `até ${format(parseISO(order.execution_deadline), "PPP", { locale: ptBR })}` : 'a ser definida'}. Este prazo pode ser alterado mediante acordo entre as partes.`);
 
-    // 5. DISPOSIÇÕES GERAIS
-    addSectionTitle("5. DISPOSIÇÕES GERAIS");
-    addParagraph("Quaisquer alterações no escopo dos serviços deverão ser formalizadas por meio de um aditivo contratual ou uma nova Ordem de Serviço, com os devidos ajustes de valor e prazo. As partes elegem o foro da Comarca de Caconde/SP para dirimir quaisquer controvérsias oriundas deste contrato.");
+    // 5. DAS DISPOSIÇÕES GERAIS
+    addSectionTitle("5. DAS DISPOSIÇÕES GERAIS");
+    addParagraph("As partes elegem o foro da comarca de Caconde/SP para dirimir quaisquer litígios oriundos do presente contrato, com renúncia expressa a qualquer outro, por mais privilegiado que seja.");
     
     // Data e Assinaturas
-    y += 20;
+    y += 20; // Espaço antes das assinaturas
     doc.text(`Gerado em: ${format(new Date(), "PPP", { locale: ptBR })}`, margin, y);
     y += 25;
     
-    const centerOfPage = pageWidth / 2;
-    const signatureLineLength = 70;
-
-    doc.line(margin, y, margin + signatureLineLength, y);
-    doc.text("CONTRATANTE", margin, y + 5);
-    doc.text(`${client?.name || '(Assinatura)'}`, margin, y + 10);
+    const signatureLineY = y;
+    const signatureTextY = y + 5;
     
-    doc.line(pageWidth - margin - signatureLineLength, y, pageWidth - margin, y);
-    doc.text("CONTRATADA", pageWidth - margin - signatureLineLength, y + 5);
-    doc.text("Venture XP", pageWidth - margin - signatureLineLength, y + 10);
+    doc.line(margin, signatureLineY, margin + 70, signatureLineY);
+    doc.text(`${client?.name || 'Contratante'}`, margin, signatureTextY);
+
+    doc.line(pageWidth - margin - 70, signatureLineY, pageWidth - margin, signatureLineY);
+    doc.text("Venture XP (Contratada)", pageWidth - margin - 70, signatureTextY);
 
     doc.save(`Contrato-OS-${order.order_number}-${client?.name || 'cliente'}.pdf`);
     toast({ title: "Contrato em PDF Gerado!", description: "O download do arquivo deve iniciar em breve." });
